@@ -1,0 +1,5 @@
+node_modules
+#测试包
+/packages/temp_*
+#核心
+/packages/crawlers
