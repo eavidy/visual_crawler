@@ -1,5 +1,5 @@
 import { it, expect, beforeEach } from "vitest";
-import { Job51JobList } from "./job_list";
+import { LiePinJobList, paseJob } from "./job_list";
 import { JobCrawlerData, CompanyCrawlerData, SiteTag, Education } from "api/model/index";
 
 const data = {
@@ -29,14 +29,14 @@ const data = {
         link: "https://www.liepin.com/company/10098303/",
     },
 };
-let jobList = new Job51JobList({} as any, "");
+let jobList = new LiePinJobList({} as any, "");
 beforeEach(() => {
     jobList.errors.length = 0;
 });
-it("解析51job职位数据", function () {
-    let res = jobList.paseJob(data.job, "esd");
+it("解析猎聘职位数据", function () {
+    let res = paseJob(data.job, SiteTag.liepin, "esd");
     expect(jobList.errors).toMatchObject([]);
-    expect(res).toMatchObject({
+    expect(res.data).toMatchObject({
         companyId: "esd",
         jobId: "56384201",
         jobData: {
@@ -47,11 +47,12 @@ it("解析51job职位数据", function () {
             salaryMonth: 16,
             salaryMax: 35000,
             salaryMin: 15000,
+            tag: ["制度制定", "岗位配置招聘", "绩效管理", "人力资源经验"],
         },
-        siteTag: SiteTag.job51,
+        siteTag: SiteTag.liepin,
     } as JobCrawlerData);
 });
-it("解析51job公司数据", function () {
+it("解析猎聘公司数据", function () {
     let res = jobList.paseCompany(data.comp);
     expect(jobList.errors).toMatchObject([]);
     expect(res).toMatchObject({
@@ -59,9 +60,10 @@ it("解析51job公司数据", function () {
             industry: "计算机软件",
             name: "云账户（天津）共享经济信息咨询有限公司",
             scale: 750,
+            welfareLabel: [],
         },
         companyId: "10098303",
         exist: true,
-        siteTag: SiteTag.job51,
+        siteTag: SiteTag.liepin,
     } as CompanyCrawlerData);
 });

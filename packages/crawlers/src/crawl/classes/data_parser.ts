@@ -6,6 +6,7 @@ export class DataParser {
         return cities.find((item) => item.name === cityName)?._id;
     }
     static matchCityToId(cityStr: string) {
+        if (typeof cityStr !== "string") return undefined;
         let cityName: string | undefined;
         for (const city of cities) {
             if (cityStr.includes(city.name)) {
@@ -17,6 +18,7 @@ export class DataParser {
         return undefined;
     }
     static matchEducation(str: string): Education | undefined {
+        if (typeof str !== "string") return undefined;
         let list = Object.keys(Education);
         let res: string | undefined;
         for (const edu of list) {
@@ -52,7 +54,8 @@ export class DataParser {
         }
     }
     static paseSalary(str: string) {
-        //11-20K 20-30K·14薪 300-350元/天
+        if (typeof str !== "string") return undefined;
+        //11-20K 20-30K·14薪
         let res = str.match(/^(?<min>\d+)-(?<max>\d+)[Kk](·(?<salaryMonth>\d+)+.)?$/)?.groups;
         if (res)
             return {
@@ -60,8 +63,14 @@ export class DataParser {
                 salaryMax: parseInt(res.max) * 1000,
                 salaryMonth: res.salaryMonth ? parseInt(res.salaryMonth) : 12,
             };
-        res = str.match(/(?<min>\d+)-(?<max>\d+)元\/天/)?.groups;
-        if (res) return { salaryMin: parseInt(res.min) * 22, salaryMax: parseInt(res.max) * 22, salaryMonth: 12 };
+        //300-350元/天
+        //200元/天
+        res = str.match(/((?<min>\d+)-)?(?<max>\d+)元\/天/)?.groups;
+        if (res) {
+            if (res.min === undefined) res.min = res.max;
+            return { salaryMin: parseInt(res.min) * 22, salaryMax: parseInt(res.max) * 22, salaryMonth: 12 };
+        }
+
         if (str.includes("面议")) {
             return null;
         }

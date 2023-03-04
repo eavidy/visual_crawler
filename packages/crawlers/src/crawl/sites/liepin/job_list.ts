@@ -1,19 +1,21 @@
 import { BrowserContext, Response } from "playwright";
-import { CompanyCrawlerData, JobCrawlerData } from "api/model/index";
+import { CompanyCrawlerData, JobCrawlerData, JobFilterOption } from "api/model";
 import { SiteTag } from "api/model";
 import { PageCrawl, DataParser as DataParser } from "../index";
-import { JobFilterOption } from "../../types/filter";
 
 /**
  * @event data {jobList:object[], compList:object[]}
  */
-export class Job51JobList extends PageCrawl {
+export class LiePinJobList extends PageCrawl {
     constructor(context: BrowserContext, readonly origin: string) {
         super(context);
     }
-    readonly siteTag = SiteTag.job51;
-    async open(options?: JobFilterOption, timeout = 0) {
-        const page = await super.newPage();
+    readonly siteTag = SiteTag.liepin;
+    async open(options?: JobFilterOption, timeout = 20 * 1000) {
+        if (!this.page) {
+            this.page = await super.newPage();
+        }
+        let page = this.page;
         page.on("response", (res) => {
             if (/apic.liepin.com\/api\/com.liepin.searchfront4c.pc-search-job$/.test(res.url())) {
                 if (res.ok()) {
@@ -26,6 +28,9 @@ export class Job51JobList extends PageCrawl {
         const url = this.origin + "/zhaopin/";
         await page.goto(url, { timeout });
     }
+    async setFilter(filter: JobFilterOption) {}
+    async gotoPage(num: number) {}
+    async nextPage() {}
     async onResponse(res: Response) {
         let data: ResData[] | undefined = (await res.json().catch(() => {}))?.data?.data?.jobCardList;
         if (typeof data !== "object") {
@@ -44,7 +49,9 @@ export class Job51JobList extends PageCrawl {
             let company = item.comp;
 
             try {
-                jobList.push(this.paseJob(job, company.compId.toString()));
+                const { data, errors } = paseJob(job, this.siteTag, company.compId.toString());
+                jobList.push(data);
+                errors.forEach((err) => this.reportError(err));
             } catch (error) {
                 this.reportError({ msg: "执行解析职位错误", err: (error as Error).toString() });
             }
@@ -56,33 +63,6 @@ export class Job51JobList extends PageCrawl {
         }
         return { jobList, compList };
     }
-    paseJob(job: typeof vData.job, companyId: string): JobCrawlerData {
-        let salary = DataParser.paseSalary(job.salary);
-        if (salary === undefined) {
-            this.reportError({ msg: "薪资解析失败", str: job.salary });
-        }
-        let cityId: number | undefined;
-
-        {
-            let cityStr = job.dq;
-            const cityName = cityStr.match(/^[^-]+/)?.[0];
-            cityId = cityName ? DataParser.cityNameToId(cityName) : DataParser.matchCityToId(cityStr);
-            if (cityId === undefined) this.reportError({ msg: "解析城市id失败", str: cityStr });
-        }
-        return {
-            jobData: {
-                cityId,
-                name: job.title,
-                tag: job.labels,
-                education: DataParser.matchEducation(job.requireEduLevel),
-                workExperience: DataParser.paseExp(job.requireWorkYears),
-                ...(salary ? salary : { salaryMonth: 12 }),
-            },
-            companyId: companyId,
-            jobId: job.jobId,
-            siteTag: SiteTag.job51,
-        };
-    }
     paseCompany(company: typeof vData.comp): CompanyCrawlerData {
         return {
             companyData: {
@@ -93,9 +73,45 @@ export class Job51JobList extends PageCrawl {
             },
             companyId: company.compId.toString(),
             exist: true,
-            siteTag: SiteTag.job51,
+            siteTag: SiteTag.liepin,
         };
     }
+}
+
+export function paseJob(
+    job: typeof vData.job,
+    siteTag: SiteTag,
+    companyId = "unknown"
+): { data: JobCrawlerData; errors: any[] } {
+    const errors: any[] = [];
+    let salary = DataParser.paseSalary(job.salary);
+    if (salary === undefined) {
+        errors.push({ msg: "薪资解析失败", str: job.salary });
+    }
+    let cityId: number | undefined;
+
+    {
+        let cityStr = job.dq;
+        const cityName = cityStr.match(/^[^-]+/)?.[0];
+        cityId = cityName ? DataParser.cityNameToId(cityName) : DataParser.matchCityToId(cityStr);
+        if (cityId === undefined) errors.push({ msg: "解析城市id失败", str: cityStr });
+    }
+    return {
+        data: {
+            jobData: {
+                cityId,
+                name: job.title,
+                tag: job.labels,
+                education: DataParser.matchEducation(job.requireEduLevel),
+                workExperience: DataParser.paseExp(job.requireWorkYears),
+                ...(salary ? salary : { salaryMonth: 12 }),
+            },
+            companyId: companyId,
+            jobId: job.jobId,
+            siteTag,
+        },
+        errors,
+    };
 }
 
 //copy 的响应数据, 用于代码提示
@@ -201,132 +217,6 @@ const filter = {
             name: "其他",
         },
     ],
-    compNatures: [
-        {
-            code: "010",
-            name: "外商独资·外企办事处",
-        },
-        {
-            code: "020",
-            name: "中外合营(合资·合作)",
-        },
-        {
-            code: "030",
-            name: "私营·民营企业",
-        },
-        {
-            code: "040",
-            name: "国有企业",
-        },
-        {
-            code: "050",
-            name: "国内上市公司",
-        },
-        {
-            code: "060",
-            name: "政府机关/非盈利机构",
-        },
-        {
-            code: "070",
-            name: "事业单位",
-        },
-        {
-            code: "999",
-            name: "其他",
-        },
-    ],
-    famousComps: [
-        {
-            code: "qua_0004",
-            name: "财富中国500强",
-        },
-        {
-            code: "qua_0009",
-            name: "创新企业100强",
-        },
-        {
-            code: "qua_0005",
-            name: "制造业500强",
-        },
-        {
-            code: "qua_0003",
-            name: "专精特新企业",
-        },
-        {
-            code: "qua_0001",
-            name: "高新技术企业",
-        },
-        {
-            code: "qua_0008",
-            name: "独角兽",
-        },
-    ],
-    dqs: [
-        {
-            code: "020010080",
-            name: "黄浦区",
-        },
-        {
-            code: "020010020",
-            name: "徐汇区",
-        },
-        {
-            code: "020010030",
-            name: "长宁区",
-        },
-        {
-            code: "020010100",
-            name: "静安区",
-        },
-        {
-            code: "020010040",
-            name: "普陀区",
-        },
-        {
-            code: "020010060",
-            name: "虹口区",
-        },
-        {
-            code: "020010070",
-            name: "杨浦区",
-        },
-        {
-            code: "020010120",
-            name: "闵行区",
-        },
-        {
-            code: "020010110",
-            name: "宝山区",
-        },
-        {
-            code: "020010130",
-            name: "嘉定区",
-        },
-        {
-            code: "020010010",
-            name: "浦东新区",
-        },
-        {
-            code: "020010140",
-            name: "金山区",
-        },
-        {
-            code: "020010150",
-            name: "松江区",
-        },
-        {
-            code: "020010160",
-            name: "青浦区",
-        },
-        {
-            code: "020010180",
-            name: "奉贤区",
-        },
-        {
-            code: "020010190",
-            name: "崇明区",
-        },
-    ],
     salaries: [
         {
             code: "0$3",
@@ -355,16 +245,6 @@ const filter = {
         {
             code: "60$999",
             name: "60K以上",
-        },
-    ],
-    jobKinds: [
-        {
-            code: "1",
-            name: "猎头职位",
-        },
-        {
-            code: "2",
-            name: "企业职位",
         },
     ],
     industries: [

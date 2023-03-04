@@ -1,5 +1,4 @@
-import { BrowserContext } from "playwright";
-import { JobFilterOption } from "../types/filter";
+import { BrowserContext, Page } from "playwright";
 import { EventEmitter } from "node:events";
 import { SiteTag } from "api/model";
 
@@ -28,7 +27,7 @@ async function createPage(ct: BrowserContext) {
 }
 
 /**
- * @event data any
+ * @event data
  * @event errData PageCrawlError[]
  */
 export abstract class PageCrawl extends EventEmitter {
@@ -49,9 +48,15 @@ export abstract class PageCrawl extends EventEmitter {
         const errors = this.errors;
         (this as any).errors = [];
         this.emit("data", data);
-        this.emit("errData", errors);
+        if (errors.length) this.emit("errData", errors);
     }
-    abstract open(options?: JobFilterOption, timeout?: number): Promise<void>;
+
+    protected page: Page | undefined;
+    async close() {
+        if (this.page) {
+            return this.page.close();
+        }
+    }
 }
 
 interface PageCrawlError {
