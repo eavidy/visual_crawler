@@ -6,5 +6,7 @@ import { JobsData } from "./collections/job";
 
 export const dbClient = new MongoClient(DB_URI);
 export const taskQueueData = new TaskQueueData(dbClient.db().collection("task_queue"));
+export const companyData = new CompanyData(dbClient.db().collection("companies"));
+export const jobsData = new JobsData(dbClient.db().collection("jobs"));
 
 export type { TaskQueueData, CompanyData, JobsData };

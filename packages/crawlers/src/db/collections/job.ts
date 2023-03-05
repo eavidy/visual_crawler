@@ -1,0 +1,109 @@
+import { JobCrawlerData, SiteTag } from "api/model";
+import { optional, testFx, checkType, ExceptTypeMap } from "common/calculate/field_test";
+import { ObjectId, Collection, WithId } from "mongodb";
+import { FieldCheckError } from "../classes/errors";
+const TIME_INTERVAL = 30 * 6 * 86400;
+
+export class JobsData {
+    constructor(private table: Collection) {}
+    private static createOpt() {
+        return [
+            //生成插入时间的字段
+            {
+                $project: {
+                    insertDate: {
+                        $function: {
+                            body: `function (_id) { let d = parseInt(_id + "", 16);  return d; }`,
+                            args: [{ $substrBytes: [{ $toString: "$_id" }, 0, 8] }],
+                            lang: "js",
+                        },
+                    },
+                    jobId: 1,
+                },
+            },
+            {
+                $match: {
+                    insertDate: { $gte: Math.floor(new Date().getTime() / 1000) - TIME_INTERVAL },
+                },
+            },
+        ];
+    }
+
+    async appendJob(job: JobCrawlerData) {
+        {
+            let testRes = checkType(job, jobChecker);
+            if (testRes) throw new FieldCheckError(testRes);
+        }
+        {
+            let res = await this.table //查询插入时间在6个月内的相同id的job
+                .aggregate([{ $match: { jobId: job.jobId, siteTag: job.siteTag } }, ...JobsData.createOpt()])
+                .toArray();
+
+            if (res.length) return false;
+        }
+        await this.table.insertOne(job);
+        return true;
+    }
+    async appendJobs(jobs: JobCrawlerData[], siteTag: SiteTag) {
+        {
+            let testRes = checkType(jobs, testFx.arrayType(jobChecker));
+            if (testRes) throw new FieldCheckError(testRes);
+        }
+        let idMap = getIdMap(jobs, siteTag);
+        let notInsertJobs: JobCrawlerData[] = [];
+        {
+            let oldJobs = await this.table
+                .aggregate<WithId<Pick<JobCrawlerData, "jobId" | "siteTag">>>([
+                    { $match: { siteTag, jobId: { $in: Object.keys(idMap) } } },
+                    ...JobsData.createOpt(),
+                ])
+                .toArray();
+
+            for (const old of oldJobs) {
+                let val = idMap[old.jobId];
+                if (val) notInsertJobs.push(val);
+                delete idMap[old.jobId];
+            }
+        }
+        await this.table.insertMany(Object.values(idMap));
+        return notInsertJobs;
+    }
+    deleteJob(jobId: string) {
+        return this.table.deleteOne({ _id: new ObjectId(jobId) });
+    }
+    getJob(jobId: string) {
+        return this.table.findOne({ _id: new ObjectId(jobId) });
+    }
+}
+function getIdMap(comps: JobCrawlerData[], siteTag: SiteTag) {
+    let idMap: Record<string, JobCrawlerData> = {};
+    for (const comp of comps) {
+        if (siteTag !== comp.siteTag) throw "siteTag不匹配";
+        idMap[comp.jobId] = comp;
+    }
+    return idMap;
+}
+const jobChecker: ExceptTypeMap = {
+    jobId: "string",
+    /** 所属公司id */
+    companyId: "string",
+    jobData: {
+        /** 薪资 */
+        salaryMin: optional.number,
+        salaryMax: optional.number,
+        /** 薪资月数 */
+        salaryMonth: optional.number,
+        /** 工作经验, 单位月 */
+        workExperience: "number",
+        /** 学历 */
+        education: optional(testFx.numScope(0, 7)),
+        cityId: optional.number,
+        /** 职位标签 */
+        tag: testFx.arrayType("string"),
+        name: "string",
+
+        compIndustry: optional.string,
+        compScale: optional.number,
+    },
+    siteTag: "number",
+};

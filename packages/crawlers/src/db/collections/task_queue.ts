@@ -1,6 +1,7 @@
 import { Collection, ObjectId, WithId } from "mongodb";
 import { CrawlerPriorityTask, TaskState, SiteTag } from "api/model";
-import { testObjectField, testFx, optional } from "common/calculate/field_test";
+import { checkType, testFx, optional } from "common/calculate/field_test";
+import { FieldCheckError } from "../classes/errors";
 
 export class TaskQueueData {
     constructor(private collection: Collection) {}
@@ -19,30 +20,30 @@ export class TaskQueueData {
         return res;
     }
     async appendTask(task: CrawlerPriorityTask) {
-        let res = taskTest(task);
-        if (res) throw new Error("数据结构异常", { cause: res });
+        let res = checkType(task, taskChecker);
+        if (res) throw new FieldCheckError(res);
         return this.collection.insertOne(task);
     }
     async appendTasks(tasks: CrawlerPriorityTask[]) {
-        for (let i = 0; i < tasks.length; i++) {
-            let res = taskTest(tasks[i]);
-            if (res) throw new Error("数据结构异常: 第" + i + "个数据", { cause: res });
+        {
+            let res = checkType(tasks, testFx.arrayType(taskChecker));
+            if (res) throw new FieldCheckError(res);
         }
         return this.collection.insertMany(tasks);
     }
     async markTasksFailed(id: string | number) {
-        return this.collection.updateOne({ _id: new ObjectId(id) }, {
+        return this.collection.updateOne({ _id: toId(id) }, {
             $set: {
                 status: TaskState.failed,
             },
         } as Partial<CrawlerPriorityTask>);
     }
     async markTasksSucceed(id: string | number) {
-        return this.collection.deleteOne({ _id: new ObjectId(id) });
+        return this.collection.deleteOne({ _id: toId(id) });
     }
 }
 
-function taskTest(task: CrawlerPriorityTask) {
+const taskChecker = (function () {
     let filterTester = optional({
         city: optional.number,
         emitTime: testFx.instanceof(Date),
@@ -51,7 +52,7 @@ function taskTest(task: CrawlerPriorityTask) {
         eduction: optional.number,
         companyScale: optional.number,
     });
-    return testObjectField(task, {
+    return {
         type: "string",
         siteTag: "number",
         status: "number",
@@ -61,5 +62,10 @@ function taskTest(task: CrawlerPriorityTask) {
         nonFixedFilter: filterTester,
     } as {
         [key in keyof CrawlerPriorityTask]?: any;
-    });
+    };
+})();
+
+function toId(id: string | number): any {
+    if (typeof id === "number") return id;
+    return new ObjectId(id);
 }

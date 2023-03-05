@@ -1,19 +1,23 @@
 import { it, expect, describe, beforeAll, afterAll } from "vitest";
 import { dbClient, taskQueueData } from "../index";
 import { CrawlerPriorityTask, SiteTag, TaskState } from "api/model";
-import { Collection, ObjectId } from "mongodb";
+import { Collection } from "mongodb";
 
-it("插入任务", async function () {
-    let res = await taskQueueData.appendTasks(initTasks);
-    expect(res).toMatchObject({ insertedCount: 18 });
-});
-it("获取任务", async function () {
-    let res = await taskQueueData.takeTask(2, SiteTag.boss);
-    expect(res).has.length(2);
-});
-it("完成任务", async function () {
-    // let res = await taskQueueData.markTasksSucceed(2);
-    expect(true).toBeTruthy();
+describe.skip("手动测试", function () {
+    it("插入任务", async function () {
+        let res = await taskQueueData.appendTasks([
+            { siteTag: SiteTag.boss, status: TaskState.unexecuted, type: "bb" },
+        ]);
+        expect(res).toMatchObject({ insertedCount: 1 });
+    });
+    it("获取任务", async function () {
+        let res = await taskQueueData.takeTasks(2, SiteTag.boss);
+        expect(res).has.length(2);
+    });
+    it("完成任务", async function () {
+        let res = await taskQueueData.markTasksSucceed(2);
+        expect(res).toMatchObject({ deletedCount: 1 });
+    });
 });
 
 let initTasks: CrawlerPriorityTask[] = [
@@ -38,6 +42,6 @@ beforeAll(async function () {
     await coll.insertMany(initTasks);
 });
 afterAll(async function () {
-    // await coll.deleteMany({});
+    await coll.deleteMany({});
     await dbClient.close();
 });
