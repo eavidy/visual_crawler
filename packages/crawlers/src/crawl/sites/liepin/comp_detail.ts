@@ -22,12 +22,12 @@ export class LiePinCompanyDetail extends PageCrawl {
             }
         });
     }
-    private currentId?: string;
-    async goto(companyId: string, timeout = 20 * 1000) {
+    private compInfo: { companyId: string; industry?: string; scale?: number } = { companyId: "unknown" };
+    async goto(companyId: string, option?: { industry?: string; scale?: number }, timeout = 20 * 1000) {
         if (!this.page) throw new Error("没有打开页面");
         const url = `${this.origin}/company-jobs/${companyId}`;
         await this.page.goto(url, { timeout });
-        this.currentId = companyId;
+        Object.assign(this.compInfo, { companyId }, option);
     }
     async getCurrentPage() {
         if (!this.page) throw new Error("没有打开页面");
@@ -46,7 +46,7 @@ export class LiePinCompanyDetail extends PageCrawl {
         await handler.click();
     }
     async crawlHtml() {
-        const companyId = this.currentId ?? "unknown";
+        let compInfo = { ...this.compInfo };
         if (!this.page) throw new Error("没有打开页面");
         const handler = this.page.locator(".content-left-section .left-list-box .job-detail-box>a");
         let data = await handler.evaluateAll(function (nodeList) {
@@ -75,27 +75,31 @@ export class LiePinCompanyDetail extends PageCrawl {
                 }
             }
         }
-        return data.map((data) => ({
-            jobData: {
-                name: data.name,
-                education: paseTag(data.tagList, DataParser.matchEducation),
-                workExperience: paseTag(data.tagList, DataParser.paseExp),
-                cityId: data.city ? DataParser.cityNameToId(data.city) : undefined,
-                ...(DataParser.paseSalary(data.salary) ?? { salaryMonth: 12 }),
-                tag: data.tagList,
-            },
-            companyId,
-            jobId: data.jobId,
-            siteTag: this.siteTag,
-        }));
+        return data.map(
+            (data): JobCrawlerData => ({
+                jobData: {
+                    name: data.name,
+                    education: paseTag(data.tagList, DataParser.matchEducation),
+                    workExperience: paseTag(data.tagList, DataParser.paseExp),
+                    cityId: data.city ? DataParser.cityNameToId(data.city) : undefined,
+                    ...(DataParser.paseSalary(data.salary) ?? { salaryMonth: 12 }),
+                    tag: data.tagList,
+                    compIndustry: compInfo.industry,
+                    compScale: compInfo.scale,
+                },
+                companyId: compInfo.companyId,
+                jobId: data.jobId,
+                siteTag: this.siteTag,
+            })
+        );
     }
     private async onResponse(res: Response) {
-        const companyId = this.currentId;
+        let compInfo = { ...this.compInfo };
         let dataList: any[] = (await res.json().catch(() => {}))?.data?.data ?? [];
         const jobList: JobCrawlerData[] = [];
         for (const dataItem of dataList) {
             try {
-                const { data, errors } = paseJob(dataItem.job, this.siteTag, companyId);
+                const { data, errors } = paseJob(dataItem.job, this.siteTag, compInfo); //todo: 规模、所属行业
                 jobList.push(data);
                 errors.forEach((err) => this.reportError(err));
             } catch (error) {

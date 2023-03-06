@@ -48,17 +48,24 @@ export class LiePinJobList extends PageCrawl {
             let job = item.job;
             let company = item.comp;
 
+            let compData;
             try {
-                const { data, errors } = paseJob(job, this.siteTag, company.compId.toString());
+                compData = this.paseCompany(company);
+                compList.push(compData);
+            } catch (error) {
+                this.reportError({ msg: "执行解析公司错误", err: (error as Error).toString() });
+            }
+
+            try {
+                const { data, errors } = paseJob(job, this.siteTag, {
+                    companyId: compData?.companyId,
+                    industry: compData?.companyData.industry,
+                    scale: compData?.companyData.scale,
+                });
                 jobList.push(data);
                 errors.forEach((err) => this.reportError(err));
             } catch (error) {
                 this.reportError({ msg: "执行解析职位错误", err: (error as Error).toString() });
-            }
-            try {
-                compList.push(this.paseCompany(company));
-            } catch (error) {
-                this.reportError({ msg: "执行解析公司错误", err: (error as Error).toString() });
             }
         }
         return { jobList, compList };
@@ -81,7 +88,7 @@ export class LiePinJobList extends PageCrawl {
 export function paseJob(
     job: typeof vData.job,
     siteTag: SiteTag,
-    companyId = "unknown"
+    company: { companyId?: string; industry?: string; scale?: number }
 ): { data: JobCrawlerData; errors: any[] } {
     const errors: any[] = [];
     let salary = DataParser.paseSalary(job.salary);
@@ -105,8 +112,11 @@ export function paseJob(
                 education: DataParser.matchEducation(job.requireEduLevel),
                 workExperience: DataParser.paseExp(job.requireWorkYears),
                 ...(salary ? salary : { salaryMonth: 12 }),
+
+                compIndustry: company.industry,
+                compScale: company.scale,
             },
-            companyId: companyId,
+            companyId: company.companyId ?? "unknown",
             jobId: job.jobId,
             siteTag,
         },

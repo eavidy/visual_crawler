@@ -13,13 +13,18 @@ export interface JobBasicData {
     /** 职位标签 */
     tag: string[];
     name: string;
+
+    /* 所属行业 */
+    compIndustry?: string;
+    /** 规模 */
+    compScale?: number;
 }
 /** jobData使用其他JobData的数据 */
 interface JobRefData {
     ref: string;
 }
 
-interface JobData {
+export interface JobCrawlerData {
     jobId: string;
     /** 所属公司id */
     companyId: string;
@@ -27,4 +32,4 @@ interface JobData {
     siteTag: SiteTag;
 }
 
-export type JobCrawlerData = JobRefData | JobData;
+export type JobData = JobRefData | JobCrawlerData;

@@ -34,7 +34,7 @@ beforeEach(() => {
     jobList.errors.length = 0;
 });
 it("解析猎聘职位数据", function () {
-    let res = paseJob(data.job, SiteTag.liepin, "esd");
+    let res = paseJob(data.job, SiteTag.liepin, { companyId: "esd" });
     expect(jobList.errors).toMatchObject([]);
     expect(res.data).toMatchObject({
         companyId: "esd",
