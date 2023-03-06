@@ -1,4 +1,4 @@
-import { Education, SiteTag } from ".";
+import { Education, SiteTag, CompanyScale } from ".";
 export interface JobBasicData {
     /** 薪资 */
     salaryMin?: number;
@@ -17,7 +17,7 @@ export interface JobBasicData {
     /* 所属行业 */
     compIndustry?: string;
     /** 规模 */
-    compScale?: number;
+    compScale?: CompanyScale;
 }
 /** jobData使用其他JobData的数据 */
 interface JobRefData {

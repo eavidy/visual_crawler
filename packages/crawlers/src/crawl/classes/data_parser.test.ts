@@ -1,5 +1,6 @@
 import { expect, it, describe } from "vitest";
 import { DataParser as Parser } from "./data_parser";
+import { CompanyScale } from "api/model";
 
 it("解析薪资", function () {
     expect(Parser.paseSalary("8-10k")).toMatchObject({ salaryMin: 8000, salaryMax: 10000, salaryMonth: 12 });
@@ -20,4 +21,17 @@ it("匹配城市", function () {
     expect(Parser.matchCityToId("s北京d")).toEqual(101010100);
     expect(Parser.matchCityToId("北京-朝阳区")).toBeUndefined(); //北京市 朝阳市, 字符串中有相同城市,解析失败
     expect(Parser.matchCityToId("北京s上海")).toBeUndefined();
+});
+describe("解析公司规模", function () {
+    it("正常范围", function () {
+        expect(Parser.paseScale("50-99人")).toEqual(CompanyScale.c20_99);
+        expect(Parser.paseScale("0-9人")).toEqual(CompanyScale.c0_20);
+        expect(Parser.paseScale("200-300人")).toEqual(CompanyScale.c100_499);
+    });
+    it("大于10000", function () {
+        expect(Parser.paseScale("10000人以上")).toEqual(CompanyScale.gt_10000);
+    });
+    it("解析失败", function () {
+        expect(Parser.paseScale("sdg")).toEqual(CompanyScale.unknown);
+    });
 });

@@ -14,6 +14,15 @@ export enum Education {
     初中 = 1,
     不限 = 0,
 }
+export enum CompanyScale {
+    c0_20 = 10,
+    c20_99 = 60,
+    c100_499 = 300,
+    c500_999 = 750,
+    c1000_9999 = 5500,
+    gt_10000 = 1000,
+    unknown = -1,
+}
 export * from "./company";
 export * from "./job";
 export * from "./task_queue";

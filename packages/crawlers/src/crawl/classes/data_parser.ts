@@ -1,5 +1,5 @@
 import { cities } from "common/constants/cities";
-import { Education } from "api/model/index";
+import { Education, CompanyScale } from "api/model";
 
 export class DataParser {
     static cityNameToId(cityName: string) {
@@ -76,21 +76,19 @@ export class DataParser {
         }
     }
     static paseScale(str: string) {
-        switch (str) {
-            case "0-20人":
-                return 10;
-            case "20-99人":
-                return 60;
-            case "100-499人":
-                return 300;
-            case "500-999人":
-                return 750;
-            case "1000-9999人":
-                return 5500;
-            case "10000人以上":
-                return 1000;
-            default:
-                return -1;
-        }
+        let res = str.match(/(?<min>\d+)-(?<max>\d+)人/)?.groups;
+        if (res) {
+            let min = parseInt(res.min);
+            let max = parseInt(res.max);
+            let avg = Math.round(max + 1 - min) / 2 + min;
+            if (avg >= 10000) return CompanyScale.gt_10000;
+            else if (avg >= 1000) return CompanyScale.c1000_9999;
+            else if (avg >= 500) return CompanyScale.c500_999;
+            else if (avg >= 100) return CompanyScale.c100_499;
+            else if (avg >= 20) return CompanyScale.c20_99;
+            else return CompanyScale.c0_20;
+        } else if (str === "10000人以上") return CompanyScale.gt_10000;
+
+        return CompanyScale.unknown;
     }
 }

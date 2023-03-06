@@ -1,9 +1,13 @@
 import { DataParser, PageCrawl } from "../index";
 import { BrowserContext, Response } from "playwright";
 import { SiteTag } from "api/model";
-import { paseJob } from "./job_list";
+import { paseJob } from "./classes/common_parser";
 import { JobCrawlerData } from "api/model/index";
+import { PageNumController } from "./classes/page_controller";
 
+/**
+ * @event request url:string
+ */
 export class LiePinCompanyDetail extends PageCrawl {
     constructor(context: BrowserContext, readonly origin: string) {
         super(context);
@@ -12,13 +16,21 @@ export class LiePinCompanyDetail extends PageCrawl {
     async open() {
         if (this.page) return;
         this.page = await this.newPage();
+        this.pageNumCtrl = new PageNumController(this.page);
+
+        let urlChecker = /apic.liepin.com\/api\/com.liepin.searchfront4c.pc-comp-homepage-search-job$/;
         this.page.on("response", (res) => {
-            if (/apic.liepin.com\/api\/com.liepin.searchfront4c.pc-comp-homepage-search-job$/.test(res.url())) {
+            if (urlChecker.test(res.url())) {
                 if (res.ok()) {
                     this.onResponse(res);
                 } else {
                     this.reportError({ msg: "响应状态码异常", status: res.status(), statusText: res.statusText() });
                 }
+            }
+        });
+        this.page.on("request", (request) => {
+            if (urlChecker.test(request.url())) {
+                this.emit("request", request.url());
             }
         });
     }
@@ -29,22 +41,8 @@ export class LiePinCompanyDetail extends PageCrawl {
         await this.page.goto(url, { timeout });
         Object.assign(this.compInfo, { companyId }, option);
     }
-    async getCurrentPage() {
-        if (!this.page) throw new Error("没有打开页面");
-        const handler = this.page.locator(`.list-pagination-box>.ant-pagination-item-active`);
-        let pageIndex = await handler.getAttribute("tabindex");
-        return pageIndex ? pageIndex + 1 : null;
-    }
-    async gotoPage(num: number) {
-        if (!this.page) throw new Error("没有打开页面");
-        const handler = this.page.locator(`.list-pagination-box>.ant-pagination-item[tabindex='${num - 1}']`);
-        await handler.click();
-    }
-    async nextPage() {
-        if (!this.page) throw new Error("没有打开页面");
-        const handler = this.page.locator(".list-pagination-box>.ant-pagination-next ");
-        await handler.click();
-    }
+    pageNumCtrl?: PageNumController;
+
     async crawlHtml() {
         let compInfo = { ...this.compInfo };
         if (!this.page) throw new Error("没有打开页面");

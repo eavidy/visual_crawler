@@ -1,14 +1,30 @@
 import { LiePinJobList } from "./job_list";
 import { createContext } from "../../crawler/browser";
+import { waitTime } from "common/async/time";
 async function test() {
     const bsCt = await createContext();
     const pageCrawl = new LiePinJobList(bsCt, "https://www.liepin.com");
-    pageCrawl.on("data", (data: any) => {
+    pageCrawl.on("data", async (data: any) => {
         console.log("职位:" + data.jobList.length + " 公司:" + data.compList.length);
     });
     pageCrawl.on("errData", (comps: any[]) => {
         console.error(comps);
     });
     await pageCrawl.open(undefined, 0);
+    return pageCrawl;
 }
-test();
+
+async function grefilter(pageCrawl: LiePinJobList) {
+    const filters = pageCrawl.pageFilter!;
+
+    for await (const res of filters) {
+        console.log(res);
+        await waitTime(2000);
+    }
+}
+
+async function start() {
+    const pageCrawl = await test();
+    await grefilter(pageCrawl);
+}
+// start();
