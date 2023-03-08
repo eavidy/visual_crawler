@@ -1,13 +1,12 @@
 import { beforeAll, describe, it, expect, afterAll } from "vitest";
-import { companyData, dbClient } from "../";
-import { SiteTag, CompanyCrawlerData } from "api/model";
+import { companyData, dbClient, CompanyCrawlerDataAppend } from "../";
+import { SiteTag } from "api/model";
 
 describe.skip("手动测试", function () {
     it("单条重复", async function () {
         let res = await companyData.appendCompany({
             companyId: "sdg0",
             /** 公司是否存在 */
-            exist: true,
             companyData: n,
             siteTag: SiteTag.boss,
         });
@@ -17,7 +16,6 @@ describe.skip("手动测试", function () {
         let res = await companyData.appendCompany({
             companyId: "sdg3",
             /** 公司是否存在 */
-            exist: true,
             companyData: n,
             siteTag: SiteTag.boss,
         });
@@ -25,38 +23,34 @@ describe.skip("手动测试", function () {
     });
 
     it("多条重复", async function () {
-        let dataList: CompanyCrawlerData[] = [
+        let dataList: CompanyCrawlerDataAppend[] = [
             {
                 companyId: "sdg2",
                 /** 公司是否存在 */
-                exist: true,
                 companyData: n,
                 siteTag: SiteTag.boss,
             },
             {
                 companyId: "sdg3",
                 /** 公司是否存在 */
-                exist: true,
                 companyData: n,
                 siteTag: SiteTag.boss,
             },
             {
                 companyId: "sdg4",
                 /** 公司是否存在 */
-                exist: true,
                 companyData: n,
                 siteTag: SiteTag.boss,
             },
             {
                 companyId: "sdg5",
                 /** 公司是否存在 */
-                exist: true,
                 companyData: n,
                 siteTag: SiteTag.boss,
             },
         ];
-        let res = await companyData.appendCompanies(dataList, SiteTag.boss);
-        expect(res.map((i) => i.companyId)).toEqual(["sdg2", "sdg3"]);
+        let { inserted, uninserted } = await companyData.appendCompanies(dataList, SiteTag.boss);
+        expect(uninserted.map((i) => i.companyId)).toEqual(["sdg2", "sdg3"]);
     });
 });
 let n = {
@@ -66,25 +60,19 @@ let n = {
     welfareLabel: [],
 };
 beforeAll(async function () {
-    let data: CompanyCrawlerData[] = [
+    let data: CompanyCrawlerDataAppend[] = [
         {
             companyId: "sdg0",
-            /** 公司是否存在 */
-            exist: true,
             companyData: n,
             siteTag: SiteTag.boss,
         },
         {
             companyId: "sd1",
-            /** 公司是否存在 */
-            exist: true,
             companyData: n,
             siteTag: SiteTag.boss,
         },
         {
             companyId: "sdg2",
-            /** 公司是否存在 */
-            exist: true,
             companyData: n,
             siteTag: SiteTag.boss,
         },

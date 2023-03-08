@@ -1,6 +1,7 @@
 import { LiePinJobList } from "./job_list";
 import { createContext } from "../../crawler/browser";
 import { waitTime } from "common/async/time";
+import { listIterator } from "../../classes/crawl_action";
 async function test() {
     const bsCt = await createContext();
     const pageCrawl = new LiePinJobList(bsCt, "https://www.liepin.com");
@@ -17,7 +18,7 @@ async function test() {
 async function grefilter(pageCrawl: LiePinJobList) {
     const filters = pageCrawl.pageFilter!;
 
-    for await (const res of filters) {
+    for await (const res of listIterator(filters.iterationSequence)) {
         console.log(res);
         await waitTime(2000);
     }

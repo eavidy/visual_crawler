@@ -1,6 +1,7 @@
 import { it, expect, beforeEach } from "vitest";
-import { LiePinJobList, paseJob } from "./job_list";
+import { LiePinJobList } from "./job_list";
 import { JobCrawlerData, CompanyCrawlerData, SiteTag, Education } from "api/model/index";
+import { paseJob } from "./classes/common_parser";
 
 const data = {
     job: {

@@ -1,37 +1,36 @@
-import { Collection, ObjectId, WithId } from "mongodb";
+import { Collection, ObjectId, WithId, Db } from "mongodb";
 import { CrawlerPriorityTask, TaskState, SiteTag } from "api/model";
 import { checkType, testFx, optional } from "common/calculate/field_test";
 import { FieldCheckError } from "../classes/errors";
-
+export type CrawlerTaskAppend = Omit<CrawlerPriorityTask, "status">;
+export type UnexecutedCrawlerTask = WithId<Omit<CrawlerPriorityTask, "status" | "priority" | "expirationTime">>;
 export class TaskQueueData {
-    constructor(private collection: Collection) {}
+    private priorityQueueView: Collection;
+
+    constructor(db: Db, private collection: Collection) {
+        this.priorityQueueView = db.collection("task_priority_queue");
+    }
     async takeTasks(count: number, siteTag: SiteTag) {
-        let res = await this.collection
-            .aggregate<WithId<CrawlerPriorityTask>>([
-                { $match: { siteTag, status: TaskState.unexecuted } },
-                { $sort: { priority: -1, expirationTime: 1 } },
-                { $limit: count },
-            ])
-            .toArray();
+        let res = await this.priorityQueueView.find<UnexecutedCrawlerTask>({ siteTag }).limit(count).toArray();
         await this.collection.updateMany(
             { _id: { $in: res.map((val) => val._id) } },
             { $set: { status: TaskState.executing } }
         );
         return res;
     }
-    async appendTask(task: CrawlerPriorityTask) {
+    async appendTask(task: CrawlerTaskAppend) {
         let res = checkType(task, taskChecker);
         if (res) throw new FieldCheckError(res);
-        return this.collection.insertOne(task);
+        return this.collection.insertOne({ ...task, status: TaskState.unexecuted });
     }
-    async appendTasks(tasks: CrawlerPriorityTask[]) {
+    async appendTasks(tasks: CrawlerTaskAppend[]) {
         {
             let res = checkType(tasks, testFx.arrayType(taskChecker));
             if (res) throw new FieldCheckError(res);
         }
         return this.collection.insertMany(tasks);
     }
-    async markTasksFailed(id: string | number) {
+    async markTasksFailed(id: string) {
         return this.collection.updateOne({ _id: toId(id) }, {
             $set: {
                 status: TaskState.failed,
@@ -40,6 +39,13 @@ export class TaskQueueData {
     }
     async markTasksSucceed(id: string | number) {
         return this.collection.deleteOne({ _id: toId(id) });
+    }
+    async updateTasksStatus(ids: (string | ObjectId)[], status: TaskState) {
+        {
+            let res = checkType(status, testFx.numScope(0));
+            if (res) throw new FieldCheckError(res);
+        }
+        return this.collection.updateMany({ _id: { $in: ids.map((id) => new ObjectId(id)) } }, { $set: { status } });
     }
 }
 
@@ -55,11 +61,9 @@ const taskChecker = (function () {
     return {
         type: "string",
         siteTag: "number",
-        status: "number",
         priority: optional.number,
         expirationTime: optional.string,
-        fixedFilter: filterTester,
-        nonFixedFilter: filterTester,
+        taskInfo: optional(testFx.any()),
     } as {
         [key in keyof CrawlerPriorityTask]?: any;
     };

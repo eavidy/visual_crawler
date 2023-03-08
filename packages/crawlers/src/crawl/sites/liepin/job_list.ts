@@ -5,9 +5,10 @@ import { PageCrawl, DataParser as DataParser } from "../index";
 import { paseJob, RawCompData, RawJobData } from "./classes/common_parser";
 import { PageNumController } from "./classes/page_controller";
 import { waitTime } from "common/async/time";
-const ACTION_TIMEOUT = 1000;
+import { FilterIteratorFx, ACTION_TIMEOUT } from "../../classes/crawl_action";
 /**
  * @event data {jobList:object[], compList:object[]}
+ * @event request url:string
  */
 export class LiePinJobList extends PageCrawl {
     constructor(context: BrowserContext, readonly origin: string) {
@@ -52,7 +53,14 @@ export class LiePinJobList extends PageCrawl {
         const resData = this.paseData(data);
         this.pageCrawlFin(resData);
     }
-    paseData(data: ResData[]) {
+    async isEmpty() {
+        let res = await this.page
+            ?.locator(".content-left-section .ant-empty")
+            .filter({ hasText: "暂时没有合适的职位" })
+            .count();
+        return !!res;
+    }
+    private paseData(data: ResData[]) {
         const jobList: JobCrawlerData[] = [];
         const compList: CompanyCrawlerData[] = [];
         for (let i = 0; i < data.length; i++) {
@@ -96,45 +104,18 @@ export class LiePinJobList extends PageCrawl {
         };
     }
 }
-export enum ESalary {
-    lt3 = 0,
-    s3_5 = 1,
-    s5_10 = 2,
-    s10_20 = 3,
-    s20_40 = 4,
-    s40_60 = 5,
-    gt60 = 6,
-}
+
 class PageFilter {
     constructor(private readonly page: Page) {}
-    private getBasicFilters(title?: string) {
-        let loc = this.page.locator(".filter-options-container .filter-options-row-section >.options-row");
-        return title ? loc.filter({ hasText: title }) : loc;
-    }
-    private getOtherFilters() {
-        return this.page.locator(
-            ".filter-options-container .filter-options-selector-section .row-options-detail-box .select-box"
-        );
-    }
-    private async clickSelector(text: string) {
-        let loc = this.page.locator(".ant-select-dropdown .rc-virtual-list-holder .ant-select-item");
-        return loc.getByText(text).click({ timeout: ACTION_TIMEOUT });
-    }
-    private async isEmpty() {
-        let res = await this.page
-            .locator(".content-left-section .ant-empty")
-            .filter({ hasText: "暂时没有合适的职位" })
-            .count();
-        return !!res;
-    }
 
     // async setEmitTime(cityId: string) {}
     // async setIndustry(cityId: string) {}
 
     //7
-    async *salary() {
+    async *salary(skipCount = 0) {
         let list = await this.getBasicFilters("薪资").locator(".options-item").all();
-        for (const item of list) {
+        for (let i = skipCount; i < list.length; i++) {
+            let item = list[i];
             try {
                 await item.click({ timeout: ACTION_TIMEOUT });
                 yield true;
@@ -144,9 +125,10 @@ class PageFilter {
         }
     }
     //7
-    async *experience() {
+    async *experience(skipCount = 0) {
         let list = await this.getBasicFilters("经验").locator(".options-item").all();
-        for (const item of list) {
+        for (let i = skipCount; i < list.length; i++) {
+            let item = list[i];
             try {
                 await item.click({ timeout: ACTION_TIMEOUT });
                 yield true;
@@ -156,10 +138,11 @@ class PageFilter {
         }
     }
     //7
-    async *education(list = ["初中及以下", "高中", "中专/中技", "大专", "本科", "硕士", "博士"]) {
+    async *education(skipCount = 0, list = ["初中及以下", "高中", "中专/中技", "大专", "本科", "硕士", "博士"]) {
         // let lastStr = "学历";
         let loc = await this.getOtherFilters().nth(0);
-        for (const str of list) {
+        for (let i = skipCount; i < list.length; i++) {
+            let str = list[i];
             try {
                 await loc.click({ timeout: ACTION_TIMEOUT });
                 await waitTime(200);
@@ -174,11 +157,12 @@ class PageFilter {
 
     //8
     async *compScale(
+        skipCount = 0,
         list = ["1-49人", "50-99人", "500-999人", "1000-2000人", "2000-5000人", "5000-10000人", "10000人以上"]
     ) {
         let loc = await this.getOtherFilters().nth(3);
-
-        for (const str of list) {
+        for (let i = skipCount; i < list.length; i++) {
+            let str = list[i];
             try {
                 await loc.click({ timeout: ACTION_TIMEOUT });
                 await waitTime(200);
@@ -191,12 +175,13 @@ class PageFilter {
     }
     //6
     async *financingStage(
+        skinList = 0,
         list = ["天使轮", "A轮", "B轮", "C轮", "D轮及以上", "已上市", "战略融资", "融资未公开", "其他"]
     ) {
         //融资阶段
         let loc = await this.getOtherFilters().nth(4);
-
-        for (const str of list) {
+        for (let i = skinList; i < list.length; i++) {
+            let str = list[i];
             try {
                 await loc.click({ timeout: ACTION_TIMEOUT });
                 await waitTime(200);
@@ -207,14 +192,25 @@ class PageFilter {
             }
         }
     }
-    async *[Symbol.asyncIterator](
-        list: FilterIteratorFx[] = [this.salary, this.experience, this.education, this.compScale, this.financingStage]
-    ) {
-        for (const fx of list) yield* await fx.call(this);
+    get iterationSequence(): FilterIteratorFx[] {
+        return [this.salary, this.experience, this.education, this.compScale, this.financingStage].map((fx) =>
+            fx.bind(this)
+        );
+    }
+    private getBasicFilters(title?: string) {
+        let loc = this.page.locator(".filter-options-container .filter-options-row-section >.options-row");
+        return title ? loc.filter({ hasText: title }) : loc;
+    }
+    private getOtherFilters() {
+        return this.page.locator(
+            ".filter-options-container .filter-options-selector-section .row-options-detail-box .select-box"
+        );
+    }
+    private async clickSelector(text: string) {
+        let loc = this.page.locator(".ant-select-dropdown .rc-virtual-list-holder .ant-select-item");
+        return loc.getByText(text).click({ timeout: ACTION_TIMEOUT });
     }
 }
-
-type FilterIteratorFx = (this: PageFilter) => AsyncGenerator<boolean, void, unknown>;
 
 type ResData = { job: RawJobData; comp: RawCompData };
 

@@ -11,9 +11,10 @@ export interface CompanyBasicData {
 
 export interface CompanyCrawlerData {
     companyId: string;
-    /** 公司是否存在 */
-    exist: boolean;
     companyData: CompanyBasicData;
     siteTag: SiteTag;
+    /** 公司已不存在 */
+    nonexistent?: boolean;
     lastUpdate?: Date;
+    lastPushQueueDate?: Date;
 }

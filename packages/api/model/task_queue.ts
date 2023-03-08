@@ -6,17 +6,31 @@ export enum TaskState {
     failed = 3,
 }
 
+export enum TaskType {
+    company = "company",
+    jobFilter = "jobFilter",
+}
 export interface CrawlerPriorityTask {
     /** 任务类型 */
-    type: string;
+    type: TaskType;
     siteTag: SiteTag;
     status: TaskState;
-    /** 优先级, 越大越优先 */
+    /** 优先级, 越小越优先 */
     priority?: number;
     /** 过期时间 */
     expirationTime?: Date;
-    fixedFilter?: JobFilterOption;
-    nonFixedFilter?: JobFilterOption;
+    taskInfo?: any;
+}
+export interface CrawlerPriorityJobFilterTask extends CrawlerPriorityTask {
+    type: TaskType.jobFilter;
+    taskInfo: {
+        fixedFilter?: JobFilterOption;
+        nonFixedFilter?: JobFilterOption;
+    };
+}
+export interface CrawlerPriorityCompanyTask extends CrawlerPriorityTask {
+    type: TaskType.company;
+    taskInfo: string;
 }
 export interface JobFilterOption {
     city?: number;

@@ -1,20 +1,26 @@
-import { CompanyCrawlerData, SiteTag } from "api/model";
+import { CompanyCrawlerData, CrawlerPriorityCompanyTask, SiteTag, TaskType } from "api/model";
 import { ObjectId, Collection, WithId } from "mongodb";
 import { checkType, ExceptTypeMap, optional, testFx } from "common/calculate/field_test";
 import { FieldCheckError } from "../classes/errors";
 
+export type CompanyCrawlerDataAppend = Omit<
+    CompanyCrawlerData,
+    "lastUpdate" | "lastPushQueue" | "nonexistent" | "lastPushQueueDate"
+>;
+
 export class CompanyData {
+    private taskQueueCollName = "task_queue";
     constructor(private table: Collection) {}
 
     /** 成功插入返回true, 如果数据库中已经存在ID, 返回false */
-    async appendCompany(comp: CompanyCrawlerData) {
+    async appendCompany(comp: CompanyCrawlerDataAppend) {
         {
             let res = checkType(comp, companyChecker);
             if (res) throw new FieldCheckError(res);
         }
         let res = await this.table.findOne({ companyId: comp.companyId, siteTag: comp.siteTag });
         if (res === null) {
-            await this.table.insertOne(comp);
+            await this.table.insertOne({ ...comp });
             return true;
         }
         return false;
@@ -25,13 +31,13 @@ export class CompanyData {
     /**
      * 如果数据库存在相同id的公司, 则不插入, 返回重复公司列表
      */
-    async appendCompanies(comps: CompanyCrawlerData[], siteTag: SiteTag) {
+    async appendCompanies(comps: CompanyCrawlerDataAppend[], siteTag: SiteTag) {
         {
             let res = checkType(comps, testFx.arrayType(companyChecker));
             if (res) throw new FieldCheckError(res);
         }
         let idMap = getIdMap(comps, siteTag);
-        let notInsertComps: CompanyCrawlerData[] = []; //todo: 更新重复的公司
+        let notInsertComps: CompanyCrawlerDataAppend[] = []; //todo: 更新重复的公司
         {
             let oldComps = await this.table
                 .aggregate<WithId<Pick<CompanyCrawlerData, "companyId" | "siteTag">>>([
@@ -46,16 +52,64 @@ export class CompanyData {
                 delete idMap[old.companyId];
             }
         }
-        await this.table.insertMany(Object.values(idMap));
-        return notInsertComps;
+        let insertable = Object.values(idMap);
+        await this.table.insertMany(insertable);
+        return { inserted: insertable, uninserted: notInsertComps };
     }
+
     async deleteCompany(compId: string) {
         return this.table.deleteOne({ _id: new ObjectId(compId) });
     }
+
+    async appendCompanyTasksToTaskQueue(beforeTime: Date, options?: { siteTag?: SiteTag; expirationTime?: Date }) {
+        {
+            let res = checkType(
+                [beforeTime, options],
+                [
+                    testFx.instanceof(Date),
+                    {
+                        siteTag: "number",
+                        expirationTime: optional(testFx.instanceof(Date)),
+                        fixedFilter: optional(testFx.any()),
+                        nonFixedFilter: optional(testFx.any()),
+                    },
+                ]
+            );
+            if (res) throw new FieldCheckError(res);
+        }
+        let siteTag = options?.siteTag;
+        let res = await this.table
+            .aggregate<CrawlerPriorityCompanyTask>([
+                {
+                    $match: {
+                        nonexistent: { $not: true },
+                        siteTag,
+                        lastPushQueueDate: { $or: [null, { $lt: beforeTime }] },
+                    },
+                },
+                {
+                    $set: {
+                        type: TaskType.company,
+                        taskInfo: "$companyId",
+                    },
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        siteTag: 1,
+                    },
+                },
+                // {
+                //     $out: this.taskQueueCollName,
+                // },
+            ])
+            .toArray();
+        return res;
+    }
 }
 
-function getIdMap(comps: CompanyCrawlerData[], siteTag: SiteTag) {
-    let idMap: Record<string, CompanyCrawlerData> = {};
+function getIdMap(comps: CompanyCrawlerDataAppend[], siteTag: SiteTag) {
+    let idMap: Record<string, CompanyCrawlerDataAppend> = {};
     for (const comp of comps) {
         if (siteTag !== comp.siteTag) throw "siteTag不匹配";
         idMap[comp.companyId] = comp;
@@ -65,8 +119,6 @@ function getIdMap(comps: CompanyCrawlerData[], siteTag: SiteTag) {
 
 const companyChecker: ExceptTypeMap = {
     companyId: "string",
-    /** 公司是否存在 */
-    exist: "boolean",
     companyData: {
         /* 所属行业 */
         industry: "string",
