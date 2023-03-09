@@ -1,4 +1,5 @@
 import { JobCrawlerData, SiteTag } from "api/model";
+import { removeUndefined } from "common/calculate/object";
 import { DataParser } from "../..";
 
 export function paseJob(
@@ -19,23 +20,25 @@ export function paseJob(
         cityId = cityName ? DataParser.cityNameToId(cityName) : DataParser.matchCityToId(cityStr);
         if (cityId === undefined) errors.push({ msg: "解析城市id失败", str: cityStr });
     }
-    return {
-        data: {
-            jobData: {
-                cityId,
-                name: job.title,
-                tag: job.labels,
-                education: DataParser.matchEducation(job.requireEduLevel),
-                workExperience: DataParser.paseExp(job.requireWorkYears),
-                ...(salary ? salary : { salaryMonth: 12 }),
+    let data = {
+        jobData: {
+            cityId,
+            name: job.title,
+            tag: job.labels,
+            education: DataParser.matchEducation(job.requireEduLevel),
+            workExperience: DataParser.paseExp(job.requireWorkYears),
+            ...(salary ? salary : { salaryMonth: 12 }),
 
-                compIndustry: company.industry,
-                compScale: company.scale,
-            },
-            companyId: company.companyId ?? "unknown",
-            jobId: job.jobId,
-            siteTag,
+            compIndustry: company.industry,
+            compScale: company.scale,
         },
+        companyId: company.companyId ?? "unknown",
+        jobId: job.jobId,
+        siteTag,
+    };
+    removeUndefined(data);
+    return {
+        data,
         errors,
     };
 }

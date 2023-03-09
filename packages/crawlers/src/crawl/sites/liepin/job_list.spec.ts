@@ -1,5 +1,5 @@
-import { LiePinJobList } from "./job_list";
-import { createContext } from "../../crawler/browser";
+import { LiePinJobList, PageController } from "./job_list";
+import { createContext } from "../../classes/browser";
 import { waitTime } from "common/async/time";
 import { listIterator } from "../../classes/crawl_action";
 async function test() {
@@ -11,21 +11,19 @@ async function test() {
     pageCrawl.on("errData", (comps: any[]) => {
         console.error(comps);
     });
-    await pageCrawl.open(undefined, 0);
-    return pageCrawl;
+    let ctrl = await pageCrawl.open(undefined, 0);
+    return ctrl;
 }
 
-async function grefilter(pageCrawl: LiePinJobList) {
-    const filters = pageCrawl.pageFilter!;
-
-    for await (const res of listIterator(filters.iterationSequence)) {
+async function grefilter(ctrl: PageController) {
+    for await (const res of listIterator(ctrl.iterationSequence)) {
         console.log(res);
         await waitTime(2000);
     }
 }
 
 async function start() {
-    const pageCrawl = await test();
-    await grefilter(pageCrawl);
+    const ctrl = await test();
+    await grefilter(ctrl);
 }
-// start();
+start();

@@ -8,11 +8,12 @@ export interface CompanyBasicData {
     welfareLabel: string[];
     name: string;
 }
-
-export interface CompanyCrawlerData {
+export interface CompanyCrawlerDataAppend {
     companyId: string;
     companyData: CompanyBasicData;
     siteTag: SiteTag;
+}
+export interface CompanyCrawlerData extends CompanyCrawlerDataAppend {
     /** 公司已不存在 */
     nonexistent?: boolean;
     lastUpdate?: Date;

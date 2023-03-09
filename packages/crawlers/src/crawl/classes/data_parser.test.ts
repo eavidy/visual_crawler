@@ -14,6 +14,7 @@ it("解析薪资", function () {
 it("城市转id", function () {
     expect(Parser.cityNameToId("北京")).toEqual(101010100);
     expect(Parser.cityNameToId("上海")).toEqual(101020100);
+    expect(Parser.cityNameToId("徐州")).toEqual(101190800);
     expect(Parser.cityNameToId("位置")).toBeUndefined();
 });
 it("匹配城市", function () {

@@ -10,7 +10,7 @@ export class DeepAssignFilter {
      * @generator 如果迭代时出现异常, 则yield false, 否则yield true   如果执行 next() 时 传入true, 则跳过深度迭代
      * @param skinList 传入每个生成器的skinCount
      */
-    async *assign(skinList?: readonly number[], index = 0): AsyncGenerator<boolean, void, boolean> {
+    async *assign(skinList?: readonly number[], index = 0): AsyncGenerator<boolean, boolean, boolean> {
         let list = this.list;
         this.assignRes[index] = 0;
 
@@ -32,4 +32,4 @@ export async function* listIterator(list: FilterIteratorFx[]) {
 /**
  * @param skipCount 要跳过操作的数量
  */
-export type FilterIteratorFx = (skipCount?: number) => AsyncGenerator<boolean, void, void>;
+export type FilterIteratorFx = (skipCount?: number) => AsyncGenerator<boolean, boolean, void>;

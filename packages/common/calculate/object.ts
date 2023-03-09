@@ -1,4 +1,6 @@
-export function patchObject(from: Record<string | number | symbol, any>, to: Record<string | number | symbol, any>) {
+type Obj = Record<string | number | symbol, any>;
+
+export function patchObject(from: Obj, to: Obj) {
     for (const [key, val] of Object.entries(from)) {
         if (typeof val === "object") {
             if (val === null) to[key] = null;
@@ -9,7 +11,7 @@ export function patchObject(from: Record<string | number | symbol, any>, to: Rec
     }
     return from;
 }
-export function groupBy<Key, T extends {}>(data: T[], key: keyof T) {
+export function groupBy<Key, T extends Obj>(data: T[], key: keyof T) {
     let res = new Map<Key, T[]>();
     for (const it of data) {
         let id = it[key] as Key;
@@ -21,4 +23,13 @@ export function groupBy<Key, T extends {}>(data: T[], key: keyof T) {
         group.push(it);
     }
     return res;
+}
+
+export function removeUndefined<T extends Obj>(obj: T, deep = true): T {
+    for (const key of Object.keys(obj)) {
+        let val = obj[key];
+        if (val === undefined) delete obj[key];
+        if (deep && typeof val === "object" && val !== null) removeUndefined(val);
+    }
+    return obj;
 }

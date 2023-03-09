@@ -34,6 +34,7 @@ export abstract class PageCrawl extends EventEmitter {
     constructor(protected context: BrowserContext) {
         super();
     }
+
     abstract readonly siteTag: SiteTag;
     protected async newPage() {
         const page = createPage(this.context);
@@ -49,13 +50,6 @@ export abstract class PageCrawl extends EventEmitter {
         (this as any).errors = [];
         this.emit("data", data);
         if (errors.length) this.emit("errData", errors);
-    }
-
-    protected page: Page | undefined;
-    async close() {
-        if (this.page) {
-            return this.page.close();
-        }
     }
 }
 

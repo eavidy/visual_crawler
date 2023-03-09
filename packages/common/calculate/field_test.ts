@@ -1,5 +1,5 @@
 /**
- * @param deleteSurplus 如果doc中的key不存在test中, 则将其删除
+ * @param deleteSurplus 如果doc中的key不存在test中, 则将其删除. 如果 对象的字段预期类型为可选, 并且实际存在字段为undefined, 则在deleteSurplus为true是将字段删除
  */
 function checkObject(doc: Record<string, any>, except: ExceptTypeMap, deleteSurplus = true) {
     let errors: Record<string, any> = {};
@@ -8,6 +8,10 @@ function checkObject(doc: Record<string, any>, except: ExceptTypeMap, deleteSurp
     for (let [testKey, exceptType] of Object.entries(except)) {
         if (exceptType instanceof OptionalKey) {
             if (!Object.hasOwn(doc, testKey)) continue;
+            else if (doc[testKey] === undefined && deleteSurplus) {
+                delete doc[testKey];
+                continue;
+            }
             exceptType = exceptType.type;
         }
         let res = checkType(doc[testKey], exceptType);

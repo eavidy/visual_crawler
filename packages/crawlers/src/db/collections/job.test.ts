@@ -66,8 +66,8 @@ describe.skip("手动测试", function () {
                 siteTag: SiteTag.boss,
             },
         ];
-        let res = await jobsData.appendJobs(dataList, SiteTag.boss);
-        expect(res.map((i) => i.jobId)).toEqual(["sdg2", "sdg3"]);
+        let { uninserted } = await jobsData.appendJobs(dataList, SiteTag.boss);
+        expect(uninserted.map((i) => i.jobId)).toEqual(["sdg2", "sdg3"]);
     });
 });
 let n: JobBasicData = {

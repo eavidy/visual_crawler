@@ -22,7 +22,7 @@ export async function createBrowser() {
     const browser = await chromium.launch({
         // args: ["--disable-plugins"],
         headless: false,
-        devtools: true,
+        // devtools: true,
         channel: "msedge",
 
         ignoreDefaultArgs: ["--enable-automation"],

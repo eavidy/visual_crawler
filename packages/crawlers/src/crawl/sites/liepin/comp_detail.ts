@@ -1,103 +1,59 @@
 import { DataParser, PageCrawl } from "../index";
-import { BrowserContext, Response } from "playwright";
+import { BrowserContext, Page, Response } from "playwright";
 import { SiteTag } from "api/model";
 import { paseJob } from "./classes/common_parser";
 import { JobCrawlerData } from "api/model/index";
-import { PageNumController } from "./classes/page_controller";
+import { PageNumControllable } from "./classes/page_controller";
 
 /**
  * @event request url:string
+ * @event data data:{jobList:any[]}
+ * @event auth    //页面需要验证码
  */
 export class LiePinCompanyDetail extends PageCrawl {
     constructor(context: BrowserContext, readonly origin: string) {
         super(context);
     }
     siteTag = SiteTag.liepin;
-    async open() {
-        if (this.page) return;
-        this.page = await this.newPage();
-        this.pageNumCtrl = new PageNumController(this.page);
+
+    async open(companyInfo: CompInfo, timeout = 20 * 1000) {
+        let page = await this.newPage();
 
         let urlChecker = /apic.liepin.com\/api\/com.liepin.searchfront4c.pc-comp-homepage-search-job$/;
-        this.page.on("response", (res) => {
+        page.on("response", (res) => {
             if (urlChecker.test(res.url())) {
                 if (res.ok()) {
-                    this.onResponse(res);
+                    this.onResponse(res, companyInfo);
                 } else {
                     this.reportError({ msg: "响应状态码异常", status: res.status(), statusText: res.statusText() });
                 }
             }
         });
-        this.page.on("request", (request) => {
+        page.on("request", (request) => {
             if (urlChecker.test(request.url())) {
                 this.emit("request", request.url());
             }
         });
-    }
-    private compInfo: { companyId: string; industry?: string; scale?: number } = { companyId: "unknown" };
-    async goto(companyId: string, option?: { industry?: string; scale?: number }, timeout = 20 * 1000) {
-        if (!this.page) throw new Error("没有打开页面");
-        const url = `${this.origin}/company-jobs/${companyId}`;
-        await this.page.goto(url, { timeout });
-        Object.assign(this.compInfo, { companyId }, option);
-    }
-    pageNumCtrl?: PageNumController;
-
-    async crawlHtml() {
-        let compInfo = { ...this.compInfo };
-        if (!this.page) throw new Error("没有打开页面");
-        const handler = this.page.locator(".content-left-section .left-list-box .job-detail-box>a");
-        let data = await handler.evaluateAll(function (nodeList) {
-            let jobDataList: { city?: string; name: string; salary: string; tagList: string[]; jobId: string }[] = [];
-            for (const node of nodeList) {
-                let jobId = node.href.match(/www.liepin.com\/job\/(\d+)\.shtml/)?.[1];
-                let city: string | undefined = node
-                    .querySelector(".job-dq-box>.ellipsis-1")
-                    .innerText?.match(/^[^-]+/)?.[0];
-
-                let name = node.querySelector(".job-title-box>.ellipsis-1").innerText;
-                let salary = node.querySelector(".job-salary").innerText;
-                let tagList: string[] = [];
-                node.querySelectorAll(".job-labels-box>span").forEach((n: any) => tagList.push(n.innerText));
-                jobDataList.push({ city, name, salary, tagList, jobId });
+        const url = `${this.origin}/company-jobs/${companyInfo.companyId}`;
+        await page.goto(url, { timeout });
+        let pageCtrl = new LiePinCompanyDetail.PageController(page, this, companyInfo);
+        let stopCheckAuth = setInterval(async () => {
+            if (await pageCtrl.isAuth()) {
+                this.emit("auth");
             }
-            return jobDataList;
         });
-        function paseTag(list: string[], fx: (str: string) => any) {
-            for (let i = 0; i < list.length; i++) {
-                let tag = list[i];
-                let res = fx(tag);
-                if (res) {
-                    list.splice(i, 1);
-                    return res;
-                }
-            }
-        }
-        return data.map(
-            (data): JobCrawlerData => ({
-                jobData: {
-                    name: data.name,
-                    education: paseTag(data.tagList, DataParser.matchEducation),
-                    workExperience: paseTag(data.tagList, DataParser.paseExp),
-                    cityId: data.city ? DataParser.cityNameToId(data.city) : undefined,
-                    ...(DataParser.paseSalary(data.salary) ?? { salaryMonth: 12 }),
-                    tag: data.tagList,
-                    compIndustry: compInfo.industry,
-                    compScale: compInfo.scale,
-                },
-                companyId: compInfo.companyId,
-                jobId: data.jobId,
-                siteTag: this.siteTag,
-            })
-        );
+        page.on("close", function () {
+            clearInterval(stopCheckAuth);
+        });
+        return pageCtrl;
     }
-    private async onResponse(res: Response) {
-        let compInfo = { ...this.compInfo };
+
+    private async onResponse(res: Response, compInfo: CompInfo) {
         let dataList: any[] = (await res.json().catch(() => {}))?.data?.data ?? [];
         const jobList: JobCrawlerData[] = [];
         for (const dataItem of dataList) {
             try {
-                const { data, errors } = paseJob(dataItem.job, this.siteTag, compInfo); //todo: 规模、所属行业
+                const { data, errors } = paseJob(dataItem.job, this.siteTag, compInfo);
                 jobList.push(data);
                 errors.forEach((err) => this.reportError(err));
             } catch (error) {
@@ -106,4 +62,95 @@ export class LiePinCompanyDetail extends PageCrawl {
         }
         this.pageCrawlFin({ jobList });
     }
+    private static PageController = class PageController extends PageNumControllable {
+        constructor(page: Page, readonly og: LiePinCompanyDetail, private readonly compInfo: CompInfo) {
+            super(page);
+        }
+
+        async crawlHtml() {
+            let compInfo = { ...this.compInfo };
+            const handler = this.page.locator(".content-left-section .left-list-box .job-detail-box>a");
+            let data = await handler.evaluateAll(function (nodeList) {
+                let jobDataList: { city?: string; name: string; salary: string; tagList: string[]; jobId: string }[] =
+                    [];
+                for (const node of nodeList) {
+                    let jobId = node.href.match(/www.liepin.com\/job\/(\d+)\.shtml/)?.[1];
+                    let city: string | undefined = node
+                        .querySelector(".job-dq-box>.ellipsis-1")
+                        .innerText?.match(/^[^-]+/)?.[0];
+
+                    let name = node.querySelector(".job-title-box>.ellipsis-1").innerText;
+                    let salary = node.querySelector(".job-salary").innerText;
+                    let tagList: string[] = [];
+                    node.querySelectorAll(".job-labels-box>span").forEach((n: any) => tagList.push(n.innerText));
+                    jobDataList.push({ city, name, salary, tagList, jobId });
+                }
+                return jobDataList;
+            });
+            function paseTag(list: string[], fx: (str: string) => any) {
+                for (let i = 0; i < list.length; i++) {
+                    let tag = list[i];
+                    let res = fx(tag);
+                    if (res) {
+                        list.splice(i, 1);
+                        return res;
+                    }
+                }
+            }
+            return data.map(
+                (data): JobCrawlerData => ({
+                    jobData: {
+                        name: data.name,
+                        education: paseTag(data.tagList, DataParser.matchEducation),
+                        workExperience: paseTag(data.tagList, DataParser.paseExp),
+                        cityId: data.city ? DataParser.cityNameToId(data.city) : undefined,
+                        ...(DataParser.paseSalary(data.salary) ?? { salaryMonth: 12 }),
+                        tag: data.tagList,
+                        compIndustry: compInfo.industry,
+                        compScale: compInfo.scale,
+                    },
+                    companyId: compInfo.companyId,
+                    jobId: data.jobId,
+                    siteTag: SiteTag.liepin,
+                })
+            );
+        }
+        async *pageNumIterator(errors: any[]): AsyncGenerator<boolean, void, void> {
+            function hasNextPageCatch() {
+                errors.push({ message: "判断是否有下一个页面时出现异常" });
+                return false;
+            }
+            function gotoPageError() {
+                errors.push({ message: "转跳页面失败" });
+                return true;
+            }
+            function crawlHtml() {
+                errors.push({ message: "crawlHtml失败" });
+                return false;
+            }
+            if (!(await this.hasNextPage().catch(hasNextPageCatch))) {
+                let res = await this.crawlHtml().catch(crawlHtml);
+                this.og.pageCrawlFin({ jobList: res });
+                yield true;
+                return;
+            }
+            yield this.nextPage().then(
+                () => true,
+                () => false
+            );
+
+            let has3 = await this.hasNextPage().catch(hasNextPageCatch);
+            yield this.gotoPage(1).then(() => true, gotoPageError);
+            if (has3)
+                yield this.gotoPage(3).then(
+                    () => true,
+                    () => false
+                );
+
+            while (await this.hasNextPage().catch(hasNextPageCatch)) {
+                yield await this.nextPage().then(() => true, gotoPageError);
+            }
+        }
+    };
 }
+type CompInfo = { companyId: string; industry?: string; scale?: number };

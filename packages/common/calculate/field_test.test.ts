@@ -73,12 +73,28 @@ describe("内置测试函数", function () {
         ).toBeUndefined();
         expect(checkType({ s: 3 }, { s: testFx.unionType(["bigint", "string"]) })).has.key("s");
     });
-    it("可选", function () {
-        expect(checkType({ s: 3, i: "s" }, { s: "number", i: "string", q: optional("string") })).toBeUndefined();
-        expect(checkType({ s: 3, i: "s", q: 8 }, { s: "number", i: "string", q: optional("string") })).has.keys(["q"]);
-        expect(
-            checkType({ s: 3, i: "s", q: "sd" }, { s: "number", i: "string", q: optional("string") })
-        ).toBeUndefined();
+    describe("可选", function () {
+        it("自定义可选", function () {
+            expect(checkType({ s: 3, i: "s" }, { s: "number", i: "string", q: optional("string") })).toBeUndefined();
+            expect(checkType({ s: 3, i: "s", q: 8 }, { s: "number", i: "string", q: optional("string") })).has.keys([
+                "q",
+            ]);
+            expect(
+                checkType({ s: 3, i: "s", q: "sd" }, { s: "number", i: "string", q: optional("string") })
+            ).toBeUndefined();
+        });
+        it("删除值为undefined且预期为可选类型的字段", function () {
+            let object = { s: 3, i: "s", q: undefined };
+            expect(checkType(object, { s: "number", i: "string", q: optional("string") })).toBeUndefined();
+            expect(object, "q应该被删除").not.has.key("q");
+        });
+        it("快捷可选", function () {
+            expect(checkType({ s: 3, i: "s" }, { s: "number", i: "string", q: optional.string })).toBeUndefined();
+            expect(checkType({ s: 3, i: "s", q: 8 }, { s: "number", i: "string", q: optional.string })).has.keys(["q"]);
+            expect(
+                checkType({ s: 3, i: "s", q: "sd" }, { s: "number", i: "string", q: optional.string })
+            ).toBeUndefined();
+        });
     });
     it("数字范围", function () {
         let towToFour = testFx.numScope(2, 4);

@@ -44,12 +44,21 @@ export class JobsData {
         await this.table.insertOne(job);
         return true;
     }
-    async appendJobs(jobs: JobCrawlerData[], siteTag: SiteTag) {
+    async appendJobs(jobs: JobCrawlerData[], siteTag: SiteTag, insertCheckedItem = true) {
+        let newJobs: JobCrawlerData[] = [];
+        let checkFail: { item: JobCrawlerData; err: any }[] = [];
         {
+            if (insertCheckedItem) {
+                for (const item of jobs) {
+                    let err = checkType(item, jobChecker);
+                    if (err) checkFail.push({ err, item });
+                    else newJobs.push(item);
+                }
+            }
             let testRes = checkType(jobs, testFx.arrayType(jobChecker));
             if (testRes) throw new FieldCheckError(testRes);
         }
-        let idMap = getIdMap(jobs, siteTag);
+        let idMap = getIdMap(newJobs, siteTag);
         let notInsertJobs: JobCrawlerData[] = [];
         {
             let oldJobs = await this.table
@@ -65,8 +74,14 @@ export class JobsData {
                 delete idMap[old.jobId];
             }
         }
-        await this.table.insertMany(Object.values(idMap));
-        return notInsertJobs;
+        let insertable = Object.values(idMap);
+        if (insertable.length) await this.table.insertMany(insertable);
+
+        return {
+            inserted: insertable,
+            uninserted: notInsertJobs.length ? notInsertJobs : null,
+            checkFail: checkFail.length ? checkFail : null,
+        };
     }
     deleteJob(jobId: string) {
         return this.table.deleteOne({ _id: new ObjectId(jobId) });

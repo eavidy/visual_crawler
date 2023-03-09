@@ -10,6 +10,9 @@ export enum TaskType {
     company = "company",
     jobFilter = "jobFilter",
 }
+
+export type CrawlerTaskAppend = Omit<CrawlerPriorityTask, "status">;
+
 export interface CrawlerPriorityTask {
     /** 任务类型 */
     type: TaskType;

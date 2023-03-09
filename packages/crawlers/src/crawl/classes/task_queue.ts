@@ -1,5 +1,5 @@
-import { SiteTag, TaskState } from "api/model";
-import { taskQueueData, UnexecutedCrawlerTask, CrawlerTaskAppend } from "../../db";
+import { CrawlerTaskAppend, SiteTag, TaskState } from "api/model";
+import { taskQueueData, UnexecutedCrawlerTask } from "../../db";
 
 export class TaskQueue {
     static cacheSize = 5;
@@ -9,7 +9,7 @@ export class TaskQueue {
     async pushMany(tasks: CrawlerTaskAppend[]) {
         return taskQueueData.appendTasks(tasks);
     }
-    async take() {
+    async takeTask() {
         let task = this.cache.shift();
         if (!task) {
             let newTasks = await taskQueueData.takeTasks(TaskQueue.cacheSize, this.siteTag);
@@ -20,7 +20,7 @@ export class TaskQueue {
             } else return null;
         }
     }
-    async restore() {
+    async restoreTask() {
         if (this.cache.length === 0) return;
         return taskQueueData.updateTasksStatus(
             this.cache.map((task) => task._id),

@@ -1,5 +1,6 @@
 import { LiePinCompanyDetail } from "./comp_detail";
-import { createContext } from "../../crawler/browser";
+import { createContext } from "../../classes/browser";
+import { waitTime } from "common/async/time";
 async function test() {
     const bsCt = await createContext();
     const pageCrawl = new LiePinCompanyDetail(bsCt, "https://www.liepin.com");
@@ -9,12 +10,9 @@ async function test() {
     pageCrawl.on("errData", (comps: any[]) => {
         console.error(comps);
     });
-    await pageCrawl.open();
-    await pageCrawl.goto("4817469");
-    setTimeout(() => {
-        pageCrawl.crawlHtml().then((data) => {
-            console.log(data);
-        });
-    });
+    let ctrl = await pageCrawl.open({ companyId: "4817469" });
+    await waitTime(2000);
+    let data = await ctrl.crawlHtml();
+    console.log(data);
 }
 test();

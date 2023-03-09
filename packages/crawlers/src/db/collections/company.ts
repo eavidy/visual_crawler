@@ -1,12 +1,7 @@
-import { CompanyCrawlerData, CrawlerPriorityCompanyTask, SiteTag, TaskType } from "api/model";
+import { CompanyCrawlerData, CompanyCrawlerDataAppend, CrawlerPriorityCompanyTask, SiteTag, TaskType } from "api/model";
 import { ObjectId, Collection, WithId } from "mongodb";
 import { checkType, ExceptTypeMap, optional, testFx } from "common/calculate/field_test";
 import { FieldCheckError } from "../classes/errors";
-
-export type CompanyCrawlerDataAppend = Omit<
-    CompanyCrawlerData,
-    "lastUpdate" | "lastPushQueue" | "nonexistent" | "lastPushQueueDate"
->;
 
 export class CompanyData {
     private taskQueueCollName = "task_queue";
@@ -30,13 +25,24 @@ export class CompanyData {
     }
     /**
      * 如果数据库存在相同id的公司, 则不插入, 返回重复公司列表
+     * @param insertCheckedItem 插入校验通过的项
      */
-    async appendCompanies(comps: CompanyCrawlerDataAppend[], siteTag: SiteTag) {
+    async appendCompanies(comps: CompanyCrawlerDataAppend[], siteTag: SiteTag, insertCheckedItem = true) {
+        let newComps: CompanyCrawlerDataAppend[] = [];
+        let checkFail: { item: CompanyCrawlerDataAppend; err: any }[] = [];
         {
-            let res = checkType(comps, testFx.arrayType(companyChecker));
-            if (res) throw new FieldCheckError(res);
+            if (insertCheckedItem) {
+                for (const item of comps) {
+                    let err = checkType(item, companyChecker);
+                    if (err) checkFail.push({ err, item });
+                    else newComps.push(item);
+                }
+            } else {
+                let res = checkType(comps, testFx.arrayType(companyChecker));
+                if (res) throw new FieldCheckError(res);
+            }
         }
-        let idMap = getIdMap(comps, siteTag);
+        let idMap = getIdMap(newComps, siteTag);
         let notInsertComps: CompanyCrawlerDataAppend[] = []; //todo: 更新重复的公司
         {
             let oldComps = await this.table
@@ -53,8 +59,12 @@ export class CompanyData {
             }
         }
         let insertable = Object.values(idMap);
-        await this.table.insertMany(insertable);
-        return { inserted: insertable, uninserted: notInsertComps };
+        if (insertable.length) await this.table.insertMany(insertable);
+        return {
+            inserted: insertable,
+            uninserted: notInsertComps.length ? notInsertComps : null,
+            checkFail: checkFail.length ? checkFail : null,
+        };
     }
 
     async deleteCompany(compId: string) {
@@ -121,7 +131,7 @@ const companyChecker: ExceptTypeMap = {
     companyId: "string",
     companyData: {
         /* 所属行业 */
-        industry: "string",
+        industry: optional.string,
         /** 规模 */
         scale: "number",
         /* 公司福利标签 */

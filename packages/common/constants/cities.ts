@@ -1441,7 +1441,7 @@ export const cities = [
     },
     {
         _id: 101100700,
-        name: " 临汾",
+        name: "临汾",
         char: "L",
         bossCode: "0357",
         liepinCode: null,
@@ -2774,7 +2774,7 @@ export const cities = [
     },
     {
         _id: 101190800,
-        name: " 徐州",
+        name: "徐州",
         char: "X",
         bossCode: "0516",
         liepinCode: null,

@@ -1,29 +1,31 @@
-import { BrowserContext, Response, Page } from "playwright";
+import { BrowserContext, Response } from "playwright";
 import { CompanyCrawlerData, JobCrawlerData, JobFilterOption } from "api/model";
+import { cities } from "common/constants/cities";
 import { SiteTag } from "api/model";
 import { PageCrawl, DataParser as DataParser } from "../index";
 import { paseJob, RawCompData, RawJobData } from "./classes/common_parser";
-import { PageNumController } from "./classes/page_controller";
+import { PageNumControllable } from "./classes/page_controller";
 import { waitTime } from "common/async/time";
 import { FilterIteratorFx, ACTION_TIMEOUT } from "../../classes/crawl_action";
+import { removeUndefined } from "common/calculate/object";
+
 /**
  * @event data {jobList:object[], compList:object[]}
  * @event request url:string
+ * @event auth    //页面需要验证码
  */
 export class LiePinJobList extends PageCrawl {
     constructor(context: BrowserContext, readonly origin: string) {
         super(context);
     }
     readonly siteTag = SiteTag.liepin;
-    pageNumCtrl?: PageNumController;
-    pageFilter?: PageFilter;
     async open(options?: JobFilterOption, timeout = 20 * 1000) {
-        if (!this.page) {
-            this.page = await super.newPage();
+        let paramsStr = "?";
+        if (options?.city) {
+            let city = cities.find((c) => c._id === options.city);
+            if (city) paramsStr += "city=" + city.liepinCode + "&dq=" + city.liepinCode;
         }
-        let page = this.page;
-        this.pageNumCtrl = new PageNumController(page);
-        this.pageFilter = new PageFilter(page);
+        let page = await super.newPage();
         const urlChecker = /apic.liepin.com\/api\/com.liepin.searchfront4c.pc-search-job$/;
         page.on("response", (res) => {
             if (urlChecker.test(res.url())) {
@@ -39,12 +41,24 @@ export class LiePinJobList extends PageCrawl {
                 this.emit("request", req.url());
             }
         });
-        const url = this.origin + "/zhaopin/";
+        const url = this.origin + "/zhaopin/" + paramsStr;
         await page.goto(url, { timeout });
-    }
-    async setFilter(filter: JobFilterOption) {}
 
-    async onResponse(res: Response) {
+        let stopCheckAuth = setInterval(async () => {
+            if (await pageCtrl.isAuth()) {
+                this.emit("auth");
+            }
+        });
+        page.on("close", function () {
+            clearInterval(stopCheckAuth);
+        });
+
+        let pageCtrl = new JobPageController(page);
+        await page.locator(".filter-options-container").focus({ timeout: 30000 });
+        return pageCtrl;
+    }
+    async loadFin() {}
+    private async onResponse(res: Response) {
         let data: ResData[] | undefined = (await res.json().catch(() => {}))?.data?.data?.jobCardList;
         if (typeof data !== "object") {
             this.reportError({ msg: "解析json错误" });
@@ -53,13 +67,7 @@ export class LiePinJobList extends PageCrawl {
         const resData = this.paseData(data);
         this.pageCrawlFin(resData);
     }
-    async isEmpty() {
-        let res = await this.page
-            ?.locator(".content-left-section .ant-empty")
-            .filter({ hasText: "暂时没有合适的职位" })
-            .count();
-        return !!res;
-    }
+
     private paseData(data: ResData[]) {
         const jobList: JobCrawlerData[] = [];
         const compList: CompanyCrawlerData[] = [];
@@ -67,15 +75,15 @@ export class LiePinJobList extends PageCrawl {
             let item = data[i];
             let job = item.job;
             let company = item.comp;
-
             let compData;
-            try {
-                compData = this.paseCompany(company);
-                compList.push(compData);
-            } catch (error) {
-                this.reportError({ msg: "执行解析公司错误", err: (error as Error).toString() });
+            if (company.compId) {
+                try {
+                    compData = this.paseCompany(company);
+                    compList.push(compData);
+                } catch (error) {
+                    this.reportError({ msg: "执行解析公司错误", err: (error as Error).stack });
+                }
             }
-
             try {
                 const { data, errors } = paseJob(job, this.siteTag, {
                     companyId: compData?.companyId,
@@ -91,23 +99,20 @@ export class LiePinJobList extends PageCrawl {
         return { jobList, compList };
     }
     paseCompany(company: RawCompData): CompanyCrawlerData {
-        return {
+        return removeUndefined({
             companyData: {
                 name: company.compName,
                 scale: DataParser.paseScale(company.compScale),
                 industry: company.compIndustry,
                 welfareLabel: [],
             },
-            companyId: company.compId.toString(),
-            exist: true,
+            companyId: company.compId?.toString(),
             siteTag: SiteTag.liepin,
-        };
+        });
     }
 }
 
-class PageFilter {
-    constructor(private readonly page: Page) {}
-
+class JobPageController extends PageNumControllable {
     // async setEmitTime(cityId: string) {}
     // async setIndustry(cityId: string) {}
 
@@ -123,6 +128,12 @@ class PageFilter {
                 yield false;
             }
         }
+        return await this.getFilterClearIcon("salary")
+            .click({ timeout: ACTION_TIMEOUT })
+            .then(
+                () => true,
+                () => false
+            );
     }
     //7
     async *experience(skipCount = 0) {
@@ -136,6 +147,12 @@ class PageFilter {
                 yield false;
             }
         }
+        return await this.getFilterClearIcon("workYearCode")
+            .click({ timeout: ACTION_TIMEOUT })
+            .then(
+                () => true,
+                () => false
+            );
     }
     //7
     async *education(skipCount = 0, list = ["初中及以下", "高中", "中专/中技", "大专", "本科", "硕士", "博士"]) {
@@ -153,12 +170,27 @@ class PageFilter {
                 yield false;
             }
         }
+        return await this.getFilterClearIcon("eduLevel")
+            .click({ timeout: ACTION_TIMEOUT })
+            .then(
+                () => true,
+                () => false
+            );
     }
 
     //8
     async *compScale(
         skipCount = 0,
-        list = ["1-49人", "50-99人", "500-999人", "1000-2000人", "2000-5000人", "5000-10000人", "10000人以上"]
+        list = [
+            "1-49人",
+            "50-99人",
+            "100-499人",
+            "500-999人",
+            "1000-2000人",
+            "2000-5000人",
+            "5000-10000人",
+            "10000人以上",
+        ]
     ) {
         let loc = await this.getOtherFilters().nth(3);
         for (let i = skipCount; i < list.length; i++) {
@@ -172,6 +204,12 @@ class PageFilter {
                 yield false;
             }
         }
+        return this.getFilterClearIcon("compScale")
+            .click({ timeout: ACTION_TIMEOUT })
+            .then(
+                () => true,
+                () => false
+            );
     }
     //6
     async *financingStage(
@@ -191,10 +229,21 @@ class PageFilter {
                 yield false;
             }
         }
+        return this.getFilterClearIcon("compStage")
+            .click({ timeout: ACTION_TIMEOUT })
+            .then(
+                () => true,
+                () => false
+            );
     }
     get iterationSequence(): FilterIteratorFx[] {
         return [this.salary, this.experience, this.education, this.compScale, this.financingStage].map((fx) =>
             fx.bind(this)
+        );
+    }
+    private getFilterClearIcon(key: string) {
+        return this.page.locator(
+            `.selected-options-box .selected-options-list-box .selected-item[data-key='${key}'] .anticon-close`
         );
     }
     private getBasicFilters(title?: string) {
@@ -210,7 +259,36 @@ class PageFilter {
         let loc = this.page.locator(".ant-select-dropdown .rc-virtual-list-holder .ant-select-item");
         return loc.getByText(text).click({ timeout: ACTION_TIMEOUT });
     }
+
+    async isEmpty() {
+        let res = await this.page
+            .locator(".content-left-section .ant-empty")
+            .filter({ hasText: "暂时没有合适的职位" })
+            .count();
+        return !!res;
+    }
+    async isFullList() {
+        let count = await this.page.locator(".content-left-section .job-list-box>div").count();
+        return count === 40;
+    }
+    async *pageNumIterator(errors: any[]): AsyncGenerator<boolean, void, void> {
+        while (
+            await this.hasNextPage().catch(() => {
+                errors.push({ message: "判断是否有下一页时出现异常" });
+            })
+        ) {
+            yield this.nextPage().then(
+                () => true,
+                () => {
+                    errors.push({ message: "转跳下一页时出现异常" });
+                    return false;
+                }
+            );
+        }
+    }
 }
+
+export type { JobPageController as PageController };
 
 type ResData = { job: RawJobData; comp: RawCompData };
 
