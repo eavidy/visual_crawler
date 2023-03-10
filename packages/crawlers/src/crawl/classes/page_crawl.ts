@@ -37,7 +37,8 @@ export abstract class PageCrawl extends EventEmitter {
 
     abstract readonly siteTag: SiteTag;
     protected async newPage() {
-        const page = createPage(this.context);
+        const page = await createPage(this.context);
+        page.route(/jp(e)?g|png$/i, (route) => route.abort());
         return page;
     }
     readonly errors: PageCrawlError[] = [];

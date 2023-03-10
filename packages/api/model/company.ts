@@ -1,7 +1,7 @@
 import { SiteTag } from ".";
 export interface CompanyBasicData {
     /* 所属行业 */
-    industry: string;
+    industry?: string;
     /** 规模 */
     scale: number;
     /* 公司福利标签 */

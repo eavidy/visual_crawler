@@ -1,4 +1,4 @@
-import { SiteTag, Education } from ".";
+import { SiteTag, Education, CompanyScale } from ".";
 export enum TaskState {
     unexecuted = 0,
     executing = 1,
@@ -28,7 +28,6 @@ export interface CrawlerPriorityJobFilterTask extends CrawlerPriorityTask {
     type: TaskType.jobFilter;
     taskInfo: {
         fixedFilter?: JobFilterOption;
-        nonFixedFilter?: JobFilterOption;
     };
 }
 export interface CrawlerPriorityCompanyTask extends CrawlerPriorityTask {
@@ -41,5 +40,5 @@ export interface JobFilterOption {
     exp?: number;
     salary?: number;
     eduction?: Education;
-    companyScale?: number;
+    companyScale?: CompanyScale;
 }

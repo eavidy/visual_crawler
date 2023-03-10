@@ -41,7 +41,7 @@ export class LiePinCompanyDetail extends PageCrawl {
             if (await pageCtrl.isAuth()) {
                 this.emit("auth");
             }
-        });
+        }, 1000);
         page.on("close", function () {
             clearInterval(stopCheckAuth);
         });

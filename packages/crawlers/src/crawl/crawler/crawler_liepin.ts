@@ -24,6 +24,8 @@ export class CrawlerLiepin extends Crawler {
     private onData = ({ jobList, compList }: { jobList: any[]; compList?: any[] }) => {
         if (compList) this.saveCompanies(compList);
         if (jobList) this.saveJobs(jobList);
+
+        console.log(this.crawlerStatistics);
     };
     private onError = (err: any) => {
         this.reportError("页面控制器触发异常", err);
@@ -32,8 +34,10 @@ export class CrawlerLiepin extends Crawler {
     private companyTask: LiePinCompanyDetail;
     private jobTask: LiePinJobList;
     async executeTask(task: UnexecutedCrawlerTask, signal?: AbortSignal) {
-        if (task.type === TaskType.company) return this.excCompanyTask(task as UnexecutedCompanyTask, signal);
-        else if (task.type === TaskType.jobFilter) return this.excJobTask(task as UnexecutedJobTask, signal);
+        if (task.type === TaskType.company)
+            return this.excCompanyTask(task as UnexecutedCompanyTask, signal).catch((e) => false);
+        else if (task.type === TaskType.jobFilter)
+            return this.excJobTask(task as UnexecutedJobTask, signal).catch((e) => false);
         return false;
     }
     randomTime() {
@@ -59,40 +63,41 @@ export class CrawlerLiepin extends Crawler {
         await ctrl.close();
         return !breakSignal;
     }
+    jobStep = {};
     private async excJobTask(task: UnexecutedJobTask, signal?: AbortSignal) {
         let ctrl = await this.jobTask.open(task.taskInfo.fixedFilter);
-        let filter = new DeepAssignFilter(ctrl.iterationSequence);
-        let filterGenerator = filter.assign();
 
-        let breakSignal = false;
-        let abortActon = () => (breakSignal = true);
-        signal?.addEventListener("abort", abortActon);
+        let filter = ctrl.createDeepAssignFilter();
+        let jobTask = new JobTask(filter, signal);
 
-        let filterGeneratorErrors: number[][] = [];
+        let filterGeneratorErrors = jobTask.filterGeneratorErrors;
         let traversePageNumErrors: any[][] = [];
-        do {
-            if (breakSignal) break;
-            let randomTime = this.randomTime();
 
-            let { done, value } = await filterGenerator.next(!(await ctrl.isFullList()));
-            if (done) break;
-            while (!value && !breakSignal) {
-                filterGeneratorErrors.push(filter.assignRes);
-                let res = await filterGenerator.next();
-                value = res.value;
-                done = res.done;
-                if (done) break;
-            }
-            if (breakSignal) break;
+        let count = 0;
+        let firstLast = false;
+
+        do {
+            if (jobTask.breakSignal) break;
+            let randomTime = this.randomTime();
+            let isFullList = !(await ctrl.isFullList());
+            let res = await jobTask.nextFilter(isFullList);
+            if (res === undefined) break;
+            if (isFullList || (!firstLast && res.isLast)) firstLast = true;
+
             await randomTime;
-            let errors = await this.traversePageNum(ctrl, signal);
-            if (errors) traversePageNumErrors.push(errors);
+            if (count > 8) {
+                count = 0;
+                await ctrl.refresh();
+            } else count++;
+            if (firstLast) {
+                let errors = await this.traversePageNum(ctrl, signal);
+                if (errors) traversePageNumErrors.push(errors);
+            }
         } while (true);
         if (filterGeneratorErrors.length) this.reportError("迭代过滤选项失败", filterGeneratorErrors);
         if (traversePageNumErrors.length) this.reportError("职位翻页出错", traversePageNumErrors);
-        signal?.removeEventListener("abort", abortActon);
         await ctrl.close();
-        return !breakSignal;
+        return !jobTask.breakSignal;
     }
 
     //翻页
@@ -109,5 +114,45 @@ export class CrawlerLiepin extends Crawler {
         }
         signal?.removeEventListener("abort", abortActon);
         if (errors) return errors;
+    }
+}
+
+class JobTask {
+    filterGeneratorErrors: number[][] = [];
+    traversePageNumErrors: any[][] = [];
+    breakSignal = false;
+    private filterGenerator;
+    constructor(private filter: DeepAssignFilter, readonly signal?: AbortSignal) {
+        signal?.addEventListener("abort", this.onAbort);
+        this.filterGenerator = filter.assign();
+    }
+    private onAbort = () => {
+        this.breakSignal = true;
+    };
+    private fin() {
+        this.done = true;
+        this.signal?.removeEventListener("abort", this.onAbort);
+    }
+    done = false;
+    async nextFilter(skipDeep: boolean): Promise<void | {
+        value: boolean;
+        isLast: boolean;
+    }> {
+        let { done, value } = await this.filterGenerator.next(skipDeep);
+        if (done || this.breakSignal) {
+            return this.fin();
+        }
+
+        while (!value) {
+            this.filterGeneratorErrors.push(this.filter.assignRes);
+            let res = await this.filterGenerator.next();
+            value = res.value;
+            done = res.done;
+            if (done) return this.fin();
+        }
+        return value as {
+            value: boolean;
+            isLast: boolean;
+        };
     }
 }

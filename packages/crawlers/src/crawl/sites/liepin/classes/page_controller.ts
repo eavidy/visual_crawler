@@ -32,5 +32,8 @@ export abstract class PageNumControllable {
     async close() {
         return this.page.close();
     }
+    async refresh() {
+        return this.page.reload();
+    }
     abstract pageNumIterator(errors: any[]): AsyncGenerator<boolean, void, void>;
 }

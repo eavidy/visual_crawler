@@ -1,5 +1,5 @@
 import { LiePinJobList, PageController } from "./job_list";
-import { createContext } from "../../classes/browser";
+import { createContext, closeBrowser } from "../../classes/browser";
 import { waitTime } from "common/async/time";
 import { listIterator } from "../../classes/crawl_action";
 async function test() {
@@ -25,5 +25,6 @@ async function grefilter(ctrl: PageController) {
 async function start() {
     const ctrl = await test();
     await grefilter(ctrl);
+    await closeBrowser();
 }
 start();
