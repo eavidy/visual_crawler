@@ -1,6 +1,6 @@
 import { expect, it, describe } from "vitest";
 import { DataParser as Parser } from "./data_parser";
-import { CompanyScale } from "api/model";
+import { CompanyScale, Education } from "api/model";
 
 it("解析薪资", function () {
     expect(Parser.paseSalary("8-10k")).toMatchObject({ salaryMin: 8000, salaryMax: 10000, salaryMonth: 12 });
@@ -34,5 +34,12 @@ describe("解析公司规模", function () {
     });
     it("解析失败", function () {
         expect(Parser.paseScale("sdg")).toEqual(CompanyScale.unknown);
+    });
+});
+
+describe("解析学历", function () {
+    it("全匹配", function () {
+        expect(Parser.matchEducation("中专")).toEqual(Education.中专);
+        expect(Parser.matchEducation("本科")).toEqual(Education.本科);
     });
 });

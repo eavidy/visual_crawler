@@ -1,6 +1,7 @@
 import { cities } from "common/constants/cities";
 import { Education, CompanyScale } from "api/model";
 
+const EDU_KEYS: readonly string[] = Object.keys(Education).filter((k) => !/\d/.test(k));
 export class DataParser {
     static cityNameToId(cityName: string) {
         return cities.find((item) => item.name === cityName)?._id;
@@ -19,9 +20,8 @@ export class DataParser {
     }
     static matchEducation(str: string): Education | undefined {
         if (typeof str !== "string") return undefined;
-        let list = Object.keys(Education);
         let res: string | undefined;
-        for (const edu of list) {
+        for (const edu of EDU_KEYS) {
             if (str.includes(edu)) {
                 if (!res) res = edu;
                 else return undefined;

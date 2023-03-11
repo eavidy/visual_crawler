@@ -4,7 +4,7 @@ import { SiteTag } from "api/model";
 import { paseJob } from "./classes/common_parser";
 import { JobCrawlerData } from "api/model";
 import { PageNumControllable } from "./classes/page_controller";
-import { ACTION_TIMEOUT } from "@/crawl/classes/crawl_action";
+import { ACTION_TIMEOUT } from "../../../crawl/classes/crawl_action";
 
 /**
  * @event request url:string
@@ -89,7 +89,7 @@ export class LiePinCompanyDetail extends PageCrawl {
                 let jobDataList: { city?: string; name: string; salary: string; tagList: string[]; jobId: string }[] =
                     [];
                 for (const node of nodeList) {
-                    let jobId = node.href.match(/www.liepin.com\/job\/(\d+)\.shtml/)?.[1];
+                    let jobId = node.href.match(/www.liepin.com\/(lpt)?job\/(\d+)/)?.[2];
                     let city: string | undefined = node
                         .querySelector(".job-dq-box>.ellipsis-1")
                         .innerText?.match(/^[^-]+/)?.[0];
