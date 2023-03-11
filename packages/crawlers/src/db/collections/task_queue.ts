@@ -46,7 +46,7 @@ export class TaskQueueData {
         } as Partial<CrawlerPriorityTask>);
     }
     async markTasksSucceed(id: string | number | ObjectId) {
-        return this.collection.deleteOne({ _id: toId(id) });
+        return this.collection.updateOne({ _id: toId(id) }, { $set: { status: TaskState.executed } });
     }
     async updateTasksStatus(ids: (string | ObjectId)[], status: TaskState) {
         {

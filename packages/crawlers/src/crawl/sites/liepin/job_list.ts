@@ -2,7 +2,7 @@ import { BrowserContext, Response } from "playwright";
 import { CompanyCrawlerData, JobCrawlerData, JobFilterOption } from "api/model";
 import { cities } from "common/constants/cities";
 import { SiteTag } from "api/model";
-import { PageCrawl, DataParser as DataParser } from "../index";
+import { PageCrawl, DataParser } from "../common";
 import { paseJob, RawCompData, RawJobData } from "./classes/common_parser";
 import { PageNumControllable } from "./classes/page_controller";
 import { waitTime } from "common/async/time";
@@ -151,6 +151,7 @@ class JobPageController extends PageNumControllable {
     //7
     async *salary(skipCount = 0) {
         let list = await this.getBasicFilters("薪资").locator(".options-item").all();
+        list.pop(); //删除薪资列表的"自定义"
         for (let i = skipCount; i < list.length; i++) {
             let item = list[i];
             try {
@@ -273,10 +274,33 @@ class JobPageController extends PageNumControllable {
             fx.bind(this)
         );
     }
-
+    excLev(list: number[]) {
+        let lev: number[] = [];
+        for (let i = 0; i < list.length - 1; i++) {
+            let val = list[i + 1];
+            for (let j = i + 2; j < list.length; j++) {
+                val *= list[i];
+            }
+            lev[i] = val;
+        }
+        lev.push(list[list.length - 1]);
+        return lev;
+    }
+    excCount(list: number[], lev: number[]) {
+        let total = 0;
+        for (let i = 0; i < list.length; i++) {
+            total += list[i] * lev[i];
+        }
+        return total;
+    }
     createDeepAssignFilter() {
         let list = this.iterationSequence;
-        return new DeepAssignFilter(list);
+        let lev = this.excLev([7, 7, 7, 8, 8]);
+        return {
+            object: new DeepAssignFilter(list),
+            lev,
+            total: this.excCount([7, 7, 7, 8, 8], lev),
+        };
     }
     private getFilterClearIcon(key: string) {
         return this.page.locator(

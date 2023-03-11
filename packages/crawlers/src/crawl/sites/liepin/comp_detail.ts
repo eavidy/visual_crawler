@@ -1,4 +1,4 @@
-import { DataParser, PageCrawl } from "../index";
+import { DataParser, PageCrawl } from "../common";
 import { BrowserContext, Page, Response } from "playwright";
 import { SiteTag } from "api/model";
 import { paseJob } from "./classes/common_parser";

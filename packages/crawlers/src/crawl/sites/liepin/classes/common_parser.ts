@@ -1,6 +1,6 @@
 import { JobCrawlerData, SiteTag } from "api/model";
 import { removeUndefined } from "common/calculate/object";
-import { DataParser } from "../..";
+import { DataParser } from "../../common";
 
 export function paseJob(
     job: RawJobData,
