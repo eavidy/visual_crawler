@@ -12,6 +12,7 @@ async function test() {
     });
     let ctrl = await pageCrawl.open({ companyId: "4817469" });
     await waitTime(2000);
+    console.log("总页数:" + (await ctrl.getTotalPage()));
     let data = await ctrl.crawlHtml();
     console.log(data);
 }

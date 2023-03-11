@@ -48,7 +48,8 @@ export class CrawlerLiepin extends Crawler {
     }
     async excCompanyTask(task: UnexecutedCompanyTask, signal?: AbortSignal) {
         let ctrl = await this.companyTask.open({ companyId: task.taskInfo });
-
+        let total = await ctrl.getTotalPage();
+        this.resetSchedule(total);
         let breakSignal = false;
         let abortActon = () => (breakSignal = true);
         signal?.addEventListener("abort", abortActon);
@@ -107,10 +108,8 @@ export class CrawlerLiepin extends Crawler {
         signal?.addEventListener("abort", abortActon);
 
         let errors: any[] = [];
-        let count = 0;
         for await (const res of pageCtrl.pageNumIterator(errors)) {
-            count++;
-            this.currentSchedule += count;
+            this.currentSchedule++;
 
             if (breakSignal) break;
             await this.randomTime();

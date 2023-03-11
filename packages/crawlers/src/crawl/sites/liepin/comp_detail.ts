@@ -2,8 +2,9 @@ import { DataParser, PageCrawl } from "../common";
 import { BrowserContext, Page, Response } from "playwright";
 import { SiteTag } from "api/model";
 import { paseJob } from "./classes/common_parser";
-import { JobCrawlerData } from "api/model/index";
+import { JobCrawlerData } from "api/model";
 import { PageNumControllable } from "./classes/page_controller";
+import { ACTION_TIMEOUT } from "@/crawl/classes/crawl_action";
 
 /**
  * @event request url:string
@@ -66,6 +67,20 @@ export class LiePinCompanyDetail extends PageCrawl {
         constructor(page: Page, readonly og: LiePinCompanyDetail, private readonly compInfo: CompInfo) {
             super(page);
         }
+        async getTotalPage() {
+            let text: string;
+            try {
+                text = await this.page
+                    .locator(".company-header-content-tab .active")
+                    .innerText({ timeout: ACTION_TIMEOUT });
+            } catch (error) {
+                return 0;
+            }
+            let countStr = text.match(/\((\d+)\)/)?.[1];
+            if (!countStr) return 0;
+
+            return Math.ceil(parseInt(countStr) / 30);
+        }
 
         async crawlHtml() {
             let compInfo = { ...this.compInfo };
@@ -87,11 +102,11 @@ export class LiePinCompanyDetail extends PageCrawl {
                 }
                 return jobDataList;
             });
-            function paseTag(list: string[], fx: (str: string) => any) {
+            function paseTag(list: string[], fx: (str: string) => any, notEqual: any) {
                 for (let i = 0; i < list.length; i++) {
                     let tag = list[i];
                     let res = fx(tag);
-                    if (res) {
+                    if (res !== notEqual) {
                         list.splice(i, 1);
                         return res;
                     }
@@ -101,8 +116,8 @@ export class LiePinCompanyDetail extends PageCrawl {
                 (data): JobCrawlerData => ({
                     jobData: {
                         name: data.name,
-                        education: paseTag(data.tagList, DataParser.matchEducation),
-                        workExperience: paseTag(data.tagList, DataParser.paseExp),
+                        education: paseTag(data.tagList, DataParser.matchEducation, undefined),
+                        workExperience: paseTag(data.tagList, DataParser.paseExp, -1) ?? -1,
                         cityId: data.city ? DataParser.cityNameToId(data.city) : undefined,
                         ...(DataParser.paseSalary(data.salary) ?? { salaryMonth: 12 }),
                         tag: data.tagList,

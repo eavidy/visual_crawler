@@ -54,9 +54,10 @@ export class JobsData {
                     if (err) checkFail.push({ err, item });
                     else newJobs.push(item);
                 }
+            } else {
+                let testRes = checkType(jobs, testFx.arrayType(jobChecker));
+                if (testRes) throw new FieldCheckError(testRes);
             }
-            let testRes = checkType(jobs, testFx.arrayType(jobChecker));
-            if (testRes) throw new FieldCheckError(testRes);
         }
         let idMap = getIdMap(newJobs, siteTag);
         let notInsertJobs: JobCrawlerData[] = [];
