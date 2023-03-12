@@ -2,10 +2,11 @@ import { Crawler, UnexecutedCompanyTask, UnexecutedJobTask } from "./crawler";
 import { BrowserContext } from "playwright";
 import { UnexecutedCrawlerTask } from "../../db";
 import { LiePinCompanyDetail, LiePinJobList, PageNumControllable } from "../sites/liepin";
-import { radomWaitTime } from "common/async/time";
+import { radomWaitTime } from "../classes/time";
 import { SiteTag, TaskType } from "api/model";
 import { DeepAssignFilter } from "../classes/crawl_action";
 import { TaskQueue } from "../classes/task_queue";
+import { PromiseHandle } from "@asnc/tslib/lib/async";
 
 /**
  * @event data
@@ -88,7 +89,7 @@ export class CrawlerLiepin extends Crawler {
 
             this.currentSchedule = ctrl.excCount([...filter.assignRes, 0], filterInfo.lev);
 
-            await randomTime;
+            await randomTime.catch(() => this.reportError("等待响应超时", undefined));
             if (jobTask.count % 8 === 0) await ctrl.refresh();
             if (firstLast) {
                 let errors = await this.traversePageNum(ctrl, signal);
@@ -112,7 +113,7 @@ export class CrawlerLiepin extends Crawler {
             this.currentSchedule++;
 
             if (breakSignal) break;
-            await this.randomTime();
+            if (res) await this.randomTime().catch(() => this.reportError("等待响应超时", undefined));
             if (breakSignal) break;
         }
         signal?.removeEventListener("abort", abortActon);
@@ -122,7 +123,6 @@ export class CrawlerLiepin extends Crawler {
 
 class JobTask {
     filterGeneratorErrors: number[][] = [];
-    traversePageNumErrors: any[][] = [];
     breakSignal = false;
     private filterGenerator;
 

@@ -1,6 +1,6 @@
 import { Collection, ObjectId, WithId, Db } from "mongodb";
 import { CrawlerPriorityTask, TaskState, SiteTag, CrawlerTaskAppend } from "api/model";
-import { checkType, testFx, optional } from "common/calculate/field_test";
+import { checkType, checkFx, optional } from "@asnc/tslib/lib/std/type_check";
 import { FieldCheckError } from "../classes/errors";
 export type UnexecutedTask<T extends CrawlerPriorityTask> = WithId<Omit<T, "priority" | "expirationTime" | "status">>;
 export type UnexecutedCrawlerTask = UnexecutedTask<CrawlerPriorityTask>;
@@ -19,14 +19,14 @@ export class TaskQueueData {
         return res;
     }
     async appendTask(task: CrawlerTaskAppend) {
-        let res = checkType(task, taskChecker);
+        let res = checkType(task, taskChecker, CheckTypeOption);
         if (res) throw new FieldCheckError(res);
         return this.collection.insertOne({ ...task, status: TaskState.unexecuted });
     }
     async appendTasks(tasks: CrawlerTaskAppend[]) {
         {
             if (!tasks.length) throw new FieldCheckError({ length: "至少为1, 实际0" });
-            let res = checkType(tasks, testFx.arrayType(taskChecker));
+            let res = checkType(tasks, checkFx.arrayType(taskChecker), CheckTypeOption);
             if (res) throw new FieldCheckError(res);
         }
         let fullTasks: CrawlerPriorityTask[] = [];
@@ -50,7 +50,7 @@ export class TaskQueueData {
     }
     async updateTasksStatus(ids: (string | ObjectId)[], status: TaskState) {
         {
-            let res = checkType(status, testFx.numScope(0));
+            let res = checkType(status, checkFx.numScope(0), CheckTypeOption);
             if (res) throw new FieldCheckError(res);
         }
         return this.collection.updateMany({ _id: { $in: ids.map((id) => new ObjectId(id)) } }, { $set: { status } });
@@ -60,7 +60,7 @@ export class TaskQueueData {
 const taskChecker = (function () {
     let filterTester = optional({
         city: optional.number,
-        emitTime: testFx.instanceof(Date),
+        emitTime: checkFx.instanceof(Date),
         exp: optional.number,
         salary: optional.number,
         eduction: optional.number,
@@ -71,7 +71,7 @@ const taskChecker = (function () {
         siteTag: "number",
         priority: optional.number,
         expirationTime: optional.string,
-        taskInfo: optional(testFx.any()),
+        taskInfo: optional(checkFx.any()),
     } as {
         [key in keyof CrawlerPriorityTask]?: any;
     };
@@ -81,3 +81,7 @@ function toId(id: string | number | ObjectId): any {
     if (typeof id === "number" || id instanceof ObjectId) return id;
     return new ObjectId(id);
 }
+const CheckTypeOption = {
+    checkAll: true,
+    deleteSurplus: true,
+};

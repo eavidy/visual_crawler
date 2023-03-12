@@ -1,6 +1,6 @@
 import { LiePinJobList, PageController } from "./job_list";
 import { createContext, closeBrowser } from "../../classes/browser";
-import { waitTime } from "common/async/time";
+import { TimeoutPromise } from "@asnc/tslib/lib/async";
 import { listIterator } from "../../classes/crawl_action";
 async function test() {
     const bsCt = await createContext();
@@ -18,7 +18,7 @@ async function test() {
 async function grefilter(ctrl: PageController) {
     for await (const res of listIterator(ctrl.iterationSequence)) {
         console.log(res);
-        await waitTime(2000);
+        await new TimeoutPromise(2000);
     }
 }
 

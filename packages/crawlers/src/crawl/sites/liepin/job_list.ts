@@ -5,9 +5,10 @@ import { SiteTag } from "api/model";
 import { PageCrawl, DataParser } from "../common";
 import { paseJob, RawCompData, RawJobData } from "./classes/common_parser";
 import { PageNumControllable } from "./classes/page_controller";
-import { waitTime } from "common/async/time";
+import { TimeoutPromise } from "@asnc/tslib/lib/async";
 import { FilterIteratorFx, ACTION_TIMEOUT, DeepAssignFilter } from "../../classes/crawl_action";
-import { removeUndefined } from "common/calculate/object";
+
+import { removeUndefined } from "@asnc/tslib/lib/object";
 import * as querystring from "node:querystring";
 
 /**
@@ -141,7 +142,7 @@ export class LiePinJobList extends PageCrawl {
 }
 
 function unfoldTime() {
-    return waitTime(300);
+    return new TimeoutPromise(300);
 }
 
 class JobPageController extends PageNumControllable {

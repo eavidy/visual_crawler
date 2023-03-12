@@ -1,5 +1,5 @@
 import { JobCrawlerData, SiteTag } from "api/model";
-import { optional, testFx, checkType, ExceptTypeMap } from "common/calculate/field_test";
+import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/lib/std/type_check";
 import { ObjectId, Collection, WithId } from "mongodb";
 import { FieldCheckError } from "../classes/errors";
 const TIME_INTERVAL = 30 * 6 * 86400;
@@ -31,7 +31,7 @@ export class JobsData {
 
     async appendJob(job: JobCrawlerData) {
         {
-            let testRes = checkType(job, jobChecker);
+            let testRes = checkType(job, jobChecker, CheckTypeOption);
             if (testRes) throw new FieldCheckError(testRes);
         }
         {
@@ -50,12 +50,12 @@ export class JobsData {
         {
             if (insertCheckedItem) {
                 for (const item of jobs) {
-                    let err = checkType(item, jobChecker);
+                    let err = checkType(item, jobChecker, CheckTypeOption);
                     if (err) checkFail.push({ err, item });
                     else newJobs.push(item);
                 }
             } else {
-                let testRes = checkType(jobs, testFx.arrayType(jobChecker));
+                let testRes = checkType(jobs, checkFx.arrayType(jobChecker), CheckTypeOption);
                 if (testRes) throw new FieldCheckError(testRes);
             }
         }
@@ -112,14 +112,18 @@ const jobChecker: ExceptTypeMap = {
         /** 工作经验, 单位月 */
         workExperience: "number",
         /** 学历 */
-        education: optional(testFx.numScope(0, 7)),
+        education: optional(checkFx.numScope(0, 7)),
         cityId: optional.number,
         /** 职位标签 */
-        tag: testFx.arrayType("string"),
+        tag: checkFx.arrayType("string"),
         name: "string",
 
         compIndustry: optional.string,
         compScale: optional.number,
     },
     siteTag: "number",
+};
+const CheckTypeOption = {
+    checkAll: true,
+    deleteSurplus: true,
 };

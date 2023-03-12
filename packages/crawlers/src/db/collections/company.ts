@@ -1,6 +1,6 @@
 import { CompanyCrawlerData, CompanyCrawlerDataAppend, CrawlerPriorityCompanyTask, SiteTag, TaskType } from "api/model";
 import { ObjectId, Collection, WithId } from "mongodb";
-import { checkType, ExceptTypeMap, optional, testFx } from "common/calculate/field_test";
+import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/lib/std/type_check";
 import { FieldCheckError } from "../classes/errors";
 
 export class CompanyData {
@@ -10,7 +10,7 @@ export class CompanyData {
     /** 成功插入返回true, 如果数据库中已经存在ID, 返回false */
     async appendCompany(comp: CompanyCrawlerDataAppend) {
         {
-            let res = checkType(comp, companyChecker);
+            let res = checkType(comp, companyChecker, CheckTypeOption);
             if (res) throw new FieldCheckError(res);
         }
         let res = await this.table.findOne({ companyId: comp.companyId, siteTag: comp.siteTag });
@@ -33,12 +33,12 @@ export class CompanyData {
         {
             if (insertCheckedItem) {
                 for (const item of comps) {
-                    let err = checkType(item, companyChecker);
+                    let err = checkType(item, companyChecker, CheckTypeOption);
                     if (err) checkFail.push({ err, item });
                     else newComps.push(item);
                 }
             } else {
-                let res = checkType(comps, testFx.arrayType(companyChecker));
+                let res = checkType(comps, checkFx.arrayType(companyChecker), CheckTypeOption);
                 if (res) throw new FieldCheckError(res);
             }
         }
@@ -76,14 +76,15 @@ export class CompanyData {
             let res = checkType(
                 [beforeTime, options],
                 [
-                    testFx.instanceof(Date),
+                    checkFx.instanceof(Date),
                     {
                         siteTag: "number",
-                        expirationTime: optional(testFx.instanceof(Date)),
-                        fixedFilter: optional(testFx.any()),
-                        nonFixedFilter: optional(testFx.any()),
+                        expirationTime: optional(checkFx.instanceof(Date)),
+                        fixedFilter: optional(checkFx.any()),
+                        nonFixedFilter: optional(checkFx.any()),
                     },
-                ]
+                ],
+                CheckTypeOption
             );
             if (res) throw new FieldCheckError(res);
         }
@@ -135,9 +136,13 @@ const companyChecker: ExceptTypeMap = {
         /** 规模 */
         scale: "number",
         /* 公司福利标签 */
-        welfareLabel: testFx.arrayType("string"),
+        welfareLabel: checkFx.arrayType("string"),
         name: "string",
     },
     siteTag: "number",
-    lastUpdate: optional(testFx.instanceof(Date)),
+    lastUpdate: optional(checkFx.instanceof(Date)),
+};
+const CheckTypeOption = {
+    checkAll: true,
+    deleteSurplus: true,
 };
