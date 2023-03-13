@@ -144,8 +144,9 @@ export class LiePinCompanyDetail extends PageCrawl {
                 return false;
             }
             if (!(await this.hasNextPage().catch(hasNextPageCatch))) {
-                let res = await this.crawlHtml().catch(crawlHtml);
-                this.og.pageCrawlFin({ jobList: res });
+                this.crawlHtml().then((res) => {
+                    this.og.pageCrawlFin({ jobList: res });
+                }, crawlHtml);
                 yield true;
                 return;
             }
