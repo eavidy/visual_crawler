@@ -6,7 +6,7 @@ import { radomWaitTime } from "../classes/time";
 import { SiteTag, TaskType } from "api/model";
 import { DeepAssignFilter } from "../classes/crawl_action";
 import { TaskQueue } from "../classes/task_queue";
-import { TimeoutPromise } from "@asnc/tslib/lib/async";
+import { TimeoutPromise, PromiseHandle } from "@asnc/tslib/lib/async";
 
 /**
  * @event data
@@ -29,7 +29,7 @@ export class CrawlerLiepin extends Crawler {
     private onData = ({ jobList, compList }: { jobList: any[]; compList?: any[] }) => {
         if (compList) this.saveCompanies(compList);
         if (jobList) this.saveJobs(jobList);
-        this.ctHandle?.resolve();
+        this.ctHandle?.resolve(jobList.length);
         this.ctHandle = undefined;
         this.emit("data");
     };
@@ -39,34 +39,34 @@ export class CrawlerLiepin extends Crawler {
 
     private companyTask: LiePinCompanyDetail;
     private jobTask: LiePinJobList;
-    async executeTask(task: UnexecutedCrawlerTask, signal?: AbortSignal) {
-        if (task.type === TaskType.company)
-            return this.excCompanyTask(task as UnexecutedCompanyTask, signal).catch((e) => false);
-        else if (task.type === TaskType.jobFilter)
-            return this.excJobTask(task as UnexecutedJobTask, signal).catch((e) => false);
-        return false;
+    private excreting = false;
+    async executeTask(task: UnexecutedCrawlerTask, signal?: AbortSignal): Promise<{ pass: boolean; result?: any }> {
+        if (this.excreting) throw new Error("执行任务中不能继续执行");
+        this.excreting = true;
+        let res: any;
+        if (task.type === TaskType.company) res = await this.excCompanyTask(task as UnexecutedCompanyTask, signal);
+        else if (task.type === TaskType.jobFilter) res = await this.excJobTask(task as UnexecutedJobTask, signal);
+        else res = { pass: false };
+        this.excreting = false;
+        return res;
     }
-    private ctHandle?: TimeoutPromise;
+    private ctHandle?: PromiseHandle<number | void>;
     randomTime() {
         this.ctHandle = new TimeoutPromise(30 * 1000, true);
-        return Promise.all([this.ctHandle, radomWaitTime(2 * 1000, 6 * 1000)]);
+        return Promise.all([this.ctHandle, radomWaitTime(2 * 1000, 6 * 1000)]).then(([count]) => count ?? 0);
     }
     async excCompanyTask(task: UnexecutedCompanyTask, signal?: AbortSignal) {
         let ctrl = await this.companyTask.open({ companyId: task.taskInfo });
-        let total = await ctrl.getTotalPage();
-        this.resetSchedule(total);
-        let breakSignal = false;
-        let abortActon = () => (breakSignal = true);
-        signal?.addEventListener("abort", abortActon);
+        let totalJob = await ctrl.getTotalJob();
+        let totalPage = Math.ceil(totalJob / 30);
+        this.resetSchedule(totalPage);
 
         let errors: any[] = [];
+        let crawlCount = await this.traversePageNum(ctrl, errors, signal, task);
 
-        await this.traversePageNum(ctrl, signal, task);
-
-        signal?.removeEventListener("abort", abortActon);
         if (errors.length) this.reportError("公司页面翻页出错", errors);
         await ctrl.close();
-        return !breakSignal;
+        return { pass: crawlCount / totalJob > 0.75, result: { total: totalJob, crawlCount } };
     }
     async excJobTask(task: UnexecutedJobTask, signal?: AbortSignal) {
         let ctrl = await this.jobTask.open(task.taskInfo.fixedFilter);
@@ -96,32 +96,48 @@ export class CrawlerLiepin extends Crawler {
             await randomTime.catch(() => this.reportError("等待响应超时", task));
             if (jobTask.count % 8 === 0) await ctrl.refresh();
             if (firstLast) {
-                let errors = await this.traversePageNum(ctrl, signal, task);
+                let errors: any[] = [];
+                let crawlCount = await this.traversePageNum(ctrl, errors, signal, task);
                 if (errors) traversePageNumErrors.push(errors);
             }
         } while (true);
         if (filterGeneratorErrors.length) this.reportError("迭代过滤选项失败", filterGeneratorErrors);
         if (traversePageNumErrors.length) this.reportError("职位翻页出错", traversePageNumErrors);
         await ctrl.close();
-        return !jobTask.breakSignal;
+
+        return {
+            pass: !jobTask.breakSignal && filter.assignRes[0] / filterInfo.index[0] > 0.6,
+            result: { index: filterInfo.index, result: filter.assignRes },
+        };
     }
 
     //翻页
-    async traversePageNum(pageCtrl: PageNumControllable, signal?: AbortSignal, task?: UnexecutedCrawlerTask) {
+    async traversePageNum(
+        pageCtrl: PageNumControllable,
+        errors: any[],
+        signal?: AbortSignal,
+        task?: UnexecutedCrawlerTask
+    ) {
         let breakSignal = false;
         let abortActon = () => (breakSignal = true);
         signal?.addEventListener("abort", abortActon);
 
-        let errors: any[] = [];
+        let crawlCount = 0;
         for await (const res of pageCtrl.pageNumIterator(errors)) {
             this.currentSchedule++;
 
             if (breakSignal) break;
-            if (res) await this.randomTime().catch(() => this.reportError("等待响应超时", task));
+            if (res) {
+                crawlCount += await this.randomTime().catch(() => {
+                    this.reportError("等待响应超时", task);
+                    return 0;
+                });
+            }
             if (breakSignal) break;
         }
         signal?.removeEventListener("abort", abortActon);
-        if (errors) return errors;
+
+        return crawlCount;
     }
 }
 

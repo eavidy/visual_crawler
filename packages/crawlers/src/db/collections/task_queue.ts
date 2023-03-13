@@ -38,15 +38,16 @@ export class TaskQueueData {
         }
         return await this.collection.insertMany(fullTasks);
     }
-    async markTasksFailed(id: string) {
+    async markTasksFailed(id: string | number | ObjectId, result?: any) {
         return this.collection.updateOne({ _id: toId(id) }, {
             $set: {
                 status: TaskState.failed,
+                result,
             },
         } as Partial<CrawlerPriorityTask>);
     }
-    async markTasksSucceed(id: string | number | ObjectId) {
-        return this.collection.updateOne({ _id: toId(id) }, { $set: { status: TaskState.executed } });
+    async markTasksSucceed(id: string | number | ObjectId, result?: any) {
+        return this.collection.updateOne({ _id: toId(id) }, { $set: { status: TaskState.executed, result } });
     }
     async updateTasksStatus(ids: (string | ObjectId)[], status: TaskState) {
         {

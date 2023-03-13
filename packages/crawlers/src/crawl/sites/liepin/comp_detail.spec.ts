@@ -12,7 +12,7 @@ async function test() {
     });
     let ctrl = await pageCrawl.open({ companyId: "8846916" });
     await new TimeoutPromise(2000);
-    console.log("总页数:" + (await ctrl.getTotalPage()));
+    console.log("总职位:" + (await ctrl.getTotalJob()));
     for await (const iterator of ctrl.pageNumIterator([])) {
         console.log(iterator);
     }

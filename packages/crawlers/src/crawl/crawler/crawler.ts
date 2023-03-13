@@ -94,7 +94,7 @@ export abstract class Crawler extends EventEmitter {
         }
     }
 
-    abstract executeTask(task: UnexecutedCrawlerTask, abc?: AbortSignal): Promise<boolean>;
+    abstract executeTask(task: UnexecutedCrawlerTask, abc?: AbortSignal): Promise<{ pass: boolean; result?: any }>;
     private errToJson(err: any) {
         if (err instanceof Error) {
             return {
@@ -130,14 +130,17 @@ export abstract class Crawler extends EventEmitter {
             let task = await this.taskQueue.takeTask();
             if (!task) break;
             let id = task._id;
-            let taskResult = await this.executeTask(task, abc.signal);
+            let { pass, result } = await this.executeTask(task, abc.signal);
             this.resetSchedule(0);
-            if (taskResult) {
-                await taskQueueData.markTasksSucceed(id);
+            if (pass) {
                 this.#statistics.taskCompleted++;
-            } else this.#statistics.taskFailed++;
+                await taskQueueData.markTasksSucceed(id, result);
+            } else {
+                this.#statistics.taskFailed++;
+                await taskQueueData.markTasksFailed(id, result);
+            }
 
-            this.emit("taskFinished", taskResult);
+            this.emit("taskFinished", { pass, result });
         }
         this.abc = undefined;
         this.emit("taskQueueFinished");

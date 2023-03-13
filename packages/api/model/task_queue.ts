@@ -18,6 +18,7 @@ export interface CrawlerPriorityTask {
     type: TaskType;
     siteTag: SiteTag;
     status: TaskState;
+    result?: any;
     /** 优先级, 越小越优先 */
     priority?: number;
     /** 过期时间 */

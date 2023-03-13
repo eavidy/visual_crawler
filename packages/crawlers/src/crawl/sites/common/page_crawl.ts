@@ -34,7 +34,15 @@ export abstract class PageCrawl extends EventEmitter {
     constructor(protected context: BrowserContext) {
         super();
     }
-
+    #closed = false;
+    get closed() {
+        return this.#closed;
+    }
+    async closeBrowserContext() {
+        if (this.#closed) return;
+        this.#closed = true;
+        return this.context.close();
+    }
     abstract readonly siteTag: SiteTag;
     protected async newPage() {
         const page = await createPage(this.context);

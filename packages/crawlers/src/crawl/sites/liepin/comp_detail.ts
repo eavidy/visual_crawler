@@ -67,7 +67,7 @@ export class LiePinCompanyDetail extends PageCrawl {
         constructor(page: Page, readonly og: LiePinCompanyDetail, private readonly compInfo: CompInfo) {
             super(page);
         }
-        async getTotalPage() {
+        async getTotalJob() {
             let text: string;
             try {
                 text = await this.page
@@ -78,8 +78,7 @@ export class LiePinCompanyDetail extends PageCrawl {
             }
             let countStr = text.match(/\((\d+)\)/)?.[1];
             if (!countStr) return 0;
-
-            return Math.ceil(parseInt(countStr) / 30);
+            return parseInt(countStr);
         }
 
         async crawlHtml() {

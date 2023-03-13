@@ -296,9 +296,11 @@ class JobPageController extends PageNumControllable {
     }
     createDeepAssignFilter() {
         let list = this.iterationSequence;
-        let lev = this.excLev([7, 7, 7, 8, 8]);
+        let index = [7, 7, 7, 8, 8];
+        let lev = this.excLev(index);
         return {
             object: new DeepAssignFilter(list),
+            index,
             lev,
             total: this.excCount([7, 7, 7, 8, 8], lev),
         };
