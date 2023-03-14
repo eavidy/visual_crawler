@@ -1,5 +1,5 @@
 import { CrawlerLiepin } from "./crawler_liepin";
-import { createContext, closeBrowser } from "../classes/browser";
+import { closeBrowser, getBrowser } from "../classes/browser";
 import { SiteTag, TaskType } from "api/model";
 import { ObjectId } from "mongodb";
 import { dbClient } from "../../db";
@@ -8,15 +8,17 @@ import { TaskQueue } from "../classes/task_queue";
 function report(...str: string[]) {
     const stdout = process.stdout;
     function clear() {
-        stdout.cursorTo(0, 0), stdout.clearScreenDown();
+        stdout.cursorTo(0, 0);
+        stdout.clearScreenDown();
     }
     clear();
+    // console.log(str.join("\n"))
     stdout.write(str.join("\n"));
 }
 
 async function start() {
     let taskQueue = new TaskQueue(SiteTag.liepin, 1);
-    let crawler = new CrawlerLiepin(await createContext(), taskQueue);
+    let crawler = new CrawlerLiepin(await getBrowser(), taskQueue);
     crawler.on("scheduleUpdate", function (this: CrawlerLiepin) {
         let statistics = this.statistics;
         let total = {
@@ -32,7 +34,9 @@ async function start() {
                 Math.round((total.companyTotal ? statistics.companyRepeated / total.companyTotal : 0) * 100) +
                 "%",
             "任务失败率:" + Math.round((total.taskTotal ? statistics.taskFailed / total.taskTotal : 0) * 100) + "%\n",
-            "任务进度: " + this.currentSchedule + "/" + this.totalSchedule + "\n",
+            `任务进度: ${this.currentSchedule}/${this.totalSchedule} (${
+                this.totalSchedule ? Math.round((this.currentSchedule / this.totalSchedule) * 100 * 100) / 100 : 0
+            }%)\n`,
         ];
         report(...yy);
     });

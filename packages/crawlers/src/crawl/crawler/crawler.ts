@@ -114,7 +114,7 @@ export abstract class Crawler extends EventEmitter {
         this.#currentSchedule = val;
         this.emit("scheduleUpdate");
     }
-    protected resetSchedule(total: number, current = 0) {
+    resetSchedule(total: number, current = 0) {
         this.totalSchedule = total;
         this.#currentSchedule = current;
         this.emit("scheduleUpdate");

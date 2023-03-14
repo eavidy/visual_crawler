@@ -76,11 +76,8 @@ export class LiePinJobList extends PageCrawl {
     }
     async loadFin() {}
     private async onResponse(res: Response) {
-        let data: ResData[] | undefined = (await res.json().catch(() => {}))?.data?.data?.jobCardList;
-        if (typeof data !== "object") {
-            this.reportError({ msg: "解析json错误" });
-            return;
-        }
+        let data: ResData[] = (await res.json().catch(() => {}))?.data?.data?.jobCardList ?? [];
+
         const resData = this.paseData(data);
         this.pageCrawlFin(resData);
     }
@@ -275,35 +272,9 @@ class JobPageController extends PageNumControllable {
             fx.bind(this)
         );
     }
-    excLev(list: number[]) {
-        let lev: number[] = [];
-        for (let i = 0; i < list.length - 1; i++) {
-            let val = list[i + 1];
-            for (let j = i + 2; j < list.length; j++) {
-                val *= list[i];
-            }
-            lev[i] = val;
-        }
-        lev.push(list[list.length - 1]);
-        return lev;
-    }
-    excCount(list: number[], lev: number[]) {
-        let total = 0;
-        for (let i = 0; i < list.length; i++) {
-            total += list[i] * lev[i];
-        }
-        return total;
-    }
     createDeepAssignFilter() {
         let list = this.iterationSequence;
-        let index = [7, 7, 7, 8, 8];
-        let lev = this.excLev(index);
-        return {
-            object: new DeepAssignFilter(list),
-            index,
-            lev,
-            total: this.excCount([7, 7, 7, 8, 8], lev),
-        };
+        return new DeepAssignFilter(list, [7, 7, 7, 8, 8]);
     }
     private getFilterClearIcon(key: string) {
         return this.page.locator(

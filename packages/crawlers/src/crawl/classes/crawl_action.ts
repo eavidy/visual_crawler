@@ -2,10 +2,20 @@ export const ACTION_TIMEOUT = 1000; //playwright与浏览器交互的超时时�
 
 export class DeepAssignFilter {
     readonly assignRes: number[]; //记录当前迭代数量
-    constructor(private readonly list: readonly FilterIteratorFx[]) {
-        this.assignRes = list.map(() => 0);
+    constructor(private readonly list: readonly FilterIteratorFx[], readonly index: readonly number[] = []) {
+        this.assignRes = list.map((_, i) => 0);
+        this.lev = DeepAssignFilter.excLev(index);
+        this.total = DeepAssignFilter.excCount(index, this.lev);
     }
-
+    readonly total: number;
+    /**
+     * 次数指数, 如计算 a=[2,2,2] 得到[4, 2, 1] ,表示当a[0] 每增加1 会迭代4次
+     */
+    private readonly lev: number[];
+    /** 获取当前进度 */
+    getCurrent() {
+        return DeepAssignFilter.excCount(this.assignRes, this.lev);
+    }
     /**
      * @description 组合深度迭代生成器列表
      * @generator 如果迭代时出现异常, 则yield false, 否则yield true   如果执行 next() 时 传入true, 则跳过深度迭代
@@ -30,6 +40,27 @@ export class DeepAssignFilter {
             let stop = yield { value: res.value, isLast };
             if (!stop && !isLast) yield* this.assign(skinList, index + 1);
         } while (true);
+    }
+
+    static excLev(list: readonly number[]) {
+        let lev: number[] = [];
+        for (let i = 0; i < list.length - 1; i++) {
+            let val = list[i + 1];
+            for (let j = i + 2; j < list.length; j++) {
+                val *= list[i];
+            }
+            lev[i] = val;
+        }
+        lev.push(list[list.length - 1]);
+        return lev;
+    }
+    /** 计算迭代总次数 */
+    static excCount(list: readonly number[], lev: readonly number[]) {
+        let total = 0;
+        for (let i = 0; i < list.length; i++) {
+            total += list[i] * lev[i];
+        }
+        return total;
     }
 }
 export async function* listIterator(list: FilterIteratorFx[]) {

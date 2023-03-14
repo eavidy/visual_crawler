@@ -17,7 +17,7 @@ export abstract class PageNumControllable {
     }
     async hasNextPage(): Promise<boolean | never> {
         const handler = this.getNextButton();
-        let className = await handler.getAttribute("class", { timeout: ACTION_TIMEOUT });
+        let className = await handler.getAttribute("class", { timeout: ACTION_TIMEOUT }).catch(() => {});
         if (!className) return false;
         if (className.includes("ant-pagination-disabled")) return false;
         return true;
