@@ -11,8 +11,8 @@ function report(...str: string[]) {
         stdout.cursorTo(0, 0);
         stdout.clearScreenDown();
     }
-    clear();
-    // console.log(str.join("\n"))
+    // clear();
+    console.log(str.join("\n"));
     stdout.write(str.join("\n"));
 }
 
@@ -41,7 +41,12 @@ async function start() {
         report(...yy);
     });
 
-    crawler.on("reportAuth", function () {});
+    crawler.on("reportAuth", function () {
+        console.log("需要人机验证");
+    });
+    crawler.on("workBreak", function ({ reason }) {
+        console.log(reason);
+    });
 
     await excWork(crawler);
     // await excJobTask(crawler);

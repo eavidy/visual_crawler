@@ -45,6 +45,10 @@ export class LiePinJobList extends PageCrawl {
         let page = await super.newPage();
         const urlChecker = /apic.liepin.com\/api\/com.liepin.searchfront4c.pc-search-job$/;
         page.on("response", (res) => {
+            if (/safe\.liepin\.com\/page\/liepin\/captchaPage_ip_PC/.test(res.url())) {
+                this.emit("auth");
+                return;
+            }
             if (urlChecker.test(res.url())) {
                 if (res.ok()) {
                     this.onResponse(res);
@@ -60,15 +64,6 @@ export class LiePinJobList extends PageCrawl {
         });
         const url = this.origin + "/zhaopin/?" + paramsStr;
         await page.goto(url, { timeout });
-
-        let stopCheckAuth = setInterval(async () => {
-            if (await pageCtrl.isAuth()) {
-                this.emit("auth");
-            }
-        }, 1000);
-        page.on("close", function () {
-            clearInterval(stopCheckAuth);
-        });
 
         let pageCtrl = new JobPageController(page);
         await page.locator(".filter-options-container").focus({ timeout: 30000 });

@@ -19,9 +19,12 @@ export class LiePinCompanyDetail extends PageCrawl {
 
     async open(companyInfo: CompInfo, timeout = 20 * 1000) {
         let page = await this.newPage();
-
-        let urlChecker = /apic.liepin.com\/api\/com.liepin.searchfront4c.pc-comp-homepage-search-job$/;
+        let urlChecker = /apic\.liepin\.com\/api\/com\.liepin\.searchfront4c\.pc-comp-homepage-search-job$/;
         page.on("response", (res) => {
+            if (/safe\.liepin\.com\/page\/liepin\/captchaPage_ip_PC/.test(res.url())) {
+                this.emit("auth");
+                return;
+            }
             if (urlChecker.test(res.url())) {
                 if (res.ok()) {
                     this.onResponse(res, companyInfo);
@@ -38,14 +41,7 @@ export class LiePinCompanyDetail extends PageCrawl {
         const url = `${this.origin}/company-jobs/${companyInfo.companyId}`;
         await page.goto(url, { timeout });
         let pageCtrl = new LiePinCompanyDetail.PageController(page, this, companyInfo);
-        let stopCheckAuth = setInterval(async () => {
-            if (await pageCtrl.isAuth()) {
-                this.emit("auth");
-            }
-        }, 1000);
-        page.on("close", function () {
-            clearInterval(stopCheckAuth);
-        });
+
         return pageCtrl;
     }
 

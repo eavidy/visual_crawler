@@ -1,4 +1,4 @@
-export const DB_HOST = "127.0.0.1",
+export const DB_HOST = "asnow.cn",
     DB_PORT = 27017,
     DB_NAME = "vsCrawlerDb",
     USER_NAME = "vscr",

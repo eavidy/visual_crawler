@@ -31,11 +31,14 @@ export abstract class Crawler extends EventEmitter {
             msg,
             cause,
         };
-        errorLogData.appendLog(info);
+        errorLogData.appendLog(info).catch(() => {
+            console.log("Error: 保存异常日志失败");
+        });
         this.emit("reportError", JSON.stringify(info, null, 2));
     }
     async reportAuth() {
         this.emit("reportAuth");
+        return this.stopWork();
     }
     #statistics!: CrawlerStatistics;
     get statistics() {
@@ -120,6 +123,8 @@ export abstract class Crawler extends EventEmitter {
         this.emit("scheduleUpdate");
     }
 
+    continuousErrorLimit = 4;
+    private continuousError = 0; //连续错误数
     async startWork() {
         if (this.working) return;
         this.endureWork = true;
@@ -134,9 +139,14 @@ export abstract class Crawler extends EventEmitter {
             this.resetSchedule(0);
             if (pass) {
                 this.#statistics.taskCompleted++;
+                this.continuousError = 0;
                 await taskQueueData.markTasksSucceed(id, result);
             } else {
                 this.#statistics.taskFailed++;
+                if (++this.continuousError >= this.continuousErrorLimit) {
+                    this.emit("workBreak", { reason: "任务连续错误达到上限" });
+                    break;
+                }
                 await taskQueueData.markTasksFailed(id, result);
             }
 
