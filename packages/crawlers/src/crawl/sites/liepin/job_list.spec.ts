@@ -1,9 +1,9 @@
 import { LiePinJobList, PageController } from "./job_list";
-import { createContext, closeBrowser } from "../../classes/browser";
+import { CrawlerDevice } from "../../classes/browser";
 import { TimeoutPromise } from "@asnc/tslib/lib/async";
 import { listIterator } from "../../classes/crawl_action";
 async function test() {
-    const bsCt = await createContext();
+    const bsCt = await CrawlerDevice.newContext();
     const pageCrawl = new LiePinJobList(bsCt, "https://www.liepin.com");
     pageCrawl.on("data", async (data: any) => {
         console.log("职位:" + data.jobList.length + " 公司:" + data.compList.length);
@@ -25,6 +25,6 @@ async function grefilter(ctrl: PageController) {
 async function start() {
     const ctrl = await test();
     await grefilter(ctrl);
-    await closeBrowser();
+    await CrawlerDevice.close();
 }
 start();

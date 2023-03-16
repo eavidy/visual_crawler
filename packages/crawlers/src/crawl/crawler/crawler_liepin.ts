@@ -1,5 +1,4 @@
 import { Crawler, UnexecutedCompanyTask, UnexecutedJobTask } from "./crawler";
-import { Browser } from "playwright";
 import { UnexecutedCrawlerTask } from "../../db";
 import { LiePinCompanyDetail, LiePinJobList, PageNumControllable } from "../sites/liepin";
 import { radomWaitTime } from "../classes/time";
@@ -7,6 +6,7 @@ import { SiteTag, TaskType } from "api/model";
 import { DeepAssignFilter } from "../classes/crawl_action";
 import { TaskQueue } from "../classes/task_queue";
 import { TimeoutPromise, PromiseHandle } from "@asnc/tslib/lib/async";
+import { CrawlerDevice } from "../classes/browser";
 
 /**
  * @event data
@@ -14,7 +14,7 @@ import { TimeoutPromise, PromiseHandle } from "@asnc/tslib/lib/async";
 export class CrawlerLiepin extends Crawler {
     siteTag = SiteTag.liepin;
     readonly origin = "https://www.liepin.com";
-    constructor(readonly browser: Browser, taskQueue: TaskQueue) {
+    constructor(readonly browser: CrawlerDevice, taskQueue: TaskQueue) {
         super(taskQueue);
     }
     private async crateLiepinCompanyDetail() {

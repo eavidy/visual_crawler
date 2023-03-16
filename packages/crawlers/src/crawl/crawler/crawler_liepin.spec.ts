@@ -1,5 +1,5 @@
 import { CrawlerLiepin } from "./crawler_liepin";
-import { closeBrowser, getBrowser } from "../classes/browser";
+import { CrawlerDevice } from "../classes/browser";
 import { SiteTag, TaskType } from "api/model";
 import { ObjectId } from "mongodb";
 import { dbClient } from "../../db";
@@ -11,14 +11,14 @@ function report(...str: string[]) {
         stdout.cursorTo(0, 0);
         stdout.clearScreenDown();
     }
-    // clear();
-    console.log(str.join("\n"));
+    clear();
     stdout.write(str.join("\n"));
 }
 
 async function start() {
+    let device = await CrawlerDevice.create();
     let taskQueue = new TaskQueue(SiteTag.liepin, 1);
-    let crawler = new CrawlerLiepin(await getBrowser(), taskQueue);
+    let crawler = new CrawlerLiepin(device, taskQueue);
     crawler.on("scheduleUpdate", function (this: CrawlerLiepin) {
         let statistics = this.statistics;
         let total = {
@@ -52,7 +52,7 @@ async function start() {
     // await excJobTask(crawler);
     // await excCompanyTask(crawler);
 
-    await closeBrowser();
+    await device.close();
     await dbClient.close();
     console.log("done");
 }

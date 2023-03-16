@@ -1,8 +1,8 @@
 import { LiePinCompanyDetail } from "./comp_detail";
-import { createContext } from "../../classes/browser";
+import { CrawlerDevice } from "../../classes/browser";
 import { TimeoutPromise } from "@asnc/tslib/lib/async";
 async function test() {
-    const bsCt = await createContext();
+    const bsCt = await CrawlerDevice.newContext();
     const pageCrawl = new LiePinCompanyDetail(bsCt, "https://www.liepin.com");
     pageCrawl.on("data", (data: any) => {
         console.log("职位:" + data.jobList.length);
