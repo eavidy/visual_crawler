@@ -4,6 +4,7 @@ import { SiteTag, TaskType } from "api/model";
 import { ObjectId } from "mongodb";
 import { dbClient } from "../../db";
 import { TaskQueue } from "../classes/task_queue";
+import { parseNodeArgs } from "../classes/parseArgs";
 
 function report(...str: string[]) {
     const stdout = process.stdout;
@@ -14,9 +15,12 @@ function report(...str: string[]) {
     clear();
     stdout.write(str.join("\n"));
 }
+const { map } = parseNodeArgs();
+const headless = !(map.nh ?? false);
+const browserPath = typeof map.browser === "string" ? map.browser : undefined;
 
 async function start() {
-    let device = await CrawlerDevice.create();
+    let device = await CrawlerDevice.create({ headless, executablePath: browserPath });
     let taskQueue = new TaskQueue(SiteTag.liepin, 1);
     let crawler = new CrawlerLiepin(device, taskQueue);
     crawler.on("scheduleUpdate", function (this: CrawlerLiepin) {
