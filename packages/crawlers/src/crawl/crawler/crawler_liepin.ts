@@ -85,16 +85,20 @@ export class CrawlerLiepin extends Crawler {
             return { pass: false, result: "页面打开失败" };
         }
         let totalJob = await ctrl.getTotalJob();
-        let totalPage = Math.ceil(totalJob / 30);
-        this.companyTaskCount += totalPage;
-        this.resetSchedule(totalPage);
+        let result;
+        if (totalJob) {
+            let totalPage = Math.ceil(totalJob / 30);
+            this.companyTaskCount += totalPage;
+            this.resetSchedule(totalPage);
 
-        let errors: any[] = [];
-        let { crawlCount, pageNum } = await this.traversePageNum(ctrl, errors, signal, task);
+            let errors: any[] = [];
+            let { crawlCount, pageNum } = await this.traversePageNum(ctrl, errors, signal, task);
 
-        if (errors.length) this.reportError("公司页面翻页出错", errors);
+            if (errors.length) this.reportError("公司页面翻页出错", errors);
+            result = { pass: crawlCount / totalJob > 0.75, result: { total: totalJob, crawlCount } };
+        } else result = { pass: true, result: { total: 0, crawlCount: 0 } };
         await ctrl.close();
-        return { pass: crawlCount / totalJob > 0.75, result: { total: totalJob, crawlCount } };
+        return result;
     }
     async excJobTask(task: UnexecutedJobTask, signal?: AbortSignal): Promise<{ pass: boolean; result: any }> {
         let jobTask: JobTask;
@@ -115,7 +119,7 @@ export class CrawlerLiepin extends Crawler {
             } catch (error) {
                 break;
             }
-            await jobTask.goToLimit(20 * 10);
+            await jobTask.goToLimit(100);
 
             skipList = jobTask.deepFilter.assignRes;
             jobTask.destroy();
@@ -252,9 +256,13 @@ class JobTask {
             if (this.breakSignal) break;
 
             if (res?.isLast && isFullList) {
-                let before = this.crawler.currentSchedule;
-                await this.crawler.traversePageNum(pageCtrl, this.traversePageNumErrors, this.signal, this.task);
-                this.count += this.crawler.currentSchedule - before;
+                const { pageNum } = await this.crawler.traversePageNum(
+                    pageCtrl,
+                    this.traversePageNumErrors,
+                    this.signal,
+                    this.task
+                );
+                this.count += pageNum;
             }
         } while (true);
 

@@ -24,6 +24,7 @@ async function start() {
     let taskQueue = new TaskQueue(SiteTag.liepin, 1);
     let crawler = new CrawlerLiepin(device, taskQueue);
     crawler.on("scheduleUpdate", function (this: CrawlerLiepin) {
+        if (process.env.NODE_ENV === "prod") return;
         let statistics = this.statistics;
         let total = {
             jobTotal: statistics.jobRepeated + statistics.newJob,
@@ -44,7 +45,10 @@ async function start() {
         ];
         report(...yy);
     });
-
+    crawler.on("taskFinished", function (this: CrawlerLiepin, taskResult) {
+        console.log(this.statistics);
+        console.log(taskResult);
+    });
     crawler.on("reportAuth", function () {
         console.log("需要人机验证");
     });

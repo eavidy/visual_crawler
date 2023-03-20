@@ -1,5 +1,5 @@
 import { Collection, ObjectId, WithId, Db } from "mongodb";
-import { CrawlerPriorityTask, TaskState, SiteTag, CrawlerTaskAppend } from "api/model";
+import { CrawlerPriorityTask, TaskState, SiteTag, CrawlerTaskAppend, TaskType } from "api/model";
 import { checkType, checkFx, optional } from "@asnc/tslib/lib/std/type_check";
 import { FieldCheckError } from "../classes/errors";
 export type UnexecutedTask<T extends CrawlerPriorityTask> = WithId<Omit<T, "priority" | "expirationTime" | "status">>;
@@ -10,12 +10,11 @@ export class TaskQueueData {
     constructor(db: Db, private collection: Collection) {
         this.priorityQueueView = db.collection("task_priority_queue");
     }
-    async takeTasks(count: number, siteTag: SiteTag) {
+    async takeTasks(count: number, siteTag: SiteTag, taskType?: TaskType) {
         let res = await this.priorityQueueView.find<UnexecutedCrawlerTask>({ siteTag }).limit(count).toArray();
-        await this.collection.updateMany(
-            { _id: { $in: res.map((val) => val._id) } },
-            { $set: { status: TaskState.executing } }
-        );
+        let match: Record<string, any> = { _id: { $in: res.map((val) => val._id) } };
+        if (taskType !== undefined) match.type = taskType;
+        await this.collection.updateMany(match, { $set: { status: TaskState.executing } });
         return res;
     }
     async appendTask(task: CrawlerTaskAppend) {

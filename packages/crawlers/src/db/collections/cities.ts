@@ -23,9 +23,9 @@ export class CitiesData {
                 { $match: {} },
                 {
                     $set: {
+                        type: TaskType.jobFilter,
                         siteTag: siteTag,
                         status: TaskState.unexecuted,
-                        type: TaskType.jobFilter,
                         taskInfo: {
                             fixedFilter: { city: "$_id" },
                         },
