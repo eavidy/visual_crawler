@@ -29,6 +29,7 @@ export interface CrawlerPriorityJobFilterTask extends CrawlerPriorityTask {
     type: TaskType.jobFilter;
     taskInfo: {
         fixedFilter?: JobFilterOption;
+        skipList?: number[];
     };
 }
 export interface CrawlerPriorityCompanyTask extends CrawlerPriorityTask {

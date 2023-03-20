@@ -10,6 +10,7 @@ import { CrawlerDevice } from "../classes/browser";
 
 /**
  * @event data
+ * @event jobTaskRest
  */
 export class CrawlerLiepin extends Crawler {
     siteTag = SiteTag.liepin;
@@ -102,7 +103,7 @@ export class CrawlerLiepin extends Crawler {
     }
     async excJobTask(task: UnexecutedJobTask, signal?: AbortSignal): Promise<{ pass: boolean; result: any }> {
         let jobTask: JobTask;
-        let skipList: number[] | undefined;
+        let skipList: number[] | undefined = task.taskInfo.skipList;
         do {
             let liepJobList = await this.createLiepinPageList();
             let randomTime = this.randomTime();
@@ -122,6 +123,8 @@ export class CrawlerLiepin extends Crawler {
             await jobTask.goToLimit(100);
 
             skipList = jobTask.deepFilter.assignRes;
+            await this.updateTaskInfo(task, { ...task.taskInfo, skipList });
+            this.emit("jobTaskRest", skipList);
             jobTask.destroy();
             await liepJobList.closeBrowserContext();
         } while (!jobTask.isFinished);

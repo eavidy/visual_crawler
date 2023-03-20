@@ -37,6 +37,13 @@ export class TaskQueueData {
         }
         return await this.collection.insertMany(fullTasks);
     }
+    async updateTaskInfo(id: string | number | ObjectId, info: any) {
+        return this.collection.updateOne({ _id: toId(id) }, {
+            $set: {
+                taskInfo: info,
+            },
+        } as Partial<CrawlerPriorityTask>);
+    }
     async markTasksFailed(id: string | number | ObjectId, result?: any) {
         return this.collection.updateOne({ _id: toId(id) }, {
             $set: {

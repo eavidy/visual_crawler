@@ -49,6 +49,9 @@ async function start() {
         console.log(this.statistics);
         console.log(taskResult);
     });
+    crawler.on("jobTaskRest", function (skipList: number[]) {
+        console.log(skipList);
+    });
     crawler.on("reportAuth", function () {
         console.log("需要人机验证");
     });

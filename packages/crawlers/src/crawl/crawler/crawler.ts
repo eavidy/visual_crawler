@@ -96,6 +96,9 @@ export abstract class Crawler extends EventEmitter {
             this.reportError("保存公司数据时出现异常", this.errToJson(error));
         }
     }
+    async updateTaskInfo(task: UnexecutedCrawlerTask, info: any) {
+        return taskQueueData.updateTaskInfo(task._id, info);
+    }
 
     abstract executeTask(task: UnexecutedCrawlerTask, abc?: AbortSignal): Promise<{ pass: boolean; result?: any }>;
     private errToJson(err: any) {
