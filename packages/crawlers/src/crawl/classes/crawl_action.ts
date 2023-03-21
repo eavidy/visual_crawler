@@ -26,20 +26,26 @@ export class DeepAssignFilter {
         index = 0
     ): AsyncGenerator<{ value: boolean; isLast: boolean }, boolean, boolean> {
         let list = this.list;
-        this.assignRes[index] = 0;
 
         let skinCount = skinList?.[index];
+        this.assignRes[index] = skinCount ?? 0;
+
         let generator = list[index](skinCount);
         do {
             let isLast = index + 1 === list.length;
             let res = await generator.next();
-            if (res.done) {
-                this.assignRes[index] = 0;
-                return res.value;
-            } else this.assignRes[index]++;
+            if (res.done) return res.value;
+            else this.assignRes[index]++;
             let stop = yield { value: res.value, isLast };
             if (!stop && !isLast) yield* this.assign(skinList, index + 1);
+            else this.setZero(index + 1); //修改assignRes
+            skinList = undefined;
         } while (true);
+    }
+    private setZero(i: number) {
+        for (; i < this.assignRes.length; i++) {
+            this.assignRes[i] = 0;
+        }
     }
 
     static excLev(list: readonly number[]) {
@@ -51,7 +57,7 @@ export class DeepAssignFilter {
             }
             lev[i] = val;
         }
-        lev.push(list[list.length - 1]);
+        lev.push(1);
         return lev;
     }
     /** 计算迭代总次数 */

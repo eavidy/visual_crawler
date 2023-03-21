@@ -122,7 +122,7 @@ export class CrawlerLiepin extends Crawler {
             }
             await jobTask.goToLimit(100);
 
-            skipList = jobTask.deepFilter.assignRes;
+            skipList = jobTask.deepFilter.assignRes.map((val) => (val ? val - 1 : 0));
             await this.updateTaskInfo(task, { ...task.taskInfo, skipList });
             this.emit("jobTaskRest", skipList);
             jobTask.destroy();
