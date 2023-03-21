@@ -95,7 +95,7 @@ export class CrawlerLiepin extends Crawler {
             let errors: any[] = [];
             let { crawlCount, pageNum } = await this.traversePageNum(ctrl, errors, signal, task);
 
-            if (errors.length) this.reportError("公司页面翻页出错", errors);
+            if (errors.length) this.reportError("公司页面翻页出错", { child: errors, task });
             result = { pass: crawlCount / totalJob > 0.75, result: { total: totalJob, crawlCount } };
         } else result = { pass: true, result: { total: 0, crawlCount: 0 } };
         await ctrl.close();
