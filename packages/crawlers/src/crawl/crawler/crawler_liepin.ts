@@ -61,7 +61,7 @@ export class CrawlerLiepin extends Crawler {
     private ctHandle?: PromiseHandle<number | void>;
     randomTime() {
         this.ctHandle = new TimeoutPromise(30 * 1000, true);
-        return Promise.all([this.ctHandle, radomWaitTime(2 * 1000, 6 * 1000)]).then(([count]) => count ?? 0);
+        return Promise.all([this.ctHandle, radomWaitTime(2 * 1000, 4 * 1000)]).then(([count]) => count ?? 0);
     }
     private companyTaskCount = 0;
     private liepinCompanyDetail?: LiePinCompanyDetail;

@@ -144,15 +144,12 @@ class JobPageController extends PageNumControllable {
     //7
     async *salary(skipCount = 0) {
         let list = await this.getBasicFilters("薪资").locator(".options-item").all();
-        list.pop(); //删除薪资列表的"自定义"
         for (let i = skipCount; i < list.length; i++) {
             let item = list[i];
-            try {
-                await item.click({ timeout: ACTION_TIMEOUT });
-                yield true;
-            } catch (error) {
-                yield false;
-            }
+            yield await item.click({ timeout: ACTION_TIMEOUT }).then(
+                () => true,
+                () => false
+            );
         }
         return await this.getFilterClearIcon("salary")
             .click({ timeout: ACTION_TIMEOUT })
@@ -166,12 +163,10 @@ class JobPageController extends PageNumControllable {
         let list = await this.getBasicFilters("经验").locator(".options-item").all();
         for (let i = skipCount; i < list.length; i++) {
             let item = list[i];
-            try {
-                await item.click({ timeout: ACTION_TIMEOUT });
-                yield true;
-            } catch (error) {
-                yield false;
-            }
+            yield await item.click({ timeout: ACTION_TIMEOUT }).then(
+                () => true,
+                () => false
+            );
         }
         return await this.getFilterClearIcon("workYearCode")
             .click({ timeout: ACTION_TIMEOUT })
