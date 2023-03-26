@@ -11,10 +11,13 @@ export class TaskQueueData {
         this.priorityQueueView = db.collection("task_priority_queue");
     }
     async takeTasks(count: number, siteTag: SiteTag, taskType?: TaskType) {
-        let res = await this.priorityQueueView.find<UnexecutedCrawlerTask>({ siteTag }).limit(count).toArray();
-        let match: Record<string, any> = { _id: { $in: res.map((val) => val._id) } };
+        let match: Record<string, any> = { siteTag };
         if (taskType !== undefined) match.type = taskType;
-        await this.collection.updateMany(match, { $set: { status: TaskState.executing } });
+        let res = await this.priorityQueueView.find<UnexecutedCrawlerTask>(match).limit(count).toArray();
+        await this.collection.updateMany(
+            { _id: { $in: res.map((val) => val._id) } },
+            { $set: { status: TaskState.executing } }
+        );
         return res;
     }
     async appendTask(task: CrawlerTaskAppend) {

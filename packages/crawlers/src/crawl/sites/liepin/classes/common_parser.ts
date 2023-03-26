@@ -23,7 +23,7 @@ export function paseJob(
     let data = {
         jobData: {
             cityId,
-            name: job.title,
+            name: DataParser.paseJobName(job.title),
             tag: job.labels,
             education: DataParser.matchEducation(job.requireEduLevel),
             workExperience: DataParser.paseExp(job.requireWorkYears),

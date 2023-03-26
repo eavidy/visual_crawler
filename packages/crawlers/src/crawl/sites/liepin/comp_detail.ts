@@ -110,7 +110,7 @@ export class LiePinCompanyDetail extends PageCrawl {
             return data.map(
                 (data): JobCrawlerData => ({
                     jobData: {
-                        name: data.name,
+                        name: DataParser.paseJobName(data.name),
                         education: paseTag(data.tagList, DataParser.matchEducation, undefined),
                         workExperience: paseTag(data.tagList, DataParser.paseExp, -1) ?? -1,
                         cityId: data.city ? DataParser.cityNameToId(data.city) : undefined,

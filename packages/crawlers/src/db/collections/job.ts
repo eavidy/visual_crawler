@@ -6,44 +6,7 @@ const TIME_INTERVAL = 30 * 6 * 86400;
 
 export class JobsData {
     constructor(private table: Collection) {}
-    private static createOpt() {
-        return [
-            //生成插入时间的字段
-            {
-                $project: {
-                    insertDate: {
-                        $function: {
-                            body: `function (_id) { let d = parseInt(_id + "", 16);  return d; }`,
-                            args: [{ $substrBytes: [{ $toString: "$_id" }, 0, 8] }],
-                            lang: "js",
-                        },
-                    },
-                    jobId: 1,
-                },
-            },
-            {
-                $match: {
-                    insertDate: { $gte: Math.floor(new Date().getTime() / 1000) - TIME_INTERVAL },
-                },
-            },
-        ];
-    }
 
-    async appendJob(job: JobCrawlerData) {
-        {
-            let testRes = checkType(job, jobChecker, CheckTypeOption);
-            if (testRes) throw new FieldCheckError(testRes);
-        }
-        {
-            let res = await this.table //查询插入时间在6个月内的相同id的job
-                .aggregate([{ $match: { jobId: job.jobId, siteTag: job.siteTag } }, ...JobsData.createOpt()])
-                .toArray();
-
-            if (res.length) return false;
-        }
-        await this.table.insertOne(job);
-        return true;
-    }
     async appendJobs(jobs: JobCrawlerData[], siteTag: SiteTag, insertCheckedItem = true) {
         let newJobs: JobCrawlerData[] = [];
         let checkFail: { item: JobCrawlerData; err: any }[] = [];
@@ -65,7 +28,6 @@ export class JobsData {
             let oldJobs = await this.table
                 .aggregate<WithId<Pick<JobCrawlerData, "jobId" | "siteTag">>>([
                     { $match: { siteTag, jobId: { $in: Object.keys(idMap) } } },
-                    ...JobsData.createOpt(),
                 ])
                 .toArray();
 

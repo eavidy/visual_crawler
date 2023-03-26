@@ -12,16 +12,15 @@ function report(...str: string[]) {
         stdout.cursorTo(0, 0);
         stdout.clearScreenDown();
     }
-    clear();
+    if (typeof stdout.cursorTo === "function") clear();
     stdout.write(str.join("\n"));
 }
 const { map } = parseNodeArgs();
 const headless = !(map.nh ?? false);
 const browserPath = typeof map.browser === "string" ? map.browser : undefined;
 
-async function start() {
+async function start(taskQueue: TaskQueue) {
     let device = await CrawlerDevice.create({ headless, executablePath: browserPath });
-    let taskQueue = new TaskQueue(SiteTag.liepin, 1);
     let crawler = new CrawlerLiepin(device, taskQueue);
     crawler.on("scheduleUpdate", function (this: CrawlerLiepin) {
         if (process.env.NODE_ENV === "prod") return;
@@ -88,4 +87,4 @@ async function excCompanyTask(crawler: CrawlerLiepin) {
         _id: new ObjectId("dddddddddddd"),
     });
 }
-start();
+start(new TaskQueue(SiteTag.liepin, undefined, 1));

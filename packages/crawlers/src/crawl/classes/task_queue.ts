@@ -1,9 +1,9 @@
-import { CrawlerTaskAppend, SiteTag, TaskState } from "api/model";
+import { CrawlerTaskAppend, SiteTag, TaskState, TaskType } from "api/model";
 import { taskQueueData, UnexecutedCrawlerTask } from "../../db";
 
 export class TaskQueue {
-    constructor(readonly siteTag: SiteTag, public cacheSize = 5) {}
-    private cache: UnexecutedCrawlerTask[] = []; //队列缓存
+    constructor(readonly siteTag: SiteTag, public taskType?: TaskType, public cacheSize = 5) {}
+    protected cache: UnexecutedCrawlerTask[] = []; //队列缓存
 
     async pushMany(tasks: CrawlerTaskAppend[]) {
         return taskQueueData.appendTasks(tasks);
@@ -11,7 +11,7 @@ export class TaskQueue {
     async takeTask() {
         let task = this.cache.shift();
         if (!task) {
-            let newTasks = await taskQueueData.takeTasks(this.cacheSize, this.siteTag);
+            let newTasks = await taskQueueData.takeTasks(this.cacheSize, this.siteTag, this.taskType);
             if (newTasks.length) {
                 task = newTasks.shift();
                 this.cache = this.cache.concat(newTasks);

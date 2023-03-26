@@ -667,7 +667,7 @@ export const cities = [
     },
     {
         _id: 101200300,
-        name: "鄂 州",
+        name: "鄂州",
         char: "E",
         bossCode: "0711",
         liepinCode: null,
@@ -883,7 +883,7 @@ export const cities = [
     },
     {
         _id: 101080100,
-        name: "呼和浩 特",
+        name: "呼和浩特",
         char: "H",
         bossCode: "0471",
         liepinCode: null,
@@ -2071,7 +2071,7 @@ export const cities = [
     },
     {
         _id: 101140200,
-        name: "日 喀则",
+        name: "日喀则",
         char: "R",
         bossCode: "0892",
         liepinCode: null,
@@ -3188,7 +3188,7 @@ export const cities = [
     },
     {
         _id: 101181400,
-        name: " 周口",
+        name: "周口",
         char: "Z",
         bossCode: "0394",
         liepinCode: null,

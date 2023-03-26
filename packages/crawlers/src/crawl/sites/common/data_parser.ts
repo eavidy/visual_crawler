@@ -38,7 +38,7 @@ export class DataParser {
                 return -2;
 
             case "应届生":
-                return 0.5;
+                return 0;
             case "1年以内":
                 return 0.5;
             case "1-3年":
@@ -90,5 +90,89 @@ export class DataParser {
         } else if (str === "10000人以上") return CompanyScale.gt_10000;
 
         return CompanyScale.unknown;
+    }
+    static paseJobName(name: string) {
+        if (typeof name !== "string") return name;
+        let val = NameParser.initJobName(name);
+        return val === "" ? name : val;
+    }
+}
+
+/**
+ *
+ */
+class NameParser {
+    static yesWord: (string | RegExp)[] = [
+        "经理",
+        "技术",
+        "专员",
+        "销售",
+        "工程师",
+        "开发",
+        "总监",
+        "marketing",
+        "manager",
+        "顾问",
+        "人事",
+        "程序员",
+        "管理",
+        "助理",
+        "专家",
+    ];
+    static noWord: (string | RegExp)[] = ["分公司", /\d/, /包[吃住]/, "工资", "应届", "毕业生"];
+    static preReplace = [/\d+-\d+k/gi, /\s*[\(（)].*?[\)>）]\s*/g];
+    static initJobName(name: string) {
+        for (const regExp of this.preReplace) {
+            name = name.replace(regExp, "");
+        }
+        name = name.toLowerCase();
+        if (/[-—_]/.test(name)) {
+            let wordList = name.split(/[-—_]/);
+
+            let lastResult = -2;
+            for (let word of wordList) {
+                if (word === "") continue;
+                let foumartWord = word.replace(/\s/g, "");
+                let res = 0;
+                let temp = this.isCity(foumartWord);
+                if (temp === 1) continue;
+                res += this.wordIncludes(foumartWord);
+
+                if (res > lastResult) {
+                    lastResult = res;
+                    name = word;
+                }
+            }
+        }
+        name = name.replace(/(?<=\W)\s+(?=\W)/g, "");
+        return name.trim();
+    }
+    static wordIncludes(str: string) {
+        let res = 0;
+        for (const word of this.yesWord) {
+            if (typeof word === "string") {
+                if (str.includes(word)) res += 0.5;
+            } else if (word.test(str)) {
+                res += 0.5;
+            }
+        }
+        for (const word of this.noWord) {
+            if (typeof word === "string") {
+                if (str.includes(word)) res -= 0.5;
+            } else if (word.test(str)) {
+                res -= 0.5;
+            }
+        }
+        return res;
+    }
+
+    static isCity(str: string) {
+        for (const { name } of cities) {
+            if (name === str) return 1;
+            if (name.includes(str)) {
+                return 1;
+            } else if (str.includes(name)) return (name.length / str.length) * 2 - 0.5;
+        }
+        return 0;
     }
 }
