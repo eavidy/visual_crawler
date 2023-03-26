@@ -5,8 +5,7 @@
         "moduleResolution": "node",
         "strict": true,
         "lib": ["ESNext"],
-        "skipDefaultLibCheck": true,
-        "baseUrl": "."
+        "skipDefaultLibCheck": true
     },
     "exclude": ["node_modules"]
 }
