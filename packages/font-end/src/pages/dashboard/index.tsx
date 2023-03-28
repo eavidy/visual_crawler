@@ -1,11 +1,10 @@
 import { useRequest } from "ahooks";
 import React, { useMemo, useState } from "react";
-import { DatePicker, Input, Select, Form, Image, Button } from "antd";
+import { DatePicker, Input, Select, Form, Image, Button, Dropdown } from "antd";
 import { $http } from "@/http";
 import { ApiReq } from "api/request/dashboard";
 import { WorkExp } from "api/request/enum";
-import { Right } from "./components/dash-right";
-import { Left } from "./components/dash-left";
+import { Body } from "./components/dash-left";
 import { Education } from "api/model";
 
 export default function () {
@@ -23,10 +22,7 @@ export default function () {
             }}
         >
             <Header onAnalysis={(values) => setFilterOption(values)} />
-            <div style={{ flex: 1, display: "flex" }}>
-                <Left filterOptions={filterOption} />
-                <Right />
-            </div>
+            <Body filterOptions={filterOption} />
         </div>
     );
 }
@@ -57,6 +53,20 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
         const { data } = await $http.get<{ value: string; label: string }[]>("api/dashboard/dq_options");
         return data;
     });
+    const [searchName, setSearchName] = useState("");
+    const { data: JobNameList } = useRequest(
+        async function () {
+            if (searchName.length === 0) return [];
+            const {
+                data: { items },
+            } = await $http.get<{ items: string[] }>("api/job/search_job_name", { params: { name: searchName } });
+            return items.map((str, i) => ({ label: str, key: i }));
+        },
+        {
+            refreshDeps: [searchName],
+            debounceWait: 500,
+        }
+    );
     const [form] = Form.useForm<ApiReq.MatchFilter>();
     const workExpOption = useMemo(() => {
         return getNumEnumEntires(WorkExp).map(([label, value]) => ({
@@ -97,7 +107,7 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
                         <Select
                             options={data}
                             loading={loading}
-                            placeholder="选择省份"
+                            placeholder="选择城市"
                             filterOption={(input, option) => !!option?.label.includes(input)}
                             showSearch
                             style={{ width: "100px" }}
@@ -129,9 +139,26 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
                         <DatePicker picker="year" placeholder="结束年份" style={{ width: 100 }} allowClear />
                     </Form.Item>
                     <div style={{ justifySelf: "center", display: "flex", gap: "24px", justifyContent: "right" }}>
-                        <Form.Item name="jobName" style={{ margin: 0 }}>
-                            <Input placeholder="请输入职位名称" allowClear />
-                        </Form.Item>
+                        <Dropdown
+                            menu={{
+                                items: JobNameList,
+                                onClick: (e) => {
+                                    let text = JobNameList![parseInt(e.key)].label;
+                                    console.log(text);
+                                    form.setFieldValue("jobName", text);
+                                    setSearchName(text);
+                                },
+                            }}
+                            trigger={["click"]}
+                        >
+                            <Form.Item name="jobName" style={{ margin: 0 }}>
+                                <Input
+                                    placeholder="请输入职位名称"
+                                    allowClear
+                                    onChange={(val) => setSearchName(val.currentTarget.value)}
+                                />
+                            </Form.Item>
+                        </Dropdown>
                         <Button type="primary" disabled={!analyzable} onClick={onAnalysis}>
                             分析
                         </Button>

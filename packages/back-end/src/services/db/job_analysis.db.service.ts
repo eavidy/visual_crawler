@@ -57,78 +57,8 @@ class JobMatcher {
     }
 }
 export class JobAnalysisDbService {
-    /** 按城市分组 */
-    async avgAndCountByCity(matcher: MatchFilter, limit = 200) {
-        let match = new JobMatcher(matcher);
-
-        // 平均工资、职位数量
-        let optList = [
-            ...match.opt,
-            { $group: { _id: "$jobData.cityId", avgSalary: { $avg: "$salary" }, jobCount: { $sum: 1 } } },
-            { $project: { cityId: "$_id", _id: 0, avgSalary: 1, jobCount: 1 } },
-            { $sort: { avgSalary: 1, jobCount: 1 } },
-            { $limit: limit },
-        ];
-        let waiting = jobsCollection.aggregate<CityAnItem>(optList);
-        return waiting.toArray();
-    }
-    /** 趋势 按时间分组*/
-    async avgAndCountByTendency(matcher: MatchFilter, limit = 200) {
-        return;
-        let match = new JobMatcher(matcher);
-
-        // 平均工资、职位数量
-        let groupOpt: Document = { _id: "$jobData.cityId", avgSalary: { $avg: "$salary" }, jobTotal: { $sum: 1 } };
-        let sortOpt: Document = { avgSalary: 1, jobTotal: 1 };
-        let optList = [
-            ...match.opt,
-            { $group: groupOpt },
-            { $project: { cityId: "$_id", _id: 0 } },
-            { $sort: sortOpt },
-        ];
-        let waiting = jobsCollection.aggregate<{ avgSalary: number; jobTotal: number; cityId: number }>(optList);
-        return waiting.toArray();
-    }
-    async avgAndCountByJob(matcher: MatchFilter, limit = 200) {
-        let match = new JobMatcher(matcher);
-
-        let baseOpts = [
-            ...match.opt,
-            { $group: { _id: "$jobData.name", avgSalary: { $avg: "$salary" }, jobCount: { $sum: 1 } } },
-            { $project: { _id: 0, jobName: "$_id", avgSalary: 1, jobCount: 1 } },
-            { $match: { jobCount: { $gt: MIN_AVG_NUMBER_OF_SAMPLES } } },
-            { $sort: { avgSalary: 1, jobCount: 1 } },
-            { $limit: limit },
-        ];
-
-        return jobsCollection.aggregate<JobAnItem>(baseOpts).toArray();
-    }
-    /** 按城市分组 */
-    async avgAndTotalByCity_all(matcher: MatchFilter, limit: number = 100): Promise<[CityAnItem[], CityAnItem[]]> {
-        let match = new JobMatcher(matcher, { "jobData.cityId": { $ne: null } });
-
-        let base = [
-            ...match.opt,
-            { $group: { _id: "$jobData.cityId", avgSalary: { $avg: "$salary" }, jobCount: { $sum: 1 } } },
-        ];
-        // 平均工资、职位数量
-        let p1 = jobsCollection
-            .aggregate([...base])
-            .match({ jobCount: { $gt: MIN_AVG_NUMBER_OF_SAMPLES } })
-            .project({ _id: 0, cityId: "$_id", avgSalary: 1, jobCount: 1 })
-            .sort({ avgSalary: 1 })
-            .limit(limit)
-            .toArray();
-        let p2 = jobsCollection
-            .aggregate([...base])
-            .project({ _id: 0, cityId: "$_id", avgSalary: 1, jobCount: 1 })
-            .sort({ jobCount: 1 })
-            .limit(limit)
-            .toArray();
-        return Promise.all([p1, p2]) as any;
-    }
     /** 按职位分组 */
-    async avgAndTotalByJob_all(matcher: MatchFilter, limit: number = 100): Promise<[JobAnItem[], JobAnItem[]]> {
+    async avgAndTotalByJob(matcher: MatchFilter, limit: number = 100): Promise<[any[], any[]]> {
         let match = new JobMatcher(matcher);
 
         let baseOpts = [
@@ -136,21 +66,64 @@ export class JobAnalysisDbService {
             { $group: { _id: "$jobData.name", avgSalary: { $avg: "$salary" }, jobCount: { $sum: 1 } } },
         ];
 
-        return Promise.all([
+        let [a, b] = await Promise.all([
             jobsCollection
                 .aggregate([...baseOpts])
                 .match({ jobCount: { $gt: MIN_AVG_NUMBER_OF_SAMPLES } })
-                .project({ _id: 0, jobName: "$_id", avgSalary: 1, jobCount: 1 })
-                .sort({ avgSalary: 1 })
+                .project({ _id: 0, jobName: "$_id", avgSalary: -1, jobCount: -1 })
+                .sort({ avgSalary: -1 })
                 .limit(limit)
                 .toArray(),
             jobsCollection
                 .aggregate([...baseOpts])
-                .project({ _id: 0, jobName: "$_id", avgSalary: 1, jobCount: 1 })
-                .sort({ jobCount: 1 })
+                .project({ _id: 0, jobName: "$_id", avgSalary: -1, jobCount: -1 })
+                .sort({ jobCount: -1 })
                 .limit(limit)
                 .toArray(),
-        ]) as any;
+        ]);
+        return [a.reverse(), b.reverse()];
+    }
+    async avgAndTotalGroupBy<T extends Object>(
+        matcher: MatchFilter,
+        option: { groupBy: string; sort: Document; limit?: number; renameId: string; filterGrouped?: Document },
+        extFilter?: Document
+    ): Promise<T[]> {
+        const { groupBy, limit, sort, renameId, filterGrouped } = option;
+        let matchOpt = new JobMatcher(matcher, extFilter).opt;
+
+        let baseOpts = [
+            ...matchOpt,
+            { $group: { _id: "$jobData." + groupBy, avgSalary: { $avg: "$salary" }, jobCount: { $sum: 1 } } },
+        ];
+        let aggregate = jobsCollection.aggregate([...baseOpts]);
+        if (filterGrouped) aggregate = aggregate.match(filterGrouped);
+
+        aggregate = aggregate
+            .match({ jobCount: { $gt: MIN_AVG_NUMBER_OF_SAMPLES } })
+            .project({ _id: 0, [renameId]: "$_id", avgSalary: 1, jobCount: 1 })
+            .sort(sort);
+        if (limit) aggregate = aggregate.limit(limit);
+
+        return aggregate.toArray() as any;
+    }
+    async avgAndTotalGroupByTime(
+        matcher: MatchFilter,
+        limit?: number
+    ): Promise<{ avgSalary: number; jobCount: number; _id: number }[]> {
+        let match = new JobMatcher(matcher);
+
+        Object.assign(match.setOpt, {
+            insertYear: { $year: "$_id" },
+        });
+
+        let baseOpts = [
+            ...match.opt,
+            { $group: { _id: "$insertYear", avgSalary: { $avg: "$salary" }, jobCount: { $sum: 1 } } },
+        ];
+        let aggregate = jobsCollection.aggregate([...baseOpts]);
+        if (limit) aggregate = aggregate.limit(limit);
+
+        return aggregate.sort({ _id: 1 }).toArray() as any;
     }
 }
 

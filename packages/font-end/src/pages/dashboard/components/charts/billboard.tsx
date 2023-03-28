@@ -19,7 +19,7 @@ export function Top20Billboard(props: {
 
     const echartsRef = useRef<echarts.ECharts>();
 
-    let height = 20 * (currentBoard?.length ?? 0) + 50;
+    let height = 19 * (currentBoard?.length ?? 0) + 80;
     const cityBoardOption = useMemo(() => {
         if (!currentBoard) return undefined;
         let series: SeriesOption = { type: "bar", label: { show: true, position: "insideLeft" } };

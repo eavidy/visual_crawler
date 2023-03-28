@@ -18,29 +18,27 @@ export interface YearAnItem extends BasicData {
     year: number;
 }
 
-export interface CityBillboard {
-    jobCount: CityAnItem[];
-    avgSalary: CityAnItem[];
-    companyCount?: CityAnItem[];
+export interface GroupItem {
+    avgSalary: number;
+    jobCount: number;
 }
-export interface JobBillboardData {
-    avgSalary: JobAnItem[];
-    jobCount: JobAnItem[];
+export interface GroupData<T extends Object = {}> {
+    avgSalary: (GroupItem & T)[];
+    jobCount: (GroupItem & T)[];
 }
+
 export namespace ApiRes {
     interface AnalysisByCity {
-        data: CityAnItem[];
+        items: CityAnItem[];
     }
     interface AnalysisByJob {
         /** 选择范围的排行榜 (职位排行)*/
-        data: JobAnItem[];
+        items: JobAnItem[];
     }
-    interface GlobalBillboard {
-        /** 近三年所有城市排行榜 (城市排行)*/
-        allCityBillboard: CityBillboard;
-        /** 近三年所有职位排行榜 (职位排行)*/
-        allJobBillboard: JobBillboardData;
-    }
+    type JobBillboard = GroupData<{ jobName: string }>;
+    type AnalysisByEducation = { items: (GroupItem & { education: string })[] };
+    type AnalysisByWorkExp = { items: (GroupItem & { workExp: string })[] };
+    type AnalysisByTime = { items: (GroupItem & { _id: number })[] };
 }
 
 export namespace ApiReq {
