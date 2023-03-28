@@ -1,0 +1,6 @@
+node_modules
+/dist
+/packages/*/out
+/packages/*/dist
+/packages/back-end/public
+tsconfig.build.tsbuildinfo
