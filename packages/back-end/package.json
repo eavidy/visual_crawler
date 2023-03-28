@@ -6,9 +6,9 @@
     "private": true,
     "license": "MIT",
     "scripts": {
-        "start:prod": "node dist/main",
         "build": "tsc -p tsconfig.build.json"
     },
+    "main": "dist/main.js",
     "dependencies": {
         "@asnc/tslib": "file:A:/packages/@asnc/basic-libs/tslib",
         "@fastify/static": "^6.9.0",
