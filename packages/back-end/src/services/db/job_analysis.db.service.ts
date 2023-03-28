@@ -1,5 +1,4 @@
 import { Education } from "api/model";
-import { CityAnItem, JobAnItem } from "api/request/dashboard";
 import { WorkExp } from "api/request/enum";
 import { Document } from "mongodb";
 import { jobsCollection } from "./db";

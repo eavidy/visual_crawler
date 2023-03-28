@@ -1,7 +1,6 @@
 import * as echarts from "echarts";
 import type { EChartsOption } from "echarts";
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from "react";
-
 export const EchartsComp = React.forwardRef(function Echarts(
     props: JSX.IntrinsicElements["div"] & {
         theme?: string | object;

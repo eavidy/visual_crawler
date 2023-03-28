@@ -23,7 +23,7 @@ function AndTheme(props: React.PropsWithChildren) {
             locale={zhCN}
             theme={{
                 token: {
-                    colorPrimary: "#00b96b",
+                    colorPrimary: "#5470C6",
                 },
             }}
         >

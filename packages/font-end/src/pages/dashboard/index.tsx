@@ -26,25 +26,6 @@ export default function () {
         </div>
     );
 }
-function getNumEnumKeys(numEnum: Object) {
-    let keys = Object.keys(numEnum);
-    let values: string[] = [];
-    for (const key of keys) {
-        let val = (numEnum as any)[key];
-        if (typeof val === "number") values.push(key);
-    }
-    return values;
-}
-function getNumEnumEntires(numEnum: Object): [string, number][];
-function getNumEnumEntires(numEnum: any) {
-    let keys = Object.keys(numEnum);
-    let values: [string, number][] = [];
-    for (const key of keys) {
-        let val = numEnum[key];
-        if (typeof val === "number") values.push([key, val]);
-    }
-    return values;
-}
 
 function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
     const { onAnalysis: onChange } = props;
@@ -87,7 +68,7 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
     }
 
     return (
-        <div style={{ flexBasis: "60px", width: "100%", padding: "8px", backgroundColor: "#688667" }}>
+        <div style={{ flexBasis: "60px", width: "100%", padding: "8px", backgroundColor: "#54a47f" }}>
             <Form
                 layout="inline"
                 form={form}
@@ -167,4 +148,23 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
             </Form>
         </div>
     );
+}
+function getNumEnumKeys(numEnum: Object) {
+    let keys = Object.keys(numEnum);
+    let values: string[] = [];
+    for (const key of keys) {
+        let val = (numEnum as any)[key];
+        if (typeof val === "number") values.push(key);
+    }
+    return values;
+}
+function getNumEnumEntires(numEnum: Object): [string, number][];
+function getNumEnumEntires(numEnum: any) {
+    let keys = Object.keys(numEnum);
+    let values: [string, number][] = [];
+    for (const key of keys) {
+        let val = numEnum[key];
+        if (typeof val === "number") values.push([key, val]);
+    }
+    return values;
 }
