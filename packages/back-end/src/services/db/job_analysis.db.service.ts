@@ -1,5 +1,5 @@
-import { Education } from "api/model";
-import { WorkExp } from "api/request/enum";
+import { Education } from "common/model";
+import { WorkExp } from "common/request/enum";
 import { Document } from "mongodb";
 import { jobsCollection } from "./db";
 const MIN_AVG_NUMBER_OF_SAMPLES = 100;

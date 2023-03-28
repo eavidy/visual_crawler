@@ -1,7 +1,7 @@
 import { $http } from "@/http";
-import { Education } from "api/model";
-import { ApiRes, ApiReq } from "api/request/dashboard";
-import { WorkExp } from "api/request/enum";
+import { Education } from "common/model";
+import { ApiRes, ApiReq } from "common/request/dashboard";
+import { WorkExp } from "common/request/enum";
 
 class DashboardResource {
     async getJobBillboard(query: ApiReq.MatchFilter) {

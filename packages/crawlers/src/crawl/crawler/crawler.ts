@@ -7,7 +7,7 @@ import {
     JobCrawlerData,
     SiteTag,
     TaskType,
-} from "api/model";
+} from "common/model";
 import { EventEmitter } from "node:events";
 
 /**

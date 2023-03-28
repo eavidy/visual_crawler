@@ -2,10 +2,10 @@ import { useRequest } from "ahooks";
 import React, { useMemo, useState } from "react";
 import { DatePicker, Input, Select, Form, Image, Button, Dropdown } from "antd";
 import { $http } from "@/http";
-import { ApiReq } from "api/request/dashboard";
-import { WorkExp } from "api/request/enum";
+import { ApiReq } from "common/request/dashboard";
+import { WorkExp } from "common/request/enum";
 import { Body } from "./components/dash-left";
-import { Education } from "api/model";
+import { Education } from "common/model";
 
 export default function () {
     const [filterOption, setFilterOption] = useState<ApiReq.MatchFilter>({});

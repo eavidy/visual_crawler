@@ -1,4 +1,4 @@
-import { JobCrawlerData, SiteTag } from "api/model";
+import { JobCrawlerData, SiteTag } from "common/model";
 import { removeUndefined } from "@asnc/tslib/lib/object";
 import { DataParser } from "../../common";
 

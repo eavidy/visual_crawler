@@ -1,4 +1,4 @@
-import { CrawlerPriorityJobFilterTask, SiteTag, TaskState, TaskType } from "api/model";
+import { CrawlerPriorityJobFilterTask, SiteTag, TaskState, TaskType } from "common/model";
 import { Collection } from "mongodb";
 import { checkType, checkFx } from "@asnc/tslib/lib/std/type_check";
 import { FieldCheckError } from "../classes/errors";

@@ -8,12 +8,25 @@ import "antd/dist/reset.css";
 const router = createBrowserRouter([
     {
         path: "/",
-        Component: React.lazy(() => import("./pages/home")),
-        children: [],
-    },
-    {
-        path: "/dashboard",
-        Component: React.lazy(() => import("./pages/dashboard")),
+        children: [
+            {
+                path: "",
+                Component: React.lazy(() => import("./pages/dashboard")),
+            },
+            {
+                path: "v",
+                children: [
+                    {
+                        path: "login",
+                        Component: React.lazy(() => import("./pages/login")),
+                    },
+                    {
+                        path: "admin",
+                        Component: React.lazy(() => import("./pages/admin")),
+                    },
+                ],
+            },
+        ],
     },
 ]);
 

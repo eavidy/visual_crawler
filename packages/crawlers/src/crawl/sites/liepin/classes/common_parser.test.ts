@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { JobCrawlerData, SiteTag, Education } from "api/model/index";
+import { JobCrawlerData, SiteTag, Education } from "common/model/index";
 import { paseJob } from "./common_parser";
 
 const jobData = {

@@ -1,6 +1,6 @@
 import { CrawlerLiepin } from "./crawler_liepin";
 import { CrawlerDevice } from "../classes/browser";
-import { SiteTag, TaskType } from "api/model";
+import { SiteTag, TaskType } from "common/model";
 import { ObjectId } from "mongodb";
 import { dbClient } from "../../db";
 import { TaskQueue } from "../classes/task_queue";

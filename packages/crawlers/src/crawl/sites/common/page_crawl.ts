@@ -1,6 +1,6 @@
 import { BrowserContext, Page } from "playwright";
 import { EventEmitter } from "node:events";
-import { SiteTag } from "api/model";
+import { SiteTag } from "common/model";
 
 /**
  * @event data

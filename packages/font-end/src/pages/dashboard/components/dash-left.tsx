@@ -1,5 +1,5 @@
 import { useRequest } from "ahooks";
-import { ApiReq } from "api/request/dashboard";
+import { ApiReq } from "common/request/dashboard";
 import React, { useEffect, useMemo } from "react";
 import { dashboardService } from "../services/dashboard.service";
 import { Top20Billboard } from "./charts/billboard";

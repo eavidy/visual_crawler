@@ -2,11 +2,9 @@
     "extends": "../../tsconfig.json",
     "compilerOptions": {
         "module": "CommonJS",
-        "declaration": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
-        "sourceMap": true,
         "outDir": "./dist",
         "rootDir": "./src",
         "baseUrl": "./",

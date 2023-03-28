@@ -1,6 +1,6 @@
 import { expect, it, describe } from "vitest";
 import { DataParser, DataParser as Parser } from "./data_parser";
-import { CompanyScale, Education } from "api/model";
+import { CompanyScale, Education } from "common/model";
 
 it("解析薪资", function () {
     expect(Parser.paseSalary("8-10k")).toMatchObject({ salaryMin: 8000, salaryMax: 10000, salaryMonth: 12 });

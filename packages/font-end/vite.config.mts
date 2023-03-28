@@ -14,6 +14,7 @@ export default defineConfig({
         },
     },
     build: {
-        copyPublicDir: false,
+        copyPublicDir: true,
+        outDir:"../back-end/public"
     },
 });

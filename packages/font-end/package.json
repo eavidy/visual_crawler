@@ -15,7 +15,6 @@
         "@emotion/styled": "^11.10.6",
         "ahooks": "^3.7.5",
         "antd": "^5.3.1",
-        "api": "workspace:*",
         "axios": "^1.3.4",
         "common": "workspace:*",
         "echarts": "^5.4.1",

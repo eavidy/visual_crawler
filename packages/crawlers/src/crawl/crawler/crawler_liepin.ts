@@ -2,7 +2,7 @@ import { Crawler, UnexecutedCompanyTask, UnexecutedJobTask } from "./crawler";
 import { UnexecutedCrawlerTask } from "../../db";
 import { LiePinCompanyDetail, LiePinJobList, PageNumControllable } from "../sites/liepin";
 import { radomWaitTime } from "../classes/time";
-import { SiteTag, TaskType } from "api/model";
+import { SiteTag, TaskType } from "common/model";
 import { DeepAssignFilter } from "../classes/crawl_action";
 import { TaskQueue } from "../classes/task_queue";
 import { TimeoutPromise, PromiseHandle } from "@asnc/tslib/lib/async";

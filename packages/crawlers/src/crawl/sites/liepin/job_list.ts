@@ -1,7 +1,7 @@
 import { BrowserContext, Response } from "playwright";
-import { CompanyCrawlerData, JobCrawlerData, JobFilterOption } from "api/model";
+import { CompanyCrawlerData, JobCrawlerData, JobFilterOption } from "common/model";
 import { cities } from "common/constants/cities";
-import { SiteTag } from "api/model";
+import { SiteTag } from "common/model";
 import { PageCrawl, DataParser } from "../common";
 import { paseJob, RawCompData, RawJobData } from "./classes/common_parser";
 import { PageNumControllable } from "./classes/page_controller";

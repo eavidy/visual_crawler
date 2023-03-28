@@ -1,4 +1,4 @@
-import { CrawlerTaskAppend, SiteTag, TaskState, TaskType } from "api/model";
+import { CrawlerTaskAppend, SiteTag, TaskState, TaskType } from "common/model";
 import { taskQueueData, UnexecutedCrawlerTask } from "../../db";
 
 export class TaskQueue {

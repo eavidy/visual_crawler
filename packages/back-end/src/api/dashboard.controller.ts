@@ -1,6 +1,6 @@
 import { ArgumentMetadata, BadRequestException, Controller, Get, PipeTransform, Query, UsePipes } from "@nestjs/common";
-import type { ApiReq, ApiRes } from "api/request/dashboard";
-import { WorkExp } from "api/request/enum";
+import type { ApiRes } from "common/request/dashboard";
+import { WorkExp } from "common/request/enum";
 import { MatchFilter } from "src/services/db";
 import { DashService } from "./services";
 

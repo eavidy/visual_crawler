@@ -1,6 +1,6 @@
 import { it, expect, beforeEach } from "vitest";
 import { LiePinJobList } from "./job_list";
-import { CompanyCrawlerData, SiteTag } from "api/model";
+import { CompanyCrawlerData, SiteTag } from "common/model";
 
 const compData = {
     compName: "云账户（天津）共享经济信息咨询有限公司",

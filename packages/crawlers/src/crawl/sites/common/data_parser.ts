@@ -1,5 +1,5 @@
 import { cities } from "common/constants/cities";
-import { Education, CompanyScale } from "api/model";
+import { Education, CompanyScale } from "common/model";
 
 const EDU_KEYS: readonly string[] = Object.keys(Education).filter((k) => !/\d/.test(k));
 export class DataParser {

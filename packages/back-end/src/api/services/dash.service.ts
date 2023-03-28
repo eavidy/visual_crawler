@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { JobAnalysisDbService, MatchFilter } from "../../services/db";
 import cityIdMap from "common/constants/city_id_map";
-import { GroupItem } from "api/request/dashboard";
-import { Education } from "api/model";
+import { GroupItem } from "common/request/dashboard";
+import { Education } from "common/model";
 function mathRound(value: number, decimals = 0) {
     let dv = 10 ** decimals;
     return Math.round(value * dv) / dv;
