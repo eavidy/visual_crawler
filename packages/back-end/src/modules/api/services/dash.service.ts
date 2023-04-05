@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { JobAnalysisDbService, MatchFilter } from "../../services/db";
+import { JobAnalysisDbService, MatchFilter } from "../../../services/db";
 import cityIdMap from "common/constants/city_id_map";
 import { GroupItem } from "common/request/dashboard";
 import { Education } from "common/model";
