@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import router from "./root";
+import router from "./router";
 
 const root = document.createElement("div");
 root.style.width = "100%";

@@ -1,28 +1,34 @@
-import React from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import React, { lazy } from "react";
+import { createBrowserRouter, LazyRouteFunction, RouterProvider } from "react-router-dom";
 
 import { ConfigProvider } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import "antd/dist/reset.css";
 
+async function lazyComponent(module: Promise<any>) {
+    const mod = await module;
+    return {
+        Component: mod.default as (...args: any) => JSX.Element,
+    };
+}
 const router = createBrowserRouter([
     {
         path: "/",
         children: [
             {
                 path: "",
-                Component: React.lazy(() => import("./pages/dashboard")),
+                lazy: () => lazyComponent(import("./pages/dashboard")),
             },
             {
                 path: "v",
                 children: [
                     {
                         path: "login",
-                        Component: React.lazy(() => import("./pages/login")),
+                        lazy: () => lazyComponent(import("./pages/login")),
                     },
                     {
                         path: "admin",
-                        Component: React.lazy(() => import("./pages/admin")),
+                        lazy: () => lazyComponent(import("./pages/admin")),
                     },
                 ],
             },
