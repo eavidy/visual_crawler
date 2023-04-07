@@ -1,11 +1,11 @@
 import { CrawlerPriorityJobFilterTask, SiteTag, TaskState, TaskType } from "common/model";
-import { Collection } from "mongodb";
 import { checkType, checkFx } from "@asnc/tslib/lib/std/type_check";
 import { FieldCheckError } from "../classes/errors";
+import { citiesCollection } from "../db";
 
 export class CitiesData {
     private readonly taskQueueCollName = "task_queue";
-    constructor(private table: Collection) {}
+    constructor() {}
     async appendAllCitesTasksFromCitesCollection(siteTag: SiteTag, expirationTime?: Date) {
         {
             let res = checkType(
@@ -18,7 +18,7 @@ export class CitiesData {
             );
             if (res) throw new FieldCheckError(res);
         }
-        return this.table
+        return citiesCollection
             .aggregate<CrawlerPriorityJobFilterTask>([
                 { $match: {} },
                 {

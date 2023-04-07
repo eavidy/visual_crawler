@@ -32,3 +32,5 @@ export function parseProcessArgs(args: string[]) {
     }
     return { default: defArg, map };
 }
+
+export const args = parseNodeArgs().map;

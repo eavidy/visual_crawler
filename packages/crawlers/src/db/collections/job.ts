@@ -2,10 +2,11 @@ import { JobCrawlerData, SiteTag } from "common/model";
 import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/lib/std/type_check";
 import { ObjectId, Collection, WithId } from "mongodb";
 import { FieldCheckError } from "../classes/errors";
+import { jobsCollection } from "../db";
 const TIME_INTERVAL = 30 * 6 * 86400;
 
 export class JobsData {
-    constructor(private table: Collection) {}
+    constructor() {}
 
     async appendJobs(jobs: JobCrawlerData[], siteTag: SiteTag, insertCheckedItem = true) {
         let newJobs: JobCrawlerData[] = [];
@@ -25,7 +26,7 @@ export class JobsData {
         let idMap = getIdMap(newJobs, siteTag);
         let notInsertJobs: JobCrawlerData[] = [];
         {
-            let oldJobs = await this.table
+            let oldJobs = await jobsCollection
                 .aggregate<WithId<Pick<JobCrawlerData, "jobId" | "siteTag">>>([
                     { $match: { siteTag, jobId: { $in: Object.keys(idMap) } } },
                 ])
@@ -38,7 +39,7 @@ export class JobsData {
             }
         }
         let insertable = Object.values(idMap);
-        if (insertable.length) await this.table.insertMany(insertable);
+        if (insertable.length) await jobsCollection.insertMany(insertable);
 
         return {
             inserted: insertable,
@@ -47,10 +48,10 @@ export class JobsData {
         };
     }
     deleteJob(jobId: string) {
-        return this.table.deleteOne({ _id: new ObjectId(jobId) });
+        return jobsCollection.deleteOne({ _id: new ObjectId(jobId) });
     }
     getJob(jobId: string) {
-        return this.table.findOne({ _id: new ObjectId(jobId) });
+        return jobsCollection.findOne({ _id: new ObjectId(jobId) });
     }
 }
 function getIdMap(comps: JobCrawlerData[], siteTag: SiteTag) {

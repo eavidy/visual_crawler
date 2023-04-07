@@ -1,10 +1,10 @@
-import { CrawlerLiepin } from "./crawler_liepin";
-import { CrawlerDevice } from "../classes/browser";
+import { CrawlerLiepin } from "../crawl/crawler/crawler_liepin";
+import { CrawlerDevice } from "../crawl/classes/browser";
 import { SiteTag, TaskType } from "common/model";
 import { ObjectId } from "mongodb";
-import { dbClient } from "../../db";
-import { TaskQueue } from "../classes/task_queue";
-import { parseNodeArgs } from "../classes/parseArgs";
+import { dbClient } from "../db/db";
+import { TaskQueue } from "../crawl/classes/task_queue";
+import { parseNodeArgs } from "../classes/parse_args";
 
 function report(...str: string[]) {
     const stdout = process.stdout;

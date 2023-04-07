@@ -24,11 +24,11 @@ importers:
       '@nestjs/platform-fastify': ^9.3.10
       '@nestjs/serve-static': ^3.0.1
       '@nestjs/testing': ^9.3.12
-      '@pnpm/exe': 8.1.1
       '@types/node': 18.11.18
       common: workspace:*
       fastify: ^4.15.0
       mongodb: ^5.1.0
+      playwright: ^1.31.1
       reflect-metadata: ^0.1.13
       rxjs: ^7.2.0
     dependencies:
@@ -39,9 +39,9 @@ importers:
       '@nestjs/jwt': registry.npmmirror.com/@nestjs/jwt/10.0.3_@nestjs+common@9.3.9
       '@nestjs/platform-fastify': registry.npmmirror.com/@nestjs/platform-fastify/9.3.10_tdsjr37n247zbypv5fnzqwaj2q
       '@nestjs/serve-static': registry.npmmirror.com/@nestjs/serve-static/3.0.1_uh7equbejhktqntpiilht4rrie
-      '@pnpm/exe': registry.npmmirror.com/@pnpm/exe/8.1.1
       common: link:../common
       mongodb: registry.npmmirror.com/mongodb/5.1.0
+      playwright: registry.npmmirror.com/playwright/1.31.1
       reflect-metadata: registry.npmmirror.com/reflect-metadata/0.1.13
       rxjs: registry.npmmirror.com/rxjs/7.8.0
     devDependencies:
@@ -1241,75 +1241,6 @@ packages:
       node-fetch: registry.npmmirror.com/node-fetch/2.6.7
     transitivePeerDependencies:
       - encoding
-
-  registry.npmmirror.com/@pnpm/exe/8.1.1:
-    resolution: {integrity: sha512-nIkzH/rp/hm0jwDFs7hu2J7W3ElQ9KJ7pGVFhTHrukW2TdoFAe9Zn85MqJXI4oKRipc8/n6OBi6WRPlaU02Rew==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@pnpm/exe/-/exe-8.1.1.tgz}
-    name: '@pnpm/exe'
-    version: 8.1.1
-    hasBin: true
-    requiresBuild: true
-    optionalDependencies:
-      '@pnpm/linux-arm64': registry.npmmirror.com/@pnpm/linux-arm64/8.1.1
-      '@pnpm/linux-x64': registry.npmmirror.com/@pnpm/linux-x64/8.1.1
-      '@pnpm/macos-arm64': registry.npmmirror.com/@pnpm/macos-arm64/8.1.1
-      '@pnpm/macos-x64': registry.npmmirror.com/@pnpm/macos-x64/8.1.1
-      '@pnpm/win-x64': registry.npmmirror.com/@pnpm/win-x64/8.1.1
-    dev: false
-
-  registry.npmmirror.com/@pnpm/linux-arm64/8.1.1:
-    resolution: {integrity: sha512-tRNGwP0QJ4q1X8cYkKhADnRVq1tLhtumGRVZKCoNPR4MHpg7eYyFexR3kgV1ILoMGVLxu9DC1vHHOMn+bhfpTw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@pnpm/linux-arm64/-/linux-arm64-8.1.1.tgz}
-    name: '@pnpm/linux-arm64'
-    version: 8.1.1
-    cpu: [arm64]
-    os: [linux]
-    hasBin: true
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmmirror.com/@pnpm/linux-x64/8.1.1:
-    resolution: {integrity: sha512-NesFYUUfRlgIAnEPTuX7eZru1YjL/5jMTHvqPfzO9y10lpLJt9kji/Y/tjVQKW1W5ZfOU43rPoGqVa1KANXVOw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@pnpm/linux-x64/-/linux-x64-8.1.1.tgz}
-    name: '@pnpm/linux-x64'
-    version: 8.1.1
-    cpu: [x64]
-    os: [linux]
-    hasBin: true
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmmirror.com/@pnpm/macos-arm64/8.1.1:
-    resolution: {integrity: sha512-irGRtKnuLj4h815HTBRviZDRI/htKvEs2mxgo77K2QtdyIp76hqqvb/pH3hSOh70WB6/iMj7olkoxCn8Ffl5/w==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@pnpm/macos-arm64/-/macos-arm64-8.1.1.tgz}
-    name: '@pnpm/macos-arm64'
-    version: 8.1.1
-    cpu: [arm64]
-    os: [darwin]
-    hasBin: true
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmmirror.com/@pnpm/macos-x64/8.1.1:
-    resolution: {integrity: sha512-Lmnp0BlhKdexdg3bnuf8z7xlsAy6VqTC5oOuztaRwcmjyeTaTyIswCw7Juf+TxdPwTx8TkwXf9SooFfUpZrSbQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@pnpm/macos-x64/-/macos-x64-8.1.1.tgz}
-    name: '@pnpm/macos-x64'
-    version: 8.1.1
-    cpu: [x64]
-    os: [darwin]
-    hasBin: true
-    requiresBuild: true
-    dev: false
-    optional: true
-
-  registry.npmmirror.com/@pnpm/win-x64/8.1.1:
-    resolution: {integrity: sha512-OVb23TPiTHirBAtZQKvInoFpMM/FDtjCB300sswDkJa+2Bn/gBbjgwdbva4Yg4dDY8b9ceKomVimRuV2P74m0w==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@pnpm/win-x64/-/win-x64-8.1.1.tgz}
-    name: '@pnpm/win-x64'
-    version: 8.1.1
-    cpu: [x64]
-    os: [win32]
-    hasBin: true
-    requiresBuild: true
-    dev: false
-    optional: true
 
   registry.npmmirror.com/@rc-component/context/1.3.0_biqbaboplfbrettd7655fr4n2y:
     resolution: {integrity: sha512-6QdaCJ7Wn5UZLJs15IEfqy4Ru3OaL5ctqpQYWd5rlfV9wwzrzdt6+kgAQZV/qdB0MUPN4nhyBfRembQCIvBf+w==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@rc-component/context/-/context-1.3.0.tgz}

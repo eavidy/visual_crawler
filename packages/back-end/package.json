@@ -6,10 +6,11 @@
     "private": true,
     "license": "MIT",
     "scripts": {
-        "build": "tsc -p tsconfig.build.json"
+        "build": "tsc -p tsconfig.back-build.json"
     },
     "main": "dist/main.js",
     "dependencies": {
+        "playwright": "^1.31.1",
         "@asnc/tslib": "file:A:/packages/@asnc/basic-libs/tslib",
         "@fastify/static": "^6.9.0",
         "@nestjs/common": "^9.0.0",

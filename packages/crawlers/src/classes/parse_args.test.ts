@@ -1,5 +1,5 @@
 import { it, describe, expect } from "vitest";
-import { parseProcessArgs } from "./parseArgs";
+import { parseProcessArgs } from "./parse_args";
 
 describe("parseProcessArgs", function () {
     it("无参", function () {

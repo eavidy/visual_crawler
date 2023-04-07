@@ -2,19 +2,20 @@ import { Collection, ObjectId, WithId, Db } from "mongodb";
 import { CrawlerPriorityTask, TaskState, SiteTag, CrawlerTaskAppend, TaskType } from "common/model";
 import { checkType, checkFx, optional } from "@asnc/tslib/lib/std/type_check";
 import { FieldCheckError } from "../classes/errors";
+import { db, taskQueueCollection } from "../db";
 export type UnexecutedTask<T extends CrawlerPriorityTask> = WithId<Omit<T, "priority" | "expirationTime" | "status">>;
 export type UnexecutedCrawlerTask = UnexecutedTask<CrawlerPriorityTask>;
 export class TaskQueueData {
     private priorityQueueView: Collection;
 
-    constructor(db: Db, private collection: Collection) {
+    constructor() {
         this.priorityQueueView = db.collection("task_priority_queue");
     }
     async takeTasks(count: number, siteTag: SiteTag, taskType?: TaskType) {
         let match: Record<string, any> = { siteTag };
         if (taskType !== undefined) match.type = taskType;
         let res = await this.priorityQueueView.find<UnexecutedCrawlerTask>(match).limit(count).toArray();
-        await this.collection.updateMany(
+        await taskQueueCollection.updateMany(
             { _id: { $in: res.map((val) => val._id) } },
             { $set: { status: TaskState.executing } }
         );
@@ -23,7 +24,7 @@ export class TaskQueueData {
     async appendTask(task: CrawlerTaskAppend) {
         let res = checkType(task, taskChecker, CheckTypeOption);
         if (res) throw new FieldCheckError(res);
-        return this.collection.insertOne({ ...task, status: TaskState.unexecuted });
+        return taskQueueCollection.insertOne({ ...task, status: TaskState.unexecuted });
     }
     async appendTasks(tasks: CrawlerTaskAppend[]) {
         {
@@ -38,17 +39,17 @@ export class TaskQueueData {
                 status: TaskState.unexecuted,
             });
         }
-        return await this.collection.insertMany(fullTasks);
+        return await taskQueueCollection.insertMany(fullTasks);
     }
     async updateTaskInfo(id: string | number | ObjectId, info: any) {
-        return this.collection.updateOne({ _id: toId(id) }, {
+        return taskQueueCollection.updateOne({ _id: toId(id) }, {
             $set: {
                 taskInfo: info,
             },
         } as Partial<CrawlerPriorityTask>);
     }
     async markTasksFailed(id: string | number | ObjectId, result?: any) {
-        return this.collection.updateOne({ _id: toId(id) }, {
+        return taskQueueCollection.updateOne({ _id: toId(id) }, {
             $set: {
                 status: TaskState.failed,
                 result,
@@ -56,14 +57,17 @@ export class TaskQueueData {
         } as Partial<CrawlerPriorityTask>);
     }
     async markTasksSucceed(id: string | number | ObjectId, result?: any) {
-        return this.collection.updateOne({ _id: toId(id) }, { $set: { status: TaskState.executed, result } });
+        return taskQueueCollection.updateOne({ _id: toId(id) }, { $set: { status: TaskState.executed, result } });
     }
     async updateTasksStatus(ids: (string | ObjectId)[], status: TaskState) {
         {
             let res = checkType(status, checkFx.numScope(0), CheckTypeOption);
             if (res) throw new FieldCheckError(res);
         }
-        return this.collection.updateMany({ _id: { $in: ids.map((id) => new ObjectId(id)) } }, { $set: { status } });
+        return taskQueueCollection.updateMany(
+            { _id: { $in: ids.map((id) => new ObjectId(id)) } },
+            { $set: { status } }
+        );
     }
 }
 
