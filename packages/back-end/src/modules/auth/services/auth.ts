@@ -27,6 +27,11 @@ export class User implements Authenticatable {
     readonly password: string;
     readonly name: string;
     readonly role?: Role;
+    toJson() {
+        return {
+            ...this,
+        };
+    }
     // readonly group?: UserGroup;
 }
 

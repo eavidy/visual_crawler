@@ -6,13 +6,13 @@ import { useState } from "react";
 import LogoIcon from "@/components/img/logo";
 import { $http, $localStore } from "@/http";
 import { ApiReq, ApiRes } from "common/request/login";
-import md5 from "js-md5";
 import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import { useRequest } from "ahooks";
 import { Effect } from "./components/effect";
 import styled from "@emotion/styled";
 import { PageContainer } from "@/components/page-container";
+import { createPwdHash } from "./funcs/pwd_hash";
 
 type LoginType = "phone" | "account";
 
@@ -20,15 +20,14 @@ export default () => {
     const [loginType, setLoginType] = useState<LoginType>("phone");
     const navigate = useNavigate();
     async function onLogin(req: ApiReq.Login) {
-        const pwd = md5(req.pwd + "asnow");
         let reqParams: ApiReq.Login = {
-            pwd,
+            pwd: createPwdHash(req.pwd),
             userId: req.userId,
             saveState: req.saveState,
         };
         try {
             const { data } = await $http.post<ApiRes.Login>("/auth/login", reqParams);
-            $localStore.accessToken = data.accessToken;
+            $localStore.setToken(req.userId, data.accessToken);
             message.success("登录成功");
             navigate("/v/admin");
         } catch (error) {

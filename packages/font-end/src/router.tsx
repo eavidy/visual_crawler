@@ -1,16 +1,12 @@
-import React, { lazy } from "react";
-import { createBrowserRouter, LazyRouteFunction, RouterProvider } from "react-router-dom";
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import adminRouter from "./pages/admin/admin.router";
+import { lazyComponent } from "./components/layz-component";
 
 import { ConfigProvider } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import "antd/dist/reset.css";
 
-async function lazyComponent(module: Promise<any>) {
-    const mod = await module;
-    return {
-        Component: mod.default as (...args: any) => JSX.Element,
-    };
-}
 const router = createBrowserRouter([
     {
         path: "/",
@@ -26,10 +22,7 @@ const router = createBrowserRouter([
                         path: "login",
                         lazy: () => lazyComponent(import("./pages/login")),
                     },
-                    {
-                        path: "admin",
-                        lazy: () => lazyComponent(import("./pages/admin")),
-                    },
+                    adminRouter,
                 ],
             },
         ],

@@ -23,7 +23,7 @@ const validationPipe: PipeTransform = {
         return value;
     },
 };
-@Controller("auth")
+@Controller()
 export class LoginController {
     constructor(private authService: AuthService) {}
 
@@ -46,6 +46,4 @@ export class LoginController {
             userId: "visitor",
         };
     }
-    @Get("user_info")
-    async getUserInfo() {}
 }

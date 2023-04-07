@@ -20,5 +20,13 @@ export class AuthService {
         return token;
     }
 
-    auth() {}
+    async verifyToken(token: string) {
+        try {
+            return this.jwtService.verifyAsync(token, {
+                secret: JWT_SECRET,
+            });
+        } catch {
+            throw new UnauthorizedException();
+        }
+    }
 }

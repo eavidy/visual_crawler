@@ -5,8 +5,16 @@ class LocalStore {
     get accessToken() {
         return localStorage.getItem("accessToken") ?? "";
     }
-    set accessToken(val: string) {
-        localStorage.setItem("accessToken", val);
+    get userId() {
+        return localStorage.getItem("userId") ?? null;
+    }
+    setToken(id: string, token: string) {
+        localStorage.setItem("accessToken", token);
+        localStorage.setItem("userId", id);
+    }
+    clearToken() {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("userId");
     }
 }
 export const $localStore = new LocalStore();

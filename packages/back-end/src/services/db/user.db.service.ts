@@ -23,12 +23,18 @@ export class UserService {
     async createUser(id: string, userInfo: UserBaseInfo) {
         {
             let res = checkType(userInfo, userInfoExceptType);
+            if (res) throw new Error("参数校验不通过", { cause: res });
         }
         let dbDoc = { _id: id, ...userInfo } as Document;
         await userCollection.insertOne(dbDoc);
     }
-    async updateUser(id: string, userInfo: UserBaseInfo) {
-        await userCollection.updateOne({ _id: id } as any, userInfo);
+    async updateUser(id: string, userInfo: Partial<UserBaseInfo>) {
+        if (Object.keys(userInfo).length === 0) throw new Error("用户信息不能为空");
+        {
+            let res = checkType(userInfo, userUpdateExceptType);
+            if (res) throw new Error("参数校验不通过", { cause: res });
+        }
+        await userCollection.updateOne({ _id: id } as any, { $set: userInfo });
     }
 }
 
@@ -39,3 +45,5 @@ let userInfoExceptType: ExceptTypeMap = {
     roleIds: optional(checkFx.arrayType("string")),
     permissions: optional(checkFx.arrayType("string")),
 };
+
+let userUpdateExceptType: ExceptTypeMap = { ...userInfoExceptType, password: optional.string, name: optional.string };
