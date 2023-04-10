@@ -111,6 +111,7 @@ export class CrawlerLiepin extends Crawler {
             try {
                 pageCtrl = await liepJobList.open(task.taskInfo.fixedFilter);
             } catch (error) {
+                await liepJobList.closeBrowserContext();
                 return { pass: true, result: "页面打开失败" };
             }
             jobTask = new JobTask(pageCtrl, this, task, skipList, signal);
@@ -118,6 +119,7 @@ export class CrawlerLiepin extends Crawler {
             try {
                 await randomTime; //等待响应
             } catch (error) {
+                await liepJobList.closeBrowserContext();
                 break;
             }
             await jobTask.goToLimit(100);

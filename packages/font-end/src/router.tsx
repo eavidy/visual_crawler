@@ -2,7 +2,7 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import adminRouter from "./pages/admin/admin.router";
 import { lazyComponent } from "./components/layz-component";
-
+import { COLOR } from "./styles/colors";
 import { ConfigProvider } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import "antd/dist/reset.css";
@@ -35,7 +35,7 @@ function AndTheme(props: React.PropsWithChildren) {
             locale={zhCN}
             theme={{
                 token: {
-                    colorPrimary: "#5470C6",
+                    colorPrimary: COLOR.main1,
                 },
             }}
         >

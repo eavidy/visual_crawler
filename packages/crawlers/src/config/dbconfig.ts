@@ -1,4 +1,4 @@
-export const DB_HOST = "asnow.cn",
+export const DB_HOST = "127.0.0.1",
     DB_PORT = 27017,
     DB_NAME = "vsCrawlerDb",
     USER_NAME = process.env["DB_USER"] ?? "vscr",

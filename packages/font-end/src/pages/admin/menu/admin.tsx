@@ -85,16 +85,7 @@ export default () => {
                 }}
                 {...settings}
             >
-                <PageContainer>
-                    <ProCard
-                        style={{
-                            height: "100vh",
-                            minHeight: 800,
-                        }}
-                    >
-                        <Outlet />
-                    </ProCard>
-                </PageContainer>
+                <Outlet />
             </ProLayout>
         </div>
     );

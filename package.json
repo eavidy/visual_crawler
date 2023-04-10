@@ -4,7 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "package": "node scripts/package.mjs"
+        "package": "node scripts/package.mjs",
+        "build:all": ""
     },
     "keywords": [],
     "author": "Asnow",

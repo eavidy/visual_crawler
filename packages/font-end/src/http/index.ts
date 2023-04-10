@@ -1,4 +1,5 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { message } from "antd";
 
 class LocalStore {
     constructor() {}
@@ -23,4 +24,13 @@ export const $http = axios.create({});
 $http.interceptors.request.use(function (config) {
     config.headers.set("access-token", $localStore.accessToken);
     return config;
+});
+$http.interceptors.response.use(undefined, function (error: AxiosError<any>) {
+    if (error.response?.status === 401) {
+        if (error.response.data?.message === "jwt expired") {
+            // message.error("身份认证已过期");
+            location.href = "/v/login";
+        } else message.error("权限不足");
+    }
+    return Promise.reject(error);
 });

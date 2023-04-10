@@ -8,3 +8,9 @@ export enum WorkExp {
     "10年以上" = 10,
     经验不限 = -1,
 }
+export enum CrawlerProcessStatus {
+    stop = 0,
+    running = 1,
+    stopping = 2,
+    starting = 3,
+}

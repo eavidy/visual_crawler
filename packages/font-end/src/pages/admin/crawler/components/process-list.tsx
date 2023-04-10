@@ -1,0 +1,242 @@
+import { Button, Card, Modal, Table, TableProps, Tooltip, Space, Form, Input, message, InputNumber } from "antd";
+import React, { useEffect, useState } from "react";
+import { ApiRes, ApiReq } from "common/request/crawler/crawl_process";
+import { DefaultStatus, FinishedStatus } from "@/components/status-bar";
+import { DeleteOutlined, EditOutlined, EllipsisOutlined, PlaySquareOutlined, StopOutlined } from "@ant-design/icons";
+import { useRequest } from "ahooks";
+import { crawlerResource } from "../services/crawler.resource";
+import { CrawlerProcessStatus } from "common/request/enum";
+
+export function ProcessList(props: {
+    data?: ApiRes.GetProcessList;
+    loading?: boolean;
+    onDetail?: (id: number, name: string) => void;
+}) {
+    const { data } = props;
+    const [typeFilter, setTypeFilter] = useState("all");
+    const [showProcess, setShowProcess] = useState<ApiRes.ProcessInfo>();
+    const [showCreateModal, setShowCreateModal] = useState<Pick<ProcessAddModalProps, "info" | "open">>({
+        open: false,
+    });
+    const [modal, modalContent] = Modal.useModal();
+    const { run: updateReq } = useRequest(
+        async (id: number, isStart: boolean) =>
+            crawlerResource.updateProcess(id, { startOrStop: isStart ? "start" : "stop" }),
+        {
+            manual: true,
+            onError: (err, params) => message.error((params[1] ? "启动" : "终止") + "失败"),
+            onSuccess: () => message.success("指令已发送"),
+        }
+    );
+    const { run: deleteReq } = useRequest(async (id: number) => crawlerResource.deleteProcess(id), {
+        manual: true,
+        onError: () => message.error("删除失败"),
+        onSuccess: () => message.success("指令已发送"),
+    });
+
+    function onDelete(item: ApiRes.ProcessInfo) {
+        modal.confirm({
+            title: "确认删除该进程?",
+            onOk: () => deleteReq(item.key),
+        });
+    }
+    function onUpdate(item: ApiRes.ProcessInfo) {
+        setShowCreateModal({ open: true, info: { memoryLimit: item.memoryTotal, name: item.name, id: item.key } });
+    }
+    function onStopOrStart(item: ApiRes.ProcessInfo, isStart: boolean) {
+        if (isStart) updateReq(item.key, isStart);
+        else modal.confirm({ title: "确认终止当前进程?", onOk: () => updateReq(item.key, isStart) });
+    }
+
+    function onCrateIsCancel() {}
+
+    const columns: TableProps<ApiRes.ProcessInfo>["columns"] = [
+        {
+            title: "名称",
+            dataIndex: "name",
+            render(value, record) {
+                return <a onClick={() => props.onDetail?.(record.key, record.name)}>{value}</a>;
+            },
+        },
+        {
+            title: "PID",
+            dataIndex: "pid",
+            render(value) {
+                return value ? value : "--";
+            },
+        },
+        {
+            title: "内存",
+            dataIndex: "memoryTotal",
+            render(memoryTotal, record) {
+                let memory = record.status ? record.memoryUsage + "/" : "--/";
+                return memory + memoryTotal + " MB";
+            },
+        },
+        {
+            title: "状态",
+            dataIndex: "status",
+            render: (value) => {
+                switch (value) {
+                    case CrawlerProcessStatus.running:
+                        return <FinishedStatus text={"运行中"} style={{ width: "60px" }} />;
+                    case CrawlerProcessStatus.starting:
+                        return <FinishedStatus text={"启动中"} style={{ width: "60px" }} />;
+                    case CrawlerProcessStatus.stopping:
+                        return <FinishedStatus text={"停止中"} style={{ width: "60px" }} />;
+                    case CrawlerProcessStatus.stop:
+                        return <DefaultStatus text="已停止" style={{ width: "60px" }} />;
+                    default:
+                        return "--";
+                }
+            },
+        },
+        {
+            title: "运行时间",
+            render(_, record) {
+                let runTime;
+                if (record.status) {
+                    runTime = Date.now() - record.startRunTime.getTime();
+                } else if (record.lastEndTime && record.startRunTime) {
+                    runTime = record.lastEndTime.getTime() - record.startRunTime.getTime();
+                }
+                return runTime ? (runTime / 1000 / 60 / 60).toFixed(1) + " h" : "--";
+            },
+        },
+        {
+            title: "异常",
+            dataIndex: "errors",
+            render(value) {
+                return <a>{value?.length}</a>;
+            },
+        },
+        {
+            title: "操作",
+            filteredValue: typeFilter !== "all" ? [typeFilter] : undefined,
+            onFilter(value, record) {
+                let cp = typeFilter === "stopping" ? 0 : 1;
+                return record.status === cp;
+            },
+            render(_, record) {
+                let startOrStop =
+                    record.status === CrawlerProcessStatus.running
+                        ? "停止"
+                        : record.status === CrawlerProcessStatus.stop
+                        ? "启动"
+                        : undefined;
+                return (
+                    <Space>
+                        <Tooltip title="删除">
+                            <DeleteOutlined style={{ cursor: "pointer" }} onClick={() => onDelete(record)} />
+                        </Tooltip>
+                        {startOrStop && (
+                            <Tooltip title={startOrStop}>
+                                {startOrStop === "停止" ? (
+                                    <StopOutlined
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => onStopOrStart(record, false)}
+                                    />
+                                ) : (
+                                    <PlaySquareOutlined
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => onStopOrStart(record, true)}
+                                    />
+                                )}
+                            </Tooltip>
+                        )}
+
+                        <Tooltip title="修改名称">
+                            <EditOutlined style={{ cursor: "pointer" }} onClick={() => onUpdate(record)} />
+                        </Tooltip>
+                    </Space>
+                );
+            },
+        },
+    ];
+    return (
+        <Card
+            tabList={[
+                { key: "all", tab: "全部" },
+                { key: "running", tab: "运行中" },
+                { key: "stopping", tab: "已停止" },
+            ]}
+            title="进程管理"
+            extra={
+                <Button type="primary" onClick={() => setShowCreateModal({ open: true })}>
+                    添加进程
+                </Button>
+            }
+            onTabChange={(e) => setTypeFilter(e)}
+        >
+            <Table size="small" loading={!data && props.loading} dataSource={data} columns={columns} />;
+            <ProcessAddModal
+                open={showCreateModal.open}
+                info={showCreateModal.info}
+                onCancel={() => setShowCreateModal({ open: false })}
+            />
+            {modalContent}
+        </Card>
+    );
+}
+
+interface ProcessAddModalProps {
+    open?: boolean;
+    onCancel: () => void;
+    info?: { name: string; memoryLimit: number; id: number };
+}
+function ProcessAddModal(props: ProcessAddModalProps) {
+    const { info, open } = props;
+    const typeDesc = info ? "修改" : "创建";
+    const { loading, runAsync } = useRequest(
+        async function (data: ApiReq.CreateProcess) {
+            if (info) {
+                const { name } = data;
+                return crawlerResource.updateProcess(info.id, { name });
+            } else return crawlerResource.createProcess(data);
+        },
+        {
+            manual: true,
+            onSuccess() {
+                message.success(typeDesc + "成功");
+            },
+            onError(e, params) {
+                message.error(typeDesc + "失败");
+            },
+        }
+    );
+    const [form] = Form.useForm();
+
+    async function onOk() {
+        let formValues = form.getFieldsValue();
+        await runAsync(formValues);
+
+        props.onCancel();
+    }
+    useEffect(() => {
+        if (open) {
+            form.resetFields();
+            if (info) form.setFieldsValue(info);
+        }
+    }, [form, info, open]);
+    return (
+        <Modal
+            open={open}
+            destroyOnClose
+            title={typeDesc + "进程"}
+            onCancel={props.onCancel}
+            onOk={onOk}
+            okText={typeDesc}
+            confirmLoading={loading}
+            bodyStyle={{ paddingTop: 24 }}
+        >
+            <Form form={form} layout="horizontal">
+                <Form.Item label="进程名称" name="name">
+                    <Input />
+                </Form.Item>
+                <Form.Item label="内存上限" name="memoryLimit">
+                    <InputNumber disabled={!!info} min={100} max={1024} />
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
+}
