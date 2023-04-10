@@ -18,11 +18,20 @@ const router: ExtraRouterObject = {
     children: [
         {
             path: "crawler",
-            lazy: () => lazyComponent(import("./crawler/crawler")),
             meta: {
                 name: "采集器管理",
                 icon: <BugOutlined />,
             },
+            children: [
+                {
+                    path: "",
+                    lazy: () => lazyComponent(import("./crawler/pages/process-list")),
+                },
+                {
+                    path: ":processId",
+                    lazy: () => lazyComponent(import("./crawler/pages/crawler-list")),
+                },
+            ],
         },
         {
             path: "auth",

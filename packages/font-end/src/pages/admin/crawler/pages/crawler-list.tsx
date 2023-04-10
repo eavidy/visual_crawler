@@ -1,4 +1,4 @@
-import { Statistic, StatisticCard, StatisticProps } from "@ant-design/pro-components";
+import { PageContainer, Statistic, StatisticCard, StatisticProps } from "@ant-design/pro-components";
 import React, { useMemo, useState } from "react";
 import styled from "@emotion/styled";
 import { EllipsisOutlined, RightOutlined } from "@ant-design/icons";
@@ -20,13 +20,11 @@ const items: StatisticProps[] = [
     { status: "success", title: "运行中", value: 1 },
 ];
 
-export function CrawlerList(props: { id: number; name: string }) {
+export default function CrawlerList(props: { id: number; name: string }) {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const tabs = useMemo(
         () =>
             items.map((item): CardTabListType => {
-                console.log("render");
-
                 return {
                     key: item.status ?? "all",
                     tab: (
@@ -45,22 +43,24 @@ export function CrawlerList(props: { id: number; name: string }) {
         [items]
     );
     return (
-        <Card
-            hoverable
-            tabList={tabs}
-            bodyStyle={{}}
-            headStyle={{ fontWeight: "bold", fontSize: "24px" }}
-            title="采集器进程管理"
-            extra={
-                <Button type="primary" onClick={() => setShowCreateModal(true)}>
-                    添加crawler
-                </Button>
-            }
-        >
-            <flex style={{ background: COLOR.gray2, padding: "14px" }}>
-                <CrawlerCard></CrawlerCard>
-            </flex>
-        </Card>
+        <PageContainer>
+            <Card
+                hoverable
+                tabList={tabs}
+                bodyStyle={{}}
+                headStyle={{ fontWeight: "bold", fontSize: "24px" }}
+                title="采集器进程管理"
+                extra={
+                    <Button type="primary" onClick={() => setShowCreateModal(true)}>
+                        添加crawler
+                    </Button>
+                }
+            >
+                <flex style={{ background: COLOR.gray2, padding: "14px" }}>
+                    <CrawlerCard></CrawlerCard>
+                </flex>
+            </Card>
+        </PageContainer>
     );
 }
 

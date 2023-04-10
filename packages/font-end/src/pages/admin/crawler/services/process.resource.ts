@@ -23,4 +23,4 @@ class CrawlerResource {
     }
 }
 
-export const crawlerResource = new CrawlerResource();
+export const processResource = new CrawlerResource();

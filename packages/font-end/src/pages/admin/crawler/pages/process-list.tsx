@@ -2,33 +2,34 @@ import { Button, Card, Modal, Table, TableProps, Tooltip, Space, Form, Input, me
 import React, { useEffect, useState } from "react";
 import { ApiRes, ApiReq } from "common/request/crawler/crawl_process";
 import { DefaultStatus, FinishedStatus } from "@/components/status-bar";
-import { DeleteOutlined, EditOutlined, EllipsisOutlined, PlaySquareOutlined, StopOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlaySquareOutlined, StopOutlined } from "@ant-design/icons";
 import { useRequest } from "ahooks";
-import { crawlerResource } from "../services/crawler.resource";
+import { processResource } from "../services/process.resource";
 import { CrawlerProcessStatus } from "common/request/enum";
-
-export function ProcessList(props: {
+import { PageContainer } from "@/components/page-container";
+import { Link } from "react-router-dom";
+export default function ProcessList(props: {
     data?: ApiRes.GetProcessList;
     loading?: boolean;
     onDetail?: (id: number, name: string) => void;
 }) {
-    const { data } = props;
+    const { data, loading } = useRequest(processResource.getProcessList, { pollingInterval: 2000 });
     const [typeFilter, setTypeFilter] = useState("all");
-    const [showProcess, setShowProcess] = useState<ApiRes.ProcessInfo>();
+
     const [showCreateModal, setShowCreateModal] = useState<Pick<ProcessAddModalProps, "info" | "open">>({
         open: false,
     });
     const [modal, modalContent] = Modal.useModal();
     const { run: updateReq } = useRequest(
         async (id: number, isStart: boolean) =>
-            crawlerResource.updateProcess(id, { startOrStop: isStart ? "start" : "stop" }),
+            processResource.updateProcess(id, { startOrStop: isStart ? "start" : "stop" }),
         {
             manual: true,
             onError: (err, params) => message.error((params[1] ? "启动" : "终止") + "失败"),
             onSuccess: () => message.success("指令已发送"),
         }
     );
-    const { run: deleteReq } = useRequest(async (id: number) => crawlerResource.deleteProcess(id), {
+    const { run: deleteReq } = useRequest(async (id: number) => processResource.deleteProcess(id), {
         manual: true,
         onError: () => message.error("删除失败"),
         onSuccess: () => message.success("指令已发送"),
@@ -48,14 +49,12 @@ export function ProcessList(props: {
         else modal.confirm({ title: "确认终止当前进程?", onOk: () => updateReq(item.key, isStart) });
     }
 
-    function onCrateIsCancel() {}
-
     const columns: TableProps<ApiRes.ProcessInfo>["columns"] = [
         {
             title: "名称",
             dataIndex: "name",
             render(value, record) {
-                return <a onClick={() => props.onDetail?.(record.key, record.name)}>{value}</a>;
+                return <Link to={record.key.toString()}>{value}</Link>;
             },
         },
         {
@@ -154,28 +153,30 @@ export function ProcessList(props: {
         },
     ];
     return (
-        <Card
-            tabList={[
-                { key: "all", tab: "全部" },
-                { key: "running", tab: "运行中" },
-                { key: "stopping", tab: "已停止" },
-            ]}
-            title="进程管理"
-            extra={
-                <Button type="primary" onClick={() => setShowCreateModal({ open: true })}>
-                    添加进程
-                </Button>
-            }
-            onTabChange={(e) => setTypeFilter(e)}
-        >
-            <Table size="small" loading={!data && props.loading} dataSource={data} columns={columns} />;
-            <ProcessAddModal
-                open={showCreateModal.open}
-                info={showCreateModal.info}
-                onCancel={() => setShowCreateModal({ open: false })}
-            />
-            {modalContent}
-        </Card>
+        <PageContainer>
+            <Card
+                tabList={[
+                    { key: "all", tab: "全部" },
+                    { key: "running", tab: "运行中" },
+                    { key: "stopping", tab: "已停止" },
+                ]}
+                title="进程管理"
+                extra={
+                    <Button type="primary" onClick={() => setShowCreateModal({ open: true })}>
+                        添加进程
+                    </Button>
+                }
+                onTabChange={(e) => setTypeFilter(e)}
+            >
+                <Table size="small" loading={!data && props.loading} dataSource={data} columns={columns} />;
+                <ProcessAddModal
+                    open={showCreateModal.open}
+                    info={showCreateModal.info}
+                    onCancel={() => setShowCreateModal({ open: false })}
+                />
+                {modalContent}
+            </Card>
+        </PageContainer>
     );
 }
 
@@ -191,8 +192,8 @@ function ProcessAddModal(props: ProcessAddModalProps) {
         async function (data: ApiReq.CreateProcess) {
             if (info) {
                 const { name } = data;
-                return crawlerResource.updateProcess(info.id, { name });
-            } else return crawlerResource.createProcess(data);
+                return processResource.updateProcess(info.id, { name });
+            } else return processResource.createProcess(data);
         },
         {
             manual: true,
