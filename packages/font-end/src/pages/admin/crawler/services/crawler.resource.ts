@@ -16,7 +16,7 @@ class CrawlerResource {
         const { data } = await $http.get<{ item: ApiRes.GetCrawlerInfo }>("/api/crawl/crawler/" + processId);
         let list = data.item.crawlerList;
         for (const item of list as CrawlerInfo[]) {
-            if (item.status === CrawlerStatus.working) {
+            if (item.status === CrawlerStatus.working || item.status === CrawlerStatus.stopping) {
                 item.startWorkDate = new Date(item.startWorkDate!);
             }
             let statistics = item.statistics;

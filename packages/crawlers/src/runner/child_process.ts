@@ -2,8 +2,8 @@ import { EventEmitter } from "node:events";
 import { CrawlerLiepin } from "../crawl/crawler/crawler_liepin";
 import { CrawlerDevice } from "../crawl/classes/browser";
 import { args } from "../classes/parse_args";
-import { TaskQueue } from "../crawl/classes/task_queue";
-import { SiteTag, TaskType } from "common/model";
+import { TaskQueue, NewCityTaskQueue } from "../crawl/classes/task_queue";
+import { SiteTag } from "common/model";
 import type { CreateCrawlerOptions } from "common/request/crawler/crawler";
 import { dbClient } from "../db/db";
 
@@ -77,7 +77,10 @@ class AppCenter extends EventEmitter {
         const device = await this.getDevice();
         const { taskCountLimit } = config;
 
-        let taskQueue = new TaskQueue(SiteTag.liepin, config.taskType, 1);
+        let taskQueue: TaskQueue;
+        if (config.taskType === "new") {
+            taskQueue = new NewCityTaskQueue(SiteTag.liepin);
+        } else taskQueue = new TaskQueue(SiteTag.liepin, config.taskType, 1);
         let crawler = new CrawlerLiepin(device, taskQueue);
 
         this.crawlers.set(id, crawler);

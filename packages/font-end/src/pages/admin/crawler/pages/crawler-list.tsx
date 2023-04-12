@@ -175,6 +175,7 @@ function CrawlerAddModal(props: ProcessAddModalProps) {
                     <Radio.Group defaultValue="all">
                         <Radio value="all">全部</Radio>
                         <Radio value="jobFilter">jobFilter</Radio>
+                        <Radio value="new">new</Radio>
                         <Radio value="company">company</Radio>
                     </Radio.Group>
                 </Form.Item>
@@ -196,7 +197,7 @@ function CrawlerCardList(props: {
     const { data, pcId, pcStatus } = props;
     const [modal, modalNode] = Modal.useModal();
     function onDelete(id: number) {
-        Modal.confirm({
+        modal.confirm({
             title: "确定删除该Crawler?",
             async onOk() {
                 await crawlerResource.deleteCrawler({ processId: pcId, crawlerId: id });

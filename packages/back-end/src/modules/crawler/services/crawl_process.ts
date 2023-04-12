@@ -75,6 +75,9 @@ export class CrawlProcess extends EventEmitter {
     }
     kill() {
         if (this.process) {
+            for (const [id, crawler] of this.crawlers) {
+                crawler.close();
+            }
             this.process.kill();
             this.#status = CrawlerProcessStatus.stopping;
         }
@@ -182,16 +185,17 @@ export class CrawlProcess extends EventEmitter {
                 this.status = CrawlerStatus.working;
                 this.startWorkDate = new Date();
             });
-            this.on("stopWork", () => {
-                this.status = CrawlerStatus.stopped;
-                this.currentTask = undefined;
-                this.startWorkDate = undefined;
-            });
+            this.on("stopWork", this.close);
             this.on("taskExc", (task) => (this.currentTask = task));
             // this.on("workFinished", () => (this.status = CrawlerStatus.starting));
             // this.on("taskFinished", (taskResult) => {});
             // this.on("jobTaskRest", (skipList) => {});
         }
+        close = () => {
+            this.status = CrawlerStatus.stopped;
+            this.currentTask = undefined;
+            this.startWorkDate = undefined;
+        };
         status = CrawlerStatus.stopped;
     };
 }

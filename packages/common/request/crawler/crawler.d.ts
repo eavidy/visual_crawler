@@ -12,7 +12,7 @@ export namespace ApiReq {
 }
 
 export interface CreateCrawlerOptions {
-    taskType?: TaskType;
+    taskType?: TaskType | "new";
     taskCountLimit?: number;
     name?: string;
 }

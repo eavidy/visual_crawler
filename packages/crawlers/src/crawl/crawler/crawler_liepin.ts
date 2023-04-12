@@ -129,7 +129,7 @@ export class CrawlerLiepin extends Crawler {
             this.emit("jobTaskRest", skipList);
             jobTask.destroy();
             await liepJobList.closeBrowserContext();
-        } while (!jobTask.isFinished);
+        } while (!jobTask.isFinished && !jobTask.breakSignal);
         return jobTask.excResult();
     }
 

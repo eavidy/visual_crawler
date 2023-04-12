@@ -11,7 +11,6 @@ if (process.env["MODE"] === "dev") {
     crawlModPath = Path.resolve(process.cwd(), "packages/crawlers/src/main.ts");
     startArgs = ["--nh"];
     nodeArgs = ["-r", "A:/back-end/pnpm/5/node_modules/@asnowc/node-tool/ts_hook"];
-    // nodeArgs.push("--inspect-brk");
 }
 
 @Injectable()

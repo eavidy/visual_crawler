@@ -21,11 +21,18 @@ export class LiePinJobList extends PageCrawl {
         super(context);
     }
     readonly siteTag = SiteTag.liepin;
+
     async open(options?: JobFilterOption, timeout?: number) {
         let paramsStr = "?";
-        if (options?.city) {
-            let city = cities.find((c) => c._id === options.city);
-            if (city) paramsStr += "city=" + city.liepinCode + "&dq=" + city.liepinCode;
+        if (options) {
+            if (options.city) {
+                let city = cities.find((c) => c._id === options.city);
+                if (!city) throw new Error("不存在该城市");
+                paramsStr += "city=" + city.liepinCode + "&dq=" + city.liepinCode;
+            }
+            if (options.emitTime) {
+                paramsStr += "&pubTime=" + options.emitTime;
+            }
         }
         return this.openUseParams(paramsStr, timeout);
     }

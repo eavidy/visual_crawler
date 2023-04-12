@@ -92,7 +92,7 @@ export default function TaskQueueList() {
             dataIndex: "status",
             render: (value) => {
                 switch (value) {
-                    case TaskState.executed:
+                    case TaskState.executing:
                         return <FinishedStatus text={"执行中"} style={{ width: "60px" }} />;
                     case TaskState.failed:
                         return <FailedStatus text={"失败"} style={{ width: "60px" }} />;
