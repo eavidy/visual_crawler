@@ -38,7 +38,7 @@ export interface CrawlerPriorityCompanyTask extends CrawlerPriorityTask {
 }
 export interface JobFilterOption {
     city?: number;
-    emitTime?: Date;
+    emitTime?: number;
     exp?: number;
     salary?: number;
     eduction?: Education;

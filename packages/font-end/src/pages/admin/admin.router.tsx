@@ -1,5 +1,5 @@
 import { lazyComponent } from "@/components/layz-component";
-import { BugOutlined, SafetyCertificateOutlined, UserOutlined } from "@ant-design/icons";
+import { BugOutlined, FileOutlined, SafetyCertificateOutlined, UserOutlined } from "@ant-design/icons";
 import React from "react";
 import type { RouteObject } from "react-router-dom";
 export interface RouterMeta {
@@ -30,6 +30,19 @@ const router: ExtraRouterObject = {
                 {
                     path: ":processId",
                     lazy: () => lazyComponent(import("./crawler/pages/crawler-list")),
+                },
+            ],
+        },
+        {
+            path: "task",
+            meta: {
+                name: "任务管理",
+                icon: <FileOutlined />,
+            },
+            children: [
+                {
+                    path: "",
+                    lazy: () => lazyComponent(import("./crawler/pages/task-queue")),
                 },
             ],
         },
