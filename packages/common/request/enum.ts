@@ -14,3 +14,9 @@ export enum CrawlerProcessStatus {
     stopping = 2,
     starting = 3,
 }
+export enum CrawlerStatus {
+    stopped = 0,
+    starting = 1,
+    working = 2,
+    stopping = 3,
+}

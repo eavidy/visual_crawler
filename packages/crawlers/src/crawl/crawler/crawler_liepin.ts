@@ -167,6 +167,12 @@ export class CrawlerLiepin extends Crawler {
 
         return { crawlCount, pageNum };
     }
+    clearMemory() {
+        if (this.liepinCompanyDetail) {
+            this.liepinCompanyDetail.closeBrowserContext();
+            this.liepinCompanyDetail = undefined;
+        }
+    }
 }
 
 type PageCtrl = Awaited<ReturnType<LiePinJobList["open"]>>;

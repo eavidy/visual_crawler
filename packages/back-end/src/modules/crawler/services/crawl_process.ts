@@ -1,10 +1,11 @@
 import { ChildProcess, fork } from "node:child_process";
 import { EventEmitter } from "node:events";
-import type { CreateCrawlProcessOptions, CreateCrawlerOptions } from "common/request/crawler/crawl_process";
-import { CrawlerProcessStatus } from "common/request/enum";
+import type { CreateCrawlProcessOptions } from "common/request/crawler/crawl_process";
+import type { CreateCrawlerOptions, CrawlerInfo } from "common/request/crawler/crawler";
+import { CrawlerProcessStatus, CrawlerStatus } from "common/request/enum";
+import type { CrawlerPriorityCompanyTask, CrawlerPriorityJobFilterTask, TaskType } from "common/model/task_queue";
+type TaskInfo = CrawlerPriorityCompanyTask | CrawlerPriorityJobFilterTask;
 /**
- * @event createCrawler {id}
- * @event removeCrawler {id}
  * @event initDevice void
  * @event memory
  * @event error error
@@ -24,10 +25,17 @@ export class CrawlProcess extends EventEmitter {
         const { memoryLimit = 200, name = "" } = info;
         this.info = { memoryLimit, name, errors: [] };
     }
-    async start(args: string[] = []): Promise<void | never> {
+    async start(args: string[] = [], nodeArgs: string[] = []): Promise<void | never> {
         if (this.process) throw new Error("进程不能重复启动");
-        const pc = fork(this.appPath, ["--max-old-space-size", this.info.memoryLimit.toString(), ...args], {
+
+        let execArgv = [...nodeArgs];
+        if (this.info.memoryLimit) {
+            // execArgv.push("--max-old-space-size");
+            // execArgv.push(this.info.memoryLimit.toString());
+        }
+        const pc = fork(this.appPath, args, {
             cwd: process.cwd(),
+            execArgv,
         });
         this.process = pc;
         pc.on("error", (e) => {
@@ -46,14 +54,8 @@ export class CrawlProcess extends EventEmitter {
                 crawler?.emit(type, data);
             } else {
                 switch (type) {
-                    case "createCrawler":
-                        this.onCreateCrawlerFin(data);
-                        break;
-                    case "removeCrawler":
-                        this.onRemoveCrawlerFin(data);
-                        break;
                     case "init":
-                        this.onChildProcessInit();
+                        this.#status = CrawlerProcessStatus.running;
                         break;
                     case "memory":
                         this.memory = data as NodeJS.MemoryUsage;
@@ -81,72 +83,116 @@ export class CrawlProcess extends EventEmitter {
     get status() {
         return this.#status;
     }
-    private onChildProcessInit() {
-        this.#status = CrawlerProcessStatus.running;
-    }
-    private onRemoveCrawlerFin({ id }: { id: number }) {
-        this.crawlers.delete(id);
-    }
-    private onCreateCrawlerFin({ id }: { id: number }) {
-        const crawler = this.crawlers.get(id);
-        if (crawler) crawler.status = 1;
-    }
+
     private crawlers = new Map<number, CrawlerHandle>();
     private nextCrawlerId = 1;
-    async createCrawler(config: CreateCrawlerOptions) {
-        let id = this.nextCrawlerId + 1;
-        this.nextCrawlerId = id;
-        this.crawlers.set(id, new CrawlProcess.CrawlerHandle(id, config));
-        if (this.process) await this.sendMsg("createCrawler", { id, config });
+    createCrawler(config: CreateCrawlerOptions) {
+        let id = this.nextCrawlerId++;
+        let name = config.name ?? id.toString();
+        this.crawlers.set(id, new CrawlProcess.CrawlerHandle(id, { ...config, name }));
     }
-    async initDriver() {
-        await this.sendMsg("initDevice");
-    }
+
     async removeCrawler(id: number) {
-        await this.sendMsg("removeCrawler", { id });
+        const crawler = this.getCrawler(id);
+        if (crawler.status === CrawlerStatus.stopped) {
+            this.crawlers.delete(id);
+            return;
+        }
+        this.stopWork(id, true);
+        crawler.on("stopWork", () => {
+            this.crawlers.delete(id);
+        });
+    }
+    private getCrawler(id: number): CrawlerHandle | never {
+        const crawler = this.crawlers.get(id);
+        if (!crawler) throw new Error("不存在的id");
+        return crawler;
+    }
+    getAllCrawlerInfo() {
+        let list: CrawlerInfo[] = [];
+        for (const [id, c] of this.crawlers) {
+            list.push({
+                config: c.config,
+                errors: c.errors,
+                id,
+                reportAuth: c.reportAuth,
+                schedule: c.schedule,
+                status: c.status,
+                currentTask: c.currentTask,
+                startWorkDate: c.startWorkDate,
+                statistics: c.statistics,
+            });
+        }
+        return list;
+    }
+
+    updateCrawlerConfig(crawlerId: number, config: Pick<CreateCrawlerOptions, "name" | "taskCountLimit">) {
+        let crawler = this.getCrawler(crawlerId);
+        Object.assign(crawler.config, config);
+    }
+    startWork(crawlerId: number): Promise<void | never> {
+        if (this.#status !== CrawlerProcessStatus.running) throw new Error("进程的当前状态无法启动 Crawler");
+        const crawler = this.getCrawler(crawlerId);
+        if (crawler.status !== CrawlerStatus.stopped) throw new Error("当前状态无法启动");
+        crawler.status = CrawlerStatus.starting;
+        return this.sendMsg("startWork", crawler.config, crawlerId);
+    }
+    stopWork(crawlerId: number, abort?: boolean) {
+        const crawler = this.getCrawler(crawlerId);
+        if (crawler.status !== CrawlerStatus.working) throw new Error("当前状态无法终止 Crawler");
+        crawler.status = CrawlerStatus.stopping;
+        return this.sendMsg("stopWork", { abort }, crawlerId);
     }
 
     private sendMsg(type: string, data?: any, id?: number) {
         return processSend(this.process!, { type, data, id });
     }
-
-    startWork(crawlerId: number) {
-        this.sendMsg("startWork", undefined, crawlerId);
-    }
-    stopWork(crawlerId: number, abort?: boolean) {
-        this.sendMsg("stopWork", { abort }, crawlerId);
-    }
     /**
      * @event scheduleUpdate [data,id]
      * @event statisticsUpdate [data,id]
+     *
      * @event taskFinished [data,id]
+     * @event workFinished [undefined,id]
+     *
      * @event jobTaskRest [data,id]
      * @event reportAuth [undefined,id]
-     * @event workFinished [undefined,id]
      * @event startWork [undefined,id]
      */
     private static CrawlerHandle = class CrawlerHandle extends EventEmitter {
-        constructor(readonly id: number, private config: CreateCrawlerOptions) {
+        constructor(readonly id: number, readonly config: CreateCrawlerOptions) {
             super();
             this.initEvent();
         }
-        schedule: any;
-        statistics: any;
+        errors: string[] = [];
+        schedule = { total: 0, current: 0 };
+        statistics: any = {};
         reportAuth = false;
-        working = false;
+        currentTask?: TaskInfo;
+        startWorkDate?: Date;
         private initEvent() {
-            this.on("initDrive", () => (this.initDrive = true));
-
             this.on("scheduleUpdate", (data) => (this.schedule = data));
             this.on("statisticsUpdate", (data) => (this.statistics = data));
+            this.on("error", (data) => {
+                if (this.errors.length > 20) this.errors.pop();
+                this.errors.push(data.toString());
+            });
+
             this.on("reportAuth", () => (this.reportAuth = true));
-            this.on("startWork", () => (this.working = true));
-            this.on("workFinished", () => (this.working = false));
+            this.on("startWork", () => {
+                this.status = CrawlerStatus.working;
+                this.startWorkDate = new Date();
+            });
+            this.on("stopWork", () => {
+                this.status = CrawlerStatus.stopped;
+                this.currentTask = undefined;
+                this.startWorkDate = undefined;
+            });
+            this.on("taskExc", (task) => (this.currentTask = task));
+            // this.on("workFinished", () => (this.status = CrawlerStatus.starting));
             // this.on("taskFinished", (taskResult) => {});
             // this.on("jobTaskRest", (skipList) => {});
         }
-        status = 0;
-        initDrive = false;
+        status = CrawlerStatus.stopped;
     };
 }
 export type CrawlerHandle = InstanceType<typeof CrawlProcess["CrawlerHandle"]>;

@@ -1,12 +1,18 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { CrawlProcess } from "./crawl_process";
-import { ApiReq, ApiRes, CreateCrawlProcessOptions } from "common/request/crawler/crawl_process";
+import { ApiRes, CreateCrawlProcessOptions } from "common/request/crawler/crawl_process";
 import { CrawlerProcessStatus } from "common/request/enum";
 import * as Path from "node:path";
 
-// const crawlModPath = Path.resolve(process.cwd(), "crawler/main.js");
-const crawlModPath = Path.resolve(process.cwd(), "packages/crawlers/src/main.ts");
-const startArgs = ["-r", "A:/back-end/pnpm/5/node_modules/@asnowc/node-tool/ts_hook"];
+let crawlModPath = Path.resolve(process.cwd(), "crawler/main.js");
+let startArgs: string[] = [];
+let nodeArgs: string[] = [];
+if (process.env["MODE"] === "dev") {
+    crawlModPath = Path.resolve(process.cwd(), "packages/crawlers/src/main.ts");
+    startArgs = ["--nh"];
+    nodeArgs = ["-r", "A:/back-end/pnpm/5/node_modules/@asnowc/node-tool/ts_hook"];
+    // nodeArgs.push("--inspect-brk");
+}
 
 @Injectable()
 export class CrawlProcessService {
@@ -30,30 +36,27 @@ export class CrawlProcessService {
         return id;
     }
     stopChildProcess(id: number) {
-        let crawlPcs = this.map.get(id);
-        if (!crawlPcs) throw new BadRequestException("id不存在");
-        crawlPcs.kill();
+        this.getProcess(id).kill();
     }
     startChildProcess(id: number) {
-        let crawlPcs = this.map.get(id);
-        if (!crawlPcs) throw new BadRequestException("id不存在");
+        let crawlPcs = this.getProcess(id);
         if (crawlPcs.status !== CrawlerProcessStatus.stop) throw new BadRequestException("当前状态不能启动运行");
+
         try {
-            return crawlPcs.start(startArgs);
+            return crawlPcs.start(startArgs, nodeArgs);
         } catch (error) {
             throw new InternalServerErrorException("启动失败");
         }
     }
     async deleteChildProcess(id: number) {
-        let crawler = this.map.get(id);
-        if (!crawler) throw new BadRequestException("不存在该ID");
-        if (crawler.status === CrawlerProcessStatus.stop) {
+        let process = this.getProcess(id);
+        if (process.status === CrawlerProcessStatus.stop) {
             this.map.delete(id);
             return;
-        } else crawler.kill();
+        } else process.kill();
 
         await new Promise(function (resolve, reject) {
-            crawler!.on("exit", resolve);
+            process!.on("exit", resolve);
         });
         this.map.delete(id);
     }
@@ -89,8 +92,12 @@ export class CrawlProcessService {
         return list;
     }
     updateProcessInfo(id: number, info: { name?: string }) {
-        let crawlPcs = this.map.get(id);
-        if (!crawlPcs) throw new BadRequestException("id不存在");
+        let crawlPcs = this.getProcess(id);
         Object.assign(crawlPcs.info, info);
+    }
+    getProcess(id: number) {
+        let process = this.map.get(id);
+        if (!process) throw new BadRequestException("id不存在");
+        return process;
     }
 }

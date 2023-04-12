@@ -4,18 +4,15 @@ import { CrawlerDevice } from "../crawl/classes/browser";
 import { args } from "../classes/parse_args";
 import { TaskQueue } from "../crawl/classes/task_queue";
 import { SiteTag, TaskType } from "common/model";
+import type { CreateCrawlerOptions } from "common/request/crawler/crawler";
+import { dbClient } from "../db/db";
 
 /**
  * @event initDevice //初始化浏览器
- * @event createCrawler {id:number, config}
- * @event removeCrawler {id:number}
  *
- * @event startWork [undefined, id:number]
+ * @event startWork [config, id:number]
  * @event stopWork [{abort:boolean}, id:number]
  * @event resetCount [undefined, id:number]  //重置计数
- *
- * @event excTask [task:any, id:number]
- * @event breakTask [undefined,id:number]
  *
  * @event getMemory
  *
@@ -36,21 +33,18 @@ class AppCenter extends EventEmitter {
     }
     private initEvent() {
         process.on("exit", async (p) => {
-            await this.closeDevice();
+            await dbClient.close();
         });
         process.on("message", ({ type, data, id }: { type: string; data: any; id?: number }) => {
             this.emit(type, data, id);
         });
-        this.on("initDevice", () => this.initDevice());
+        this.on("initDevice", () => this.getDevice());
 
-        this.on("createCrawler", ({ id, config }) => this.createCrawler(id, config));
-        this.on("removeCrawler", ({ id }) => this.removeCrawler(id));
-
-        this.on("excTask", (task, id) => this.excTask(id, task));
-        this.on("breakTask", (_, id) => this.taskBreak(id));
+        // this.on("excTask", (task, id) => this.excTask(id, task));
+        // this.on("breakTask", (_, id) => this.taskBreak(id));
         this.on("resetCount", (_, id) => this.resetCount(id));
 
-        this.on("startWork", (_, id) => this.startWork(id));
+        this.on("startWork", (config, id) => this.startWork(id, config));
         this.on("stopWork", ({ abort }, id) => this.stopWork(id, abort));
 
         this.on("getMemory", () => {
@@ -58,90 +52,86 @@ class AppCenter extends EventEmitter {
         });
     }
 
-    device?: CrawlerDevice;
-
-    async initDevice() {
-        this.closeDevice();
+    private device?: CrawlerDevice | Promise<CrawlerDevice>;
+    private async getDevice() {
+        if (this.device) this.device;
         const headless = !args["nh"] ?? true;
         const browserPath = typeof args["browser"] === "string" ? args["browser"] : undefined;
-        this.device = await CrawlerDevice.create({ headless, executablePath: browserPath });
-        AppCenter.sendParent("initDevice", undefined);
+        let pms = CrawlerDevice.create({ headless, executablePath: browserPath });
+        this.device = pms;
+        const device = await pms;
+        this.device = device;
+        return device;
     }
-    private async closeDevice() {
-        let device = this.device;
+    async closeDevice() {
+        let device = this.device instanceof Promise ? await this.device : this.device;
         if (!device) return;
         this.device = undefined;
-        for (const [id] of this.crawlers) {
-            this.removeCrawler(id);
+        for (const [id, crawler] of this.crawlers) {
+            if (crawler.working) crawler.stopWork(true);
         }
-        await device?.close();
+        await device.close();
     }
-    private crawlers = new Map<number, { crawler: CrawlerLiepin; abc?: AbortController; working: boolean }>();
-    createCrawler(id: number, config: { taskType?: TaskType }) {
-        if (!this.device) throw new Error("创建Crawler前必须初始化浏览器");
+    private crawlers = new Map<number, CrawlerLiepin>();
+    private async createCrawler(id: number, config: CreateCrawlerOptions) {
+        const device = await this.getDevice();
+        const { taskCountLimit } = config;
 
         let taskQueue = new TaskQueue(SiteTag.liepin, config.taskType, 1);
-        let crawler = new CrawlerLiepin(this.device, taskQueue);
-        this.crawlers.set(id, { crawler, working: false });
+        let crawler = new CrawlerLiepin(device, taskQueue);
+
+        this.crawlers.set(id, crawler);
         crawler.on("scheduleUpdate", function (this: CrawlerLiepin) {
             AppCenter.sendParent("scheduleUpdate", { total: this.totalSchedule, current: this.currentSchedule }, id);
         });
-        crawler.on("taskFinished", (taskResult) => {
+        crawler.on("taskExc", function (this: CrawlerLiepin, task) {
+            AppCenter.sendParent("taskExc", task, id);
+        });
+        crawler.on("taskFinished", function (this: CrawlerLiepin, taskResult) {
             AppCenter.sendParent("taskFinished", taskResult, id);
+            if (taskCountLimit) {
+                let statistics = this.statistics;
+                if (statistics.taskCompleted + statistics.taskFailed >= taskCountLimit) {
+                    this.stopWork(true);
+                }
+            }
         });
-        crawler.on("workFinished", (taskResult) => {
-            AppCenter.sendParent("workFinished", taskResult, id);
-        });
+        // crawler.on("workFinished", (taskResult) => {
+        //     AppCenter.sendParent("workFinished", taskResult, id);
+        // });
+
         crawler.on("jobTaskRest", (skipList: number[]) => {
             AppCenter.sendParent("jobTaskRest", skipList, id);
         });
-        crawler.on("reportAuth", () => {
+        crawler.on("reportAuth", function (this: CrawlerLiepin) {
             AppCenter.sendParent("reportAuth", undefined, id);
+            this.stopWork(true);
         });
         crawler.on("statisticsUpdate", function (this: CrawlerLiepin) {
             AppCenter.sendParent("statisticsUpdate", this.statistics, id);
         });
-        AppCenter.sendParent("createCrawler", { id });
-    }
-    removeCrawler(id: number) {
-        let crawler = this.taskBreak(id);
-        if (!crawler) return false;
-
-        AppCenter.sendParent("removeCrawler", { id });
-        return this.crawlers.delete(id);
-    }
-    async startWork(id: number) {
-        let crawler = this.crawlers.get(id)?.crawler;
-        AppCenter.sendParent("startWork");
-        return crawler?.startWork();
-    }
-    async stopWork(id: number, abort?: boolean) {
-        let crawler = this.crawlers.get(id)?.crawler;
-        crawler?.stopWork(abort);
-    }
-    async excTask(id: number, task: any) {
-        let crawlerInfo = this.crawlers.get(id);
-        if (!crawlerInfo || crawlerInfo.abc) return;
-        crawlerInfo.abc = new AbortController();
-        try {
-            await crawlerInfo.crawler.executeTask(task, crawlerInfo.abc.signal);
-        } catch (error) {
-            AppCenter.sendParent("error", error);
-        }
-        crawlerInfo.abc = undefined;
-    }
-
-    taskBreak(id: number) {
-        let { crawler, abc } = this.crawlers.get(id) ?? {};
-        abc?.abort();
         return crawler;
     }
+    async startWork(id: number, config: CreateCrawlerOptions) {
+        const crawler = await this.createCrawler(id, config);
+        AppCenter.sendParent("startWork", undefined, id);
+        await crawler.startWork();
+        this.crawlers.delete(id);
+        crawler.clearMemory();
+        if (!this.crawlers.size) this.closeDevice();
+        AppCenter.sendParent("stopWork", undefined, id);
+    }
+    async stopWork(id: number, abort?: boolean) {
+        let crawler = this.crawlers.get(id);
+        if (crawler) crawler.stopWork(abort);
+    }
+
     resetCount(id: number) {
-        let { crawler, abc } = this.crawlers.get(id) ?? {};
+        let crawler = this.crawlers.get(id);
         crawler?.resetCount();
     }
 }
 
-new AppCenter();
+export const appCenter = new AppCenter();
 AppCenter.sendParent("init");
 AppCenter.sendParent("memory", process.memoryUsage());

@@ -13,7 +13,8 @@ import { EventEmitter } from "node:events";
 /**
  * @event scheduleUpdate 进度更新
  * @event statisticsUpdate 统计信息更新
- * @event taskFinished 完成一个任务 taskResult:boolean 任务是否完成, false 为中断
+ * @event taskExc 开始执行任务(startWork中的任务)
+ * @event taskFinished 完成一个任务(startWork中的任务) taskResult:boolean 任务是否完成, false 为中断
  * @event workFinished 任务队列清空
  * @event reportError
  * @event reportAuth
@@ -143,6 +144,7 @@ export abstract class Crawler extends EventEmitter {
             let task = await this.taskQueue.takeTask();
             if (!task) break;
             let id = task._id;
+            this.emit("taskExc", { ...task });
             let { pass, result } = await this.executeTask(task, abc.signal);
             this.resetSchedule(0);
             if (pass) {

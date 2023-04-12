@@ -1,4 +1,3 @@
-import { TaskType } from "../../model";
 import { CrawlerProcessStatus } from "../enum";
 
 export namespace ApiReq {
@@ -9,10 +8,7 @@ export namespace ApiReq {
         name?: string;
         startOrStop?: "start" | "stop";
     }
-    interface CreateProcess {
-        memoryLimit?: number;
-        name?: string;
-    }
+    type CreateProcess = CreateCrawlProcessOptions;
 }
 interface ProcessInfoBase {
     key: number;
@@ -27,9 +23,7 @@ export interface CreateCrawlProcessOptions {
     name?: string;
     memoryLimit?: number;
 }
-export interface CreateCrawlerOptions {
-    taskType?: TaskType;
-}
+
 export namespace ApiRes {
     interface RunningProcessInfo extends ProcessInfoBase {
         memoryUsage: number;

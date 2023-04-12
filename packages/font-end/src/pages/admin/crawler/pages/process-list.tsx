@@ -1,4 +1,17 @@
-import { Button, Card, Modal, Table, TableProps, Tooltip, Space, Form, Input, message, InputNumber } from "antd";
+import {
+    Button,
+    Card,
+    Modal,
+    Table,
+    TableProps,
+    Tooltip,
+    Space,
+    Form,
+    Input,
+    message,
+    InputNumber,
+    Switch,
+} from "antd";
 import React, { useEffect, useState } from "react";
 import { ApiRes, ApiReq } from "common/request/crawler/crawl_process";
 import { DefaultStatus, FinishedStatus } from "@/components/status-bar";
@@ -13,7 +26,7 @@ export default function ProcessList(props: {
     loading?: boolean;
     onDetail?: (id: number, name: string) => void;
 }) {
-    const { data, loading } = useRequest(processResource.getProcessList, { pollingInterval: 2000 });
+    const { data, refresh } = useRequest(processResource.getProcessList, { pollingInterval: 2000 });
     const [typeFilter, setTypeFilter] = useState("all");
 
     const [showCreateModal, setShowCreateModal] = useState<Pick<ProcessAddModalProps, "info" | "open">>({
@@ -26,13 +39,19 @@ export default function ProcessList(props: {
         {
             manual: true,
             onError: (err, params) => message.error((params[1] ? "启动" : "终止") + "失败"),
-            onSuccess: () => message.success("指令已发送"),
+            onSuccess() {
+                message.success("指令已发送");
+                refresh();
+            },
         }
     );
     const { run: deleteReq } = useRequest(async (id: number) => processResource.deleteProcess(id), {
         manual: true,
         onError: () => message.error("删除失败"),
-        onSuccess: () => message.success("指令已发送"),
+        onSuccess() {
+            message.success("指令已发送");
+            refresh();
+        },
     });
 
     function onDelete(item: ApiRes.ProcessInfo) {
@@ -173,6 +192,7 @@ export default function ProcessList(props: {
                     open={showCreateModal.open}
                     info={showCreateModal.info}
                     onCancel={() => setShowCreateModal({ open: false })}
+                    onRefresh={refresh}
                 />
                 {modalContent}
             </Card>
@@ -183,6 +203,7 @@ export default function ProcessList(props: {
 interface ProcessAddModalProps {
     open?: boolean;
     onCancel: () => void;
+    onRefresh: () => void;
     info?: { name: string; memoryLimit: number; id: number };
 }
 function ProcessAddModal(props: ProcessAddModalProps) {
@@ -190,10 +211,8 @@ function ProcessAddModal(props: ProcessAddModalProps) {
     const typeDesc = info ? "修改" : "创建";
     const { loading, runAsync } = useRequest(
         async function (data: ApiReq.CreateProcess) {
-            if (info) {
-                const { name } = data;
-                return processResource.updateProcess(info.id, { name });
-            } else return processResource.createProcess(data);
+            if (info) return processResource.updateProcess(info.id, data);
+            else return processResource.createProcess(data);
         },
         {
             manual: true,
@@ -210,7 +229,7 @@ function ProcessAddModal(props: ProcessAddModalProps) {
     async function onOk() {
         let formValues = form.getFieldsValue();
         await runAsync(formValues);
-
+        props.onRefresh();
         props.onCancel();
     }
     useEffect(() => {
@@ -234,9 +253,11 @@ function ProcessAddModal(props: ProcessAddModalProps) {
                 <Form.Item label="进程名称" name="name">
                     <Input />
                 </Form.Item>
-                <Form.Item label="内存上限" name="memoryLimit">
-                    <InputNumber disabled={!!info} min={100} max={1024} />
-                </Form.Item>
+                {!info && (
+                    <Form.Item label="内存上限" name="memoryLimit">
+                        <InputNumber min={100} max={1024} />
+                    </Form.Item>
+                )}
             </Form>
         </Modal>
     );
