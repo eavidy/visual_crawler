@@ -1,29 +1,17 @@
-import { PageContainer, ProCard, StatisticCard, Statistic as ProStatistic } from "@ant-design/pro-components";
+import { PageContainer, Statistic as ProStatistic } from "@ant-design/pro-components";
 import React, { CSSProperties, useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
-import { CaretRightOutlined, DeleteOutlined, LeftOutlined, LoadingOutlined, StopOutlined } from "@ant-design/icons";
-import {
-    Button,
-    Card,
-    Empty,
-    Form,
-    Input,
-    InputNumber,
-    Modal,
-    Radio,
-    Space,
-    Tooltip,
-    message,
-    Statistic,
-    Progress,
-} from "antd";
+import { LeftOutlined } from "@ant-design/icons";
+import { Button, Card, Empty, Form, Input, InputNumber, Modal, Radio, message } from "antd";
 import { CardTabListType } from "antd/es/card";
 import { COLOR } from "@/styles/colors";
 import { ApiReq } from "common/request/crawler/crawler";
 import { useRequest } from "ahooks";
-import { crawlerResource, GetCrawlerInfo, CrawlerInfo } from "../services/crawler.resource";
-import { useParams } from "react-router-dom";
+import { crawlerResource, CrawlerInfo } from "../services/crawler.resource";
+import { useNavigate, useParams } from "react-router-dom";
 import { CrawlerProcessStatus, CrawlerStatus } from "common/request/enum";
+import { CrawlerCard } from "../components/crawler-card";
+
 const statusMap = {
     all: { title: "全部" },
     error: { status: "error" as const, title: "异常停止" },
@@ -32,7 +20,8 @@ const statusMap = {
 };
 
 export default function CrawlerList() {
-    let pathParams = useParams();
+    const pathParams = useParams();
+    const navigate = useNavigate();
     let processId = pathParams.processId ? parseInt(pathParams.processId) : undefined;
     const [currentTab, setCurrentTab] = useState<keyof typeof group>("all");
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -95,7 +84,7 @@ export default function CrawlerList() {
     );
 
     return (
-        <PageContainer backIcon={<LeftOutlined />} onBack={() => {}}>
+        <PageContainer backIcon={<LeftOutlined />} title={processName} onBack={() => navigate(-1)}>
             <Card
                 tabList={tabs}
                 onTabChange={(key) => setCurrentTab(key as any)}
@@ -253,126 +242,6 @@ function CrawlerCardList(props: {
             </>
         );
     else return <Empty />;
-}
-function CrawlerCard(
-    props: CrawlerInfo & { onStart: (id: number) => void; onDelete: (id: number) => void; onStop: (id: number) => void }
-) {
-    const { config, errors = [], statistics, status, id, companyRepetitionRate, jobRepetitionRate } = props;
-
-    const actionIcon = useMemo(() => {
-        if (status === CrawlerStatus.stopped)
-            return (
-                <Tooltip title="启动">
-                    <CaretRightOutlined onClick={() => props.onStart(id)} style={{ cursor: "pointer" }} />
-                </Tooltip>
-            );
-        else if (status === CrawlerStatus.working)
-            return (
-                <Tooltip title="终止运行">
-                    <StopOutlined onClick={() => props.onStop(id)} style={{ cursor: "pointer" }} />
-                </Tooltip>
-            );
-        else return <LoadingOutlined />;
-    }, [status]);
-    const taskInfo = useMemo(() => {
-        if (!props.currentTask) return undefined;
-        return JSON.stringify(props.currentTask, null, 4);
-    }, [props.currentTask]);
-
-    const subTitle = useMemo(() => {
-        let subTitle = config.taskType ?? "";
-        if (config.taskCountLimit) subTitle += " limit:" + config.taskCountLimit;
-        if (props.startWorkDate) subTitle += " " + props.startWorkDate.toLocaleDateString();
-
-        return subTitle;
-    }, [config, props.startWorkDate]);
-    return (
-        <ProCard
-            style={{ cursor: "default", minWidth: "350px", flex: 1 }}
-            split="horizontal"
-            hoverable
-            title={
-                <Tooltip title={taskInfo}>
-                    <Space>
-                        <CrawlerStatusSpot status={status} error={props.reportAuth} />
-                        <a>{config.name}</a>
-                    </Space>
-                </Tooltip>
-            }
-            subTitle={subTitle}
-            extra={
-                <Space>
-                    {actionIcon}
-                    <Tooltip title="删除">
-                        <DeleteOutlined onClick={() => props.onDelete(id)} style={{ cursor: "pointer" }} />
-                    </Tooltip>
-                </Space>
-            }
-        >
-            <div style={{ margin: "0 24px" }}>
-                <Progress percent={props.taskPercent} size="small" strokeColor={COLOR.main1} />
-            </div>
-            <ProCard split="vertical">
-                <StatisticCard
-                    statistic={{
-                        title: "新增职位",
-                        value: statistics?.newJob,
-                        valueStyle: { color: COLOR.main1 },
-                        description: (
-                            <Space>
-                                <Statistic title="重复数量" value={statistics.jobRepeated} />
-                                <Statistic title="重复率" suffix="%" value={jobRepetitionRate} />
-                            </Space>
-                        ),
-                    }}
-                />
-                <StatisticCard
-                    statistic={{
-                        title: "新增公司",
-                        valueStyle: { color: COLOR.main1 },
-                        value: statistics.newCompany,
-                        description: (
-                            <Space>
-                                <Statistic title="重复数量" value={statistics.companyRepeated} />
-                                <Statistic title="重复率" suffix="%" value={companyRepetitionRate} />
-                            </Space>
-                        ),
-                    }}
-                />
-            </ProCard>
-            <ProCard style={{ width: "100%" }}>
-                <flex style={{ justifyContent: "space-between" }}>
-                    <div>
-                        任务执行数(成功/失败)：
-                        <b>{(statistics.taskCompleted ?? 0) + "/" + (statistics.taskFailed ?? 0)}</b>
-                    </div>
-                    <div>
-                        异常数量：<b>{errors.length}</b>
-                    </div>
-                </flex>
-            </ProCard>
-        </ProCard>
-    );
-}
-let colorMap = {
-    [CrawlerStatus.starting]: "#BFBFBF",
-    [CrawlerStatus.stopped]: "#BFBFBF",
-    [CrawlerStatus.working]: "#52C41A",
-    [CrawlerStatus.stopping]: "#52C41A",
-};
-function CrawlerStatusSpot(props: { size?: number; status: CrawlerStatus; error?: boolean }) {
-    const { size = 6, status, error } = props;
-
-    return (
-        <div
-            style={{
-                borderRadius: "50%",
-                width: size,
-                height: size,
-                backgroundColor: error ? "#FF4D4F" : colorMap[status],
-            }}
-        />
-    );
 }
 
 const CssStatistic = styled(ProStatistic)`
