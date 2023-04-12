@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from "@nestjs/common";
-import { JobSearchDbService } from "../../services/db";
+import { JobSearchDbService } from "../../services/db/job_search.db.service";
 
 @Controller("job")
 export class JobController {

@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Get, Headers, Post, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "./grand/auth.grand";
-import { UserService } from "src/services/db";
+import { UserService } from "src/services/db/user.db.service";
 import type { ApiReq } from "common/request/auth/user";
 import { UserBaseInfo } from "./services";
 

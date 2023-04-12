@@ -1,6 +1,6 @@
 import { Module, SetMetadata } from "@nestjs/common";
 import { LoginController } from "./login.controller";
-import { UserService } from "../../services/db";
+import { UserService } from "../../services/db/user.db.service";
 import { AuthService } from "./services";
 import { JwtService } from "@nestjs/jwt";
 import { MODULE_PATH } from "@nestjs/common/constants";

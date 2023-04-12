@@ -1,11 +1,11 @@
 import { Module } from "@nestjs/common";
-import { ApiModule } from "./api/api.module";
+import { DashModule } from "./dash/dash.module";
 import { ViewModule } from "./view/view.module";
 import { AuthModule } from "./auth/auth.module";
 import { CrawlerModule } from "./crawler/crawler.module";
 
 @Module({
-    imports: [ApiModule, ViewModule, AuthModule, CrawlerModule],
+    imports: [DashModule, ViewModule, AuthModule, CrawlerModule],
     controllers: [],
     providers: [],
 })

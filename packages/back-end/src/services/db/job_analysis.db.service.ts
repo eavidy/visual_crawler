@@ -2,6 +2,7 @@ import { Education } from "common/model";
 import { WorkExp } from "common/request/enum";
 import { Document } from "mongodb";
 import { jobsCollection } from "./db";
+import { Injectable } from "@nestjs/common";
 const MIN_AVG_NUMBER_OF_SAMPLES = 100;
 class JobMatcher {
     matchOpt: Document = {};
@@ -55,6 +56,7 @@ class JobMatcher {
         };
     }
 }
+@Injectable()
 export class JobAnalysisDbService {
     /** 按职位分组 */
     async avgAndTotalByJob(matcher: MatchFilter, limit: number = 100): Promise<[any[], any[]]> {

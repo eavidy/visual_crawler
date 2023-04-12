@@ -1,8 +1,8 @@
 import { ArgumentMetadata, BadRequestException, Controller, Get, PipeTransform, Query, UsePipes } from "@nestjs/common";
 import type { ApiRes } from "common/request/dashboard";
 import { WorkExp } from "common/request/enum";
-import { MatchFilter } from "src/services/db";
-import { DashService } from "./services";
+import { MatchFilter } from "src/services/db/job_analysis.db.service";
+import { DashService } from "./dash.service";
 
 const validationPipe: PipeTransform = {
     transform(value: any, metadata: ArgumentMetadata) {
