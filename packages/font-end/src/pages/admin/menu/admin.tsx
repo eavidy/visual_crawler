@@ -5,7 +5,7 @@ import { useState } from "react";
 import { antdRouter } from "../admin.router";
 import React from "react";
 import Logo from "@/components/img/logo";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate, useNavigation, useParams } from "react-router-dom";
 import { UserAvatar } from "./components/user-avatar";
 
 function selectFirstSubMenu(path: string) {
@@ -24,6 +24,7 @@ function selectFirstSubMenu(path: string) {
     return path;
 }
 
+const routerPrefix = "/v/admin";
 export default () => {
     const settings: ProSettings | undefined = {
         title: "Visualized Analysis",
@@ -31,21 +32,14 @@ export default () => {
         layout: "mix",
         splitMenus: true,
     };
+    const { pathname } = useLocation();
     const navigate = useNavigate();
-    const [pathname, setPathname] = useState("/crawler");
 
-    function onRouterChange(path: string) {
-        setPathname(path);
-        navigate("/v/admin" + path);
-    }
     function onMenuSelect(item: Parameters<NonNullable<MenuProps["onSelect"]>>[0]) {
         let path = item.key;
         if (path) {
-            setPathname(path);
             let firstPath = selectFirstSubMenu(path);
-            if (firstPath !== path) setPathname(firstPath);
-
-            onRouterChange(firstPath);
+            navigate(routerPrefix + firstPath);
         }
     }
     function onMenuHeaderClick() {}
@@ -61,7 +55,7 @@ export default () => {
                 route={antdRouter}
                 pageTitleRender={false}
                 location={{
-                    pathname,
+                    pathname: pathname.slice(routerPrefix.length),
                 }}
                 avatarProps={false}
                 actionsRender={(props) => [<UserAvatar />]}

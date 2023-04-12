@@ -51,7 +51,7 @@ export default function TaskQueueList() {
         });
     }
     function onClear() {
-        modal.warning({
+        modal.confirm({
             title: "确认清空任务队列?",
             async onOk() {
                 try {
@@ -64,7 +64,7 @@ export default function TaskQueueList() {
         });
     }
     function onDelete() {
-        modal.warning({
+        modal.confirm({
             title: "确认删除该进程?",
             async onOk() {
                 try {
