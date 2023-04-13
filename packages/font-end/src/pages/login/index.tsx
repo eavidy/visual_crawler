@@ -15,7 +15,7 @@ import { PageContainer } from "@/components/page-container";
 import { createPwdHash } from "./funcs/pwd_hash";
 
 type LoginType = "phone" | "account";
-
+const loginFinGoTo = "/v/admin/crawler";
 export default () => {
     const [loginType, setLoginType] = useState<LoginType>("phone");
     const navigate = useNavigate();
@@ -29,7 +29,7 @@ export default () => {
             const { data } = await $http.post<ApiRes.Login>("/auth/login", reqParams);
             $localStore.setToken(req.userId, data.accessToken);
             message.success("登录成功");
-            navigate("/v/admin");
+            navigate(loginFinGoTo);
         } catch (error) {
             const { response } = error as AxiosError<{ message: string }>;
             response?.data?.message && message.error(response?.data.message);
@@ -127,7 +127,7 @@ export default () => {
                             },
                         ]}
                     />
-                    <div
+                    {/* <div
                         style={{
                             marginBlockEnd: 24,
                         }}
@@ -142,7 +142,7 @@ export default () => {
                         >
                             忘记密码
                         </a>
-                    </div>
+                    </div> */}
                 </LoginForm>
             </div>
         </PageContainer>

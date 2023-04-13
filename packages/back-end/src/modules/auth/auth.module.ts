@@ -10,12 +10,6 @@ import { UserController } from "./user.controller";
 @Module({
     providers: [AuthService, UserService, JwtService],
     controllers: [LoginController, UserController],
-    // imports: [
-    //     JwtModule.register({
-    //         global: true,
-    //     }),
-    // ],
-    // exports: [AuthService],
 })
 export class AuthModule {
     constructor() {}

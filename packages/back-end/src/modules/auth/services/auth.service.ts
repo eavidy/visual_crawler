@@ -3,6 +3,10 @@ import { UserService } from "../../../services/db/user.db.service";
 import { User } from "./auth";
 import { JwtService } from "@nestjs/jwt";
 
+export interface TokenPayload {
+    id: string;
+}
+
 const JWT_SECRET = "yyq";
 @Injectable()
 export class AuthService {
@@ -21,12 +25,16 @@ export class AuthService {
     }
 
     async verifyToken(token: string) {
+        let payload: TokenPayload;
         try {
-            return this.jwtService.verifyAsync(token, {
+            payload = await this.jwtService.verifyAsync<TokenPayload>(token, {
                 secret: JWT_SECRET,
             });
         } catch {
             throw new UnauthorizedException();
         }
+        let user = await this.userService.getUser(payload.id);
+        if (user === null) throw new UnauthorizedException();
+        return { payload, user };
     }
 }

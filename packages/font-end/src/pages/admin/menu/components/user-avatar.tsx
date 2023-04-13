@@ -1,11 +1,10 @@
 import { EditOutlined, LockOutlined, LogoutOutlined } from "@ant-design/icons";
-import { Avatar, Dropdown, MenuProps, Modal, Space, Form, Input, message, Spin } from "antd";
+import { Avatar, Dropdown, MenuProps, Modal, Space, Form, Input, message, Spin, notification } from "antd";
 import { useState } from "react";
 import React from "react";
 import { useRequest } from "ahooks";
 import { $http, $localStore } from "@/http";
 import { Rule } from "antd/es/form";
-import { useNavigate } from "react-router-dom";
 import type { ApiReq } from "common/request/auth/user";
 import { createPwdHash } from "@/pages/login/funcs/pwd_hash";
 import { AxiosError } from "axios";
@@ -13,17 +12,34 @@ import { AxiosError } from "axios";
 interface UserInfo {
     id: string;
     name: string;
+    permission: Set<string>;
 }
 
 function goToLoginPage() {
     location.href = "/v/login";
 }
 export function UserAvatar() {
-    let { refresh, data, loading } = useRequest(async function () {
-        const { data } = await $http.get<{ item: UserInfo }>("/auth/user/info");
-        return data.item;
-    });
-    const navigate = useNavigate();
+    let { refresh, data, loading } = useRequest(
+        async function () {
+            const {
+                data: { item },
+            } = await $http.get<{ item: UserInfo }>("/auth/user/info");
+
+            if (Array.isArray(item.permission)) item.permission = new Set(item.permission);
+            return item;
+        },
+        {
+            onSuccess(data, params) {
+                if (data.permission.has("readonly"))
+                    notification.warning({
+                        message: "您当前处于访客模式，欢迎参观！",
+                        description: "访客模式下您没有权限执行增删改操作",
+                        placement: "top",
+                        duration: 0,
+                    });
+            },
+        }
+    );
     const [openModal, setOpenModal] = useState<boolean | string>();
     const userName = data?.name ?? "--";
 

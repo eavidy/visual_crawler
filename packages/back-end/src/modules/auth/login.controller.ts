@@ -11,6 +11,7 @@ import {
 } from "@nestjs/common";
 import type { ApiReq, ApiRes } from "common/request/login";
 import { AuthService } from "./services";
+import { UserService } from "src/services/db/user.db.service";
 const validationPipe: PipeTransform = {
     transform(value: any, metadata: ArgumentMetadata) {
         let exceptType: Record<keyof ApiReq.Login, ExceptType> = {
@@ -25,7 +26,7 @@ const validationPipe: PipeTransform = {
 };
 @Controller()
 export class LoginController {
-    constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService, private userService: UserService) {}
 
     @Post("login")
     @UsePipes(validationPipe)
@@ -39,11 +40,18 @@ export class LoginController {
     }
     @Get("visitor")
     async getVisitor(): Promise<ApiRes.Visitor> {
-        return {
-            enable: true,
-            message: "已开启访客账号",
-            pwd: "123",
-            userId: "visitor",
-        };
+        let pwd = await this.userService.isEnableVisitor();
+        if (pwd)
+            return {
+                enable: true,
+                message: "已开启访客账号",
+                pwd,
+                userId: "visitor",
+            };
+        else
+            return {
+                enable: false,
+                message: "Hello",
+            };
     }
 }

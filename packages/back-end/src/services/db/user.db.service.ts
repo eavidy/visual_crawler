@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Document, WithId } from "mongodb";
-import { UserBaseInfo, User } from "../../modules/auth/services";
+import { UserBaseInfo, User, Permission } from "../../modules/auth/services";
 import { userCollection } from "./db";
 import { checkType, ExceptTypeMap, checkFx, optional } from "@asnc/tslib/lib/std/type_check";
 
@@ -10,7 +10,8 @@ export class UserService {
         const data = await userCollection
             .aggregate([{ $match: {} }])
             .project<WithId<{ name: string }>>({
-                password: 0,
+                name: 1,
+                permissions: 1,
             })
             .toArray();
         return data;
@@ -20,7 +21,7 @@ export class UserService {
             .aggregate()
             .match({ _id: id })
             .limit(1)
-            .project<UserBaseInfo>({ _id: 0 })
+            .project<UserBaseInfo>({ _id: 0, name: 1, permissions: 1, password: 1 })
             .toArray();
         let userInfo = resList[0];
         if (!userInfo) return null;
@@ -44,6 +45,18 @@ export class UserService {
             if (res) throw new Error("参数校验不通过", { cause: res });
         }
         await userCollection.updateOne({ _id: id } as any, { $set: userInfo });
+    }
+
+    async isEnableVisitor() {
+        let id = "visitor";
+        let match: Document = { _id: id };
+        let res = await userCollection.findOne<UserBaseInfo & { pwd?: string }>(match);
+        if (res) {
+            let user = new User(id, res);
+            if (user.hasPermission(Permission.readonly) && res.pwd) {
+                return res.pwd;
+            }
+        }
     }
 }
 

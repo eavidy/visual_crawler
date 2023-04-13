@@ -9,10 +9,12 @@ import {
     PipeTransform,
     Post,
     Query,
+    UseGuards,
     UsePipes,
 } from "@nestjs/common";
-import { SiteTag, TaskState, TaskType } from "common/model";
+import { SiteTag } from "common/model";
 import { GetTasksFilter, TaskQueueDbService } from "src/services/db/task_queue.db.service";
+import { authGuard } from "../auth/grand";
 
 const getTaskListPipe: PipeTransform = {
     transform(value, metadata) {
@@ -34,6 +36,7 @@ const getTaskListPipe: PipeTransform = {
     },
 };
 
+@UseGuards(authGuard)
 @Controller("task_queue")
 export class TaskQueueController {
     constructor(private taskQueueDbService: TaskQueueDbService) {}

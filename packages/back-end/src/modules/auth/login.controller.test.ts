@@ -3,7 +3,7 @@ import { LoginController } from "./login.controller";
 import { describe, it, expect, vi } from "vitest";
 import { AuthService, User } from "./services";
 import { JwtService } from "@nestjs/jwt";
-import { UserService } from "../../services/db";
+import { UserService } from "../../services/db/user.db.service";
 
 describe("CatsController", async function () {
     let loginController: LoginController;

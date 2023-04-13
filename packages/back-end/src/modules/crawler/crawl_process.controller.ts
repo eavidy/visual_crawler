@@ -11,11 +11,13 @@ import {
     Post,
     Put,
     UsePipes,
+    UseGuards,
 } from "@nestjs/common";
 import { CrawlProcessService } from "./services/process_center.service";
 import type { ApiReq } from "common/request/crawler/crawl_process";
 import { checkFx, checkType, optional } from "@asnc/tslib/lib/std";
 import { CrawlerProcessStatus } from "common/request/enum";
+import { authGuard } from "../auth/grand";
 
 const updateBodyPipes: PipeTransform = {
     transform(value: ApiReq.UpdateProcess, metadata) {
@@ -46,6 +48,7 @@ const crateBodyPipes: PipeTransform = {
     },
 };
 
+@UseGuards(authGuard)
 @Controller("process")
 export class CrawlProcessController {
     constructor(private crawlProcessService: CrawlProcessService) {}

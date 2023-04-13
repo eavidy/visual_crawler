@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { message } from "antd";
 
 class LocalStore {
@@ -26,11 +26,16 @@ $http.interceptors.request.use(function (config) {
     return config;
 });
 $http.interceptors.response.use(undefined, function (error: AxiosError<any>) {
-    if (error.response?.status === 401) {
-        if (error.response.data?.message === "jwt expired") {
-            // message.error("身份认证已过期");
-            location.href = "/v/login";
-        } else message.error("权限不足");
+    let response: AxiosResponse<{ report?: boolean; message?: string }> | undefined = error.response;
+    if (response) {
+        let errData = response.data;
+        if (response.status === 401) {
+            if (errData.message === "jwt expired") {
+                location.href = "/v/login";
+            } else message.error("权限不足");
+        }
+        if (errData.report && errData.message) message.error(errData.message);
     }
+
     return Promise.reject(error);
 });

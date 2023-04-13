@@ -39,6 +39,7 @@ export default function User() {
         const { pwdConfirm, ...data } = await form.validateFields();
         if (pwdConfirm !== data.pwd) {
             message.error("密码不一致");
+            return;
         }
         await createUserReq(data);
         setShowModal(false);

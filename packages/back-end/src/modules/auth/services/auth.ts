@@ -30,6 +30,7 @@ export class User implements Authenticatable {
     toJson() {
         return {
             ...this,
+            permission: Array.from(this.permission),
         };
     }
     // readonly group?: UserGroup;

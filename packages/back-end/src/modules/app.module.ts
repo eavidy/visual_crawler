@@ -9,7 +9,6 @@ import { CrawlerModule } from "./crawler/crawler.module";
 @Module({
     imports: [DashModule, AdminModule, ViewModule, AuthModule, CrawlerModule],
     controllers: [],
-    providers: [],
 })
 export class AppModule {
     constructor() {}

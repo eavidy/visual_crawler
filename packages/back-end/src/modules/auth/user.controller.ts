@@ -12,13 +12,13 @@ import {
     Query,
     UseGuards,
 } from "@nestjs/common";
-import { AuthGuard } from "./grand/auth.grand";
+import { authGuard } from "./grand/auth.grand";
 import { UserService } from "src/services/db/user.db.service";
 import type { ApiReq } from "common/request/auth/user";
 import { UserBaseInfo } from "./services";
 
 @Controller("user")
-@UseGuards(AuthGuard)
+@UseGuards(authGuard)
 export class UserController {
     constructor(private userService: UserService) {}
     @Get("list")

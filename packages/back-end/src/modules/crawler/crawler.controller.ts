@@ -10,11 +10,13 @@ import {
     Post,
     Put,
     Query,
+    UseGuards,
     UsePipes,
 } from "@nestjs/common";
-import type { ApiReq, ApiRes, CrawlerMeta } from "common/request/crawler/crawler";
+import type { ApiReq, ApiRes } from "common/request/crawler/crawler";
 import { CrawlerService } from "./services";
 import { checkType, optional } from "@asnc/tslib/lib/std";
+import { authGuard } from "../auth/grand";
 
 const createCrawlerCheck: PipeTransform = {
     transform(value: ApiReq.CreateCrawler, metadata) {
@@ -31,6 +33,7 @@ const createCrawlerCheck: PipeTransform = {
     },
 };
 
+@UseGuards(authGuard)
 @Controller("crawler")
 export class CrawlerController {
     constructor(private crawlerService: CrawlerService) {}
