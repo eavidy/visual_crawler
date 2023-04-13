@@ -241,7 +241,7 @@ function CrawlerCardList(props: {
         } catch (error) {}
     }
     function onStop(id: number) {
-        Modal.confirm({
+        modal.confirm({
             title: "确定终止该Crawler?",
             onOk: () => onUpdateStart(id, false),
         });

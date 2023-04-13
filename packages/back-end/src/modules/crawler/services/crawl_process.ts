@@ -36,7 +36,7 @@ export class CrawlProcess extends EventEmitter {
     private internalId?: NodeJS.Timer;
     async start(args: string[] = [], nodeArgs: string[] = []): Promise<void | never> {
         if (this.process) throw new Error("进程不能重复启动");
-        this.internalId = setInterval(this.onCrawlNew, 3 * 24 * 86400 * 1000);
+        this.internalId = setInterval(this.onCrawlNew, 3 * 86400 * 1000);
         let execArgv = [...nodeArgs];
         if (this.info.memoryLimit) {
             // execArgv.push("--max-old-space-size");
