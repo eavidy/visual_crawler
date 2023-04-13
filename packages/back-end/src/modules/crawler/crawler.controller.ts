@@ -23,6 +23,7 @@ const createCrawlerCheck: PipeTransform = {
                 taskType: optional.string,
                 taskCountLimit: optional.number,
                 name: optional.string,
+                isAuto: optional("boolean"),
             });
             if (res) throw new BadRequestException({ message: "字段校验不通过", cause: res });
         }

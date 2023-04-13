@@ -15,6 +15,8 @@ export interface CreateCrawlerOptions {
     taskType?: TaskType | "new";
     taskCountLimit?: number;
     name?: string;
+    /** 仅在taskType=="new时有效" */
+    isAuto?: boolean;
 }
 
 export interface CrawlerMeta {

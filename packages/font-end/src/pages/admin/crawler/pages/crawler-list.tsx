@@ -2,7 +2,20 @@ import { PageContainer, Statistic as ProStatistic } from "@ant-design/pro-compon
 import React, { CSSProperties, useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
 import { LeftOutlined } from "@ant-design/icons";
-import { Button, Card, Empty, Form, Input, InputNumber, Modal, Radio, message } from "antd";
+import {
+    Button,
+    Card,
+    Empty,
+    Form,
+    Input,
+    InputNumber,
+    Modal,
+    Radio,
+    RadioChangeEvent,
+    Switch,
+    Tooltip,
+    message,
+} from "antd";
 import { CardTabListType } from "antd/es/card";
 import { COLOR } from "@/styles/colors";
 import { ApiReq } from "common/request/crawler/crawler";
@@ -124,14 +137,10 @@ interface ProcessAddModalProps {
     pcId: number;
 }
 function CrawlerAddModal(props: ProcessAddModalProps) {
-    const { info, open, pcId } = props;
-    const typeDesc = info ? "修改" : "创建";
+    const { open, pcId } = props;
+    const typeDesc = "创建";
     const { loading, runAsync } = useRequest(
-        async function (data: ApiReq.CreateCrawler) {
-            if (!data.taskCountLimit) delete data.taskCountLimit;
-            if (info) return crawlerResource.updateCrawler({ crawlerId: info.id, processId: pcId }, data);
-            else return crawlerResource.createCrawler(pcId, data);
-        },
+        (data: ApiReq.CreateCrawler) => crawlerResource.createCrawler(pcId, data),
         {
             manual: true,
             onSuccess() {
@@ -142,10 +151,19 @@ function CrawlerAddModal(props: ProcessAddModalProps) {
             },
         }
     );
+    const [isNew, setIsNew] = useState(false);
+    const [isAuto, setIsAuto] = useState(false);
     const [form] = Form.useForm();
+    function onTaskTypeChange(e: RadioChangeEvent) {
+        let isNew = e.target.value === "new";
+        setIsNew(isNew);
+        if (!isNew) setIsAuto(false);
+    }
 
     async function onOk() {
         let formValues = form.getFieldsValue();
+        console.log(formValues);
+
         await runAsync(formValues);
         props.onRefresh();
         props.onCancel();
@@ -153,9 +171,10 @@ function CrawlerAddModal(props: ProcessAddModalProps) {
     useEffect(() => {
         if (open) {
             form.resetFields();
-            if (info) form.setFieldsValue(info);
+            setIsNew(false);
+            setIsAuto(false);
         }
-    }, [form, info, open]);
+    }, [form, open]);
     return (
         <Modal
             open={open}
@@ -172,18 +191,23 @@ function CrawlerAddModal(props: ProcessAddModalProps) {
                     <Input />
                 </Form.Item>
                 <Form.Item label="任务类型" name="taskType">
-                    <Radio.Group defaultValue="all">
+                    <Radio.Group defaultValue="all" onChange={onTaskTypeChange}>
                         <Radio value="all">全部</Radio>
                         <Radio value="jobFilter">jobFilter</Radio>
                         <Radio value="new">new</Radio>
                         <Radio value="company">company</Radio>
                     </Radio.Group>
                 </Form.Item>
-                {!info && (
-                    <Form.Item label="任务上限" name="taskCountLimit">
-                        <InputNumber min={1} />
-                    </Form.Item>
+                {isNew && (
+                    <Tooltip title="持续运行，获取最新发布的职位数据">
+                        <Form.Item label="自动" name="isAuto">
+                            <Switch onChange={() => setIsAuto(!isAuto)} disabled={!isNew} checked={isAuto} />
+                        </Form.Item>
+                    </Tooltip>
                 )}
+                <Form.Item label="任务上限" name="taskCountLimit">
+                    <InputNumber min={1} />
+                </Form.Item>
             </Form>
         </Modal>
     );

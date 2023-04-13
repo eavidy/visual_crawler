@@ -25,9 +25,18 @@ export class CrawlProcess extends EventEmitter {
         const { memoryLimit = 200, name = "" } = info;
         this.info = { memoryLimit, name, errors: [] };
     }
+
+    private onCrawlNew = () => {
+        for (const [id, crawler] of this.crawlers) {
+            if (crawler.status === CrawlerStatus.stopped && crawler.config.isAuto) {
+                this.startWork(id);
+            }
+        }
+    };
+    private internalId?: NodeJS.Timer;
     async start(args: string[] = [], nodeArgs: string[] = []): Promise<void | never> {
         if (this.process) throw new Error("进程不能重复启动");
-
+        this.internalId = setInterval(this.onCrawlNew, 3 * 24 * 86400 * 1000);
         let execArgv = [...nodeArgs];
         if (this.info.memoryLimit) {
             // execArgv.push("--max-old-space-size");
@@ -45,6 +54,7 @@ export class CrawlProcess extends EventEmitter {
         });
         pc.on("exit", () => {
             this.#status = CrawlerProcessStatus.stop;
+            if (this.internalId) clearInterval(this.internalId);
             this.process = undefined;
             this.emit("exit");
         });
@@ -92,7 +102,8 @@ export class CrawlProcess extends EventEmitter {
     createCrawler(config: CreateCrawlerOptions) {
         let id = this.nextCrawlerId++;
         let name = config.name ?? id.toString();
-        this.crawlers.set(id, new CrawlProcess.CrawlerHandle(id, { ...config, name }));
+        const crawler = new CrawlProcess.CrawlerHandle(id, { ...config, name });
+        this.crawlers.set(id, crawler);
     }
 
     async removeCrawler(id: number) {
