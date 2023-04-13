@@ -1,4 +1,17 @@
-import { BadRequestException, Body, Controller, Get, Headers, Post, UseGuards } from "@nestjs/common";
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Headers,
+    Param,
+    ParseIntPipe,
+    Post,
+    Put,
+    Query,
+    UseGuards,
+} from "@nestjs/common";
 import { AuthGuard } from "./grand/auth.grand";
 import { UserService } from "src/services/db/user.db.service";
 import type { ApiReq } from "common/request/auth/user";
@@ -8,7 +21,19 @@ import { UserBaseInfo } from "./services";
 @UseGuards(AuthGuard)
 export class UserController {
     constructor(private userService: UserService) {}
-
+    @Get("list")
+    async getUserList() {
+        const items = await this.userService.getUserList();
+        return { items };
+    }
+    @Put()
+    async createUser(@Body("id") id: string, @Body("pwd") pwd: string, @Body("name") name: string = id) {
+        return this.userService.createUser(id, { password: pwd, name });
+    }
+    @Delete()
+    async deleteUser(@Query("id") id: string) {
+        return this.userService.removeUser(id);
+    }
     @Get("info")
     async getUserInfo(@Headers("user-id") userId: string) {
         let user = await this.userService.getUser(userId);

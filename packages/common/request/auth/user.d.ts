@@ -13,4 +13,15 @@ export namespace ApiReq {
             new: string;
         };
     }
+    interface CreateUser {
+        id: string;
+        name?: string;
+        pwd: string;
+    }
+}
+export namespace ApiRes {
+    interface GetUserList {
+        _id: string;
+        name: string;
+    }
 }

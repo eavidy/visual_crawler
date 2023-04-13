@@ -1,11 +1,20 @@
 import { Injectable } from "@nestjs/common";
-import { Document } from "mongodb";
+import { Document, WithId } from "mongodb";
 import { UserBaseInfo, User } from "../../modules/auth/services";
 import { userCollection } from "./db";
 import { checkType, ExceptTypeMap, checkFx, optional } from "@asnc/tslib/lib/std/type_check";
 
 @Injectable()
 export class UserService {
+    async getUserList() {
+        const data = await userCollection
+            .aggregate([{ $match: {} }])
+            .project<WithId<{ name: string }>>({
+                password: 0,
+            })
+            .toArray();
+        return data;
+    }
     async getUser(id: string): Promise<null | User> {
         let resList = await userCollection
             .aggregate()

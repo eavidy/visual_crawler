@@ -49,24 +49,26 @@ const router: ExtraRouterObject = {
         {
             path: "auth",
             meta: {
-                name: "权限管理",
-                icon: <SafetyCertificateOutlined />,
+                // name: "权限管理",
+                // icon: <SafetyCertificateOutlined />,
+                name: "用户管理",
+                icon: <UserOutlined />,
             },
             children: [
                 {
                     path: "user",
                     lazy: () => lazyComponent(import("./auth/pages/user")),
-                    meta: {
-                        name: "用户管理",
-                        icon: <UserOutlined />,
-                    },
+                    // meta: {
+                    // name: "用户管理",
+                    // icon: <UserOutlined />,
+                    // },
                 },
                 {
                     path: "permission",
                     lazy: () => lazyComponent(import("./auth/pages/auth")),
-                    meta: {
-                        name: "权限配置",
-                    },
+                    // meta: {
+                    // name: "权限配置",
+                    // },
                 },
             ],
         },
