@@ -3,7 +3,7 @@ import { CrawlerDevice } from "../crawl/classes/browser";
 import { SiteTag, TaskType } from "common/model";
 import { ObjectId } from "mongodb";
 import { dbClient } from "../db/db";
-import { TaskQueue } from "../crawl/classes/task_queue";
+import { NewCityTaskQueue, TaskQueue } from "../crawl/classes/task_queue";
 import { parseNodeArgs } from "../classes/parse_args";
 
 function report(...str: string[]) {
@@ -87,4 +87,5 @@ async function excCompanyTask(crawler: CrawlerLiepin) {
         _id: new ObjectId("dddddddddddd"),
     });
 }
-start(new TaskQueue(SiteTag.liepin, undefined, 1));
+const useNew = true;
+start(useNew ? new NewCityTaskQueue(SiteTag.liepin) : new TaskQueue(SiteTag.liepin, undefined, 1));

@@ -50,7 +50,7 @@ export class LiePinJobList extends PageCrawl {
     async openUseParams(params: string | LiePinFilterOption, timeout = 20 * 1000) {
         let paramsStr = typeof params === "string" ? params : querystring.stringify(params);
         let page = await super.newPage();
-        const urlChecker = /apic.liepin.com\/api\/com.liepin.searchfront4c.pc-search-job$/;
+        const urlChecker = /liepin.com\/api\/com.liepin.searchfront4c.pc-search-job$/;
         page.on("response", (res) => {
             if (/safe\.liepin\.com\/page\/liepin\/captchaPage_ip_PC/.test(res.url())) {
                 this.emit("auth");
