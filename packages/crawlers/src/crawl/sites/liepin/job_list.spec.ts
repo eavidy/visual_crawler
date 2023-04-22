@@ -1,6 +1,6 @@
 import { LiePinJobList, PageController } from "./job_list";
 import { CrawlerDevice } from "../../classes/browser";
-import { TimeoutPromise } from "@asnc/tslib/lib/async";
+import { TimeoutPromise } from "@asnc/tslib/async";
 import { listIterator } from "../../classes/crawl_action";
 async function test() {
     const bsCt = await CrawlerDevice.newContext();

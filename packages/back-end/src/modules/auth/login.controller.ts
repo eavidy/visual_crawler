@@ -1,4 +1,4 @@
-import { ExceptType, checkType, optional } from "@asnc/tslib/lib/std";
+import { ExceptType, checkType, optional } from "@asnc/tslib/std";
 import {
     ArgumentMetadata,
     BadRequestException,
@@ -11,7 +11,7 @@ import {
 } from "@nestjs/common";
 import type { ApiReq, ApiRes } from "common/request/login";
 import { AuthService } from "./services";
-import { UserService } from "src/services/db/user.db.service";
+import { UserService } from "../../services/db/user.db.service";
 const validationPipe: PipeTransform = {
     transform(value: any, metadata: ArgumentMetadata) {
         let exceptType: Record<keyof ApiReq.Login, ExceptType> = {

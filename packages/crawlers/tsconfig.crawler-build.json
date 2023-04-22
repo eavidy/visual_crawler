@@ -3,8 +3,7 @@
     "compilerOptions": {
         "noEmit": false,
         "outDir": "../../dist/crawler",
-        "skipLibCheck": true,
-        "incremental": true
+        "skipLibCheck": true
     },
     "include": ["src"],
     "exclude": ["node_modules", "src/**/*.test.ts", "src/**/*.spec.ts"]

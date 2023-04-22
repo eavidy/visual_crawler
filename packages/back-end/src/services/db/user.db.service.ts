@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Document, WithId } from "mongodb";
 import { UserBaseInfo, User, Permission } from "../../modules/auth/services";
 import { userCollection } from "./db";
-import { checkType, ExceptTypeMap, checkFx, optional } from "@asnc/tslib/lib/std/type_check";
+import { checkType, ExceptTypeMap, checkFx, optional } from "@asnc/tslib/std/type_check";
 
 @Injectable()
 export class UserService {

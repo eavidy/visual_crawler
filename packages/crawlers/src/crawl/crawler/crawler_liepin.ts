@@ -5,7 +5,7 @@ import { radomWaitTime } from "../classes/time";
 import { SiteTag, TaskType } from "common/model";
 import { DeepAssignFilter } from "../classes/crawl_action";
 import { TaskQueue } from "../classes/task_queue";
-import { TimeoutPromise, PromiseHandle } from "@asnc/tslib/lib/async";
+import { TimeoutPromise, PromiseHandle } from "@asnc/tslib/async";
 import { CrawlerDevice } from "../classes/browser";
 
 /**

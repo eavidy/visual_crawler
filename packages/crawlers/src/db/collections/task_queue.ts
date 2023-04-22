@@ -1,6 +1,6 @@
 import { Collection, ObjectId, WithId, Db } from "mongodb";
 import { CrawlerPriorityTask, TaskState, SiteTag, CrawlerTaskAppend, TaskType } from "common/model";
-import { checkType, checkFx, optional } from "@asnc/tslib/lib/std/type_check";
+import { checkType, checkFx, optional } from "@asnc/tslib/std/type_check";
 import { FieldCheckError } from "../classes/errors";
 import { db, taskQueueCollection } from "../db";
 export type UnexecutedTask<T extends CrawlerPriorityTask> = WithId<Omit<T, "priority" | "expirationTime" | "status">>;

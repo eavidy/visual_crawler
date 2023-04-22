@@ -9,13 +9,13 @@ interface ProcessArgs {
 async function check() {
     switch (args.runType) {
         case "db":
-            await import("./runner/manual");
+            await import("./runner/manual.js");
             break;
         case "net":
-            await import("./runner/net_connect");
+            await import("./runner/net_connect.js");
             break;
         default:
-            await import("./runner/child_process");
+            await import("./runner/child_process.js");
             break;
     }
 }

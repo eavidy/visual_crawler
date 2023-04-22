@@ -1,4 +1,4 @@
-import { checkFx, checkType, optional } from "@asnc/tslib/lib/std";
+import { checkFx, checkType, optional } from "@asnc/tslib/std";
 import {
     BadRequestException,
     Body,
@@ -13,7 +13,7 @@ import {
     UsePipes,
 } from "@nestjs/common";
 import { SiteTag } from "common/model";
-import { GetTasksFilter, TaskQueueDbService } from "src/services/db/task_queue.db.service";
+import { GetTasksFilter, TaskQueueDbService } from "../../services/db/task_queue.db.service";
 import { authGuard } from "../auth/grand";
 
 const getTaskListPipe: PipeTransform = {

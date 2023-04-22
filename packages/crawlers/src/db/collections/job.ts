@@ -1,5 +1,5 @@
 import { JobCrawlerData, SiteTag } from "common/model";
-import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/lib/std/type_check";
+import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/std/type_check";
 import { ObjectId, WithId } from "mongodb";
 import { FieldCheckError } from "../classes/errors";
 import { jobsCollection } from "../db";

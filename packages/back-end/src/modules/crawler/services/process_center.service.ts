@@ -10,7 +10,7 @@ let nodeArgs: string[] = [];
 if (process.env["MODE"] === "dev") {
     crawlModPath = Path.resolve(process.cwd(), "packages/crawlers/src/main.ts");
     startArgs = ["--nh"];
-    nodeArgs = ["-r", "A:/back-end/pnpm/5/node_modules/@asnowc/node-tool/ts_hook"];
+    nodeArgs = ["--loader", "/A:/packages/asnc-pack/ts_hook/hook.mjs"];
 }
 
 @Injectable()
@@ -73,7 +73,7 @@ export class CrawlProcessService {
                     errors: crawler.info.errors,
                 });
             } else {
-                let memoryUsed = crawler.memory?.heapUsed ?? 0;
+                let memoryUsed = crawler.memory?.rss ?? 0;
 
                 list.push({
                     key: id,

@@ -179,7 +179,7 @@ function CrawlerAddModal(props: ProcessAddModalProps) {
         <Modal
             open={open}
             destroyOnClose
-            title={typeDesc + "进程"}
+            title={typeDesc + "采集器"}
             onCancel={props.onCancel}
             onOk={onOk}
             okText={typeDesc}

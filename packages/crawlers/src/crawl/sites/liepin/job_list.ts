@@ -5,10 +5,10 @@ import { SiteTag } from "common/model";
 import { PageCrawl, DataParser } from "../common";
 import { paseJob, RawCompData, RawJobData } from "./classes/common_parser";
 import { PageNumControllable } from "./classes/page_controller";
-import { TimeoutPromise } from "@asnc/tslib/lib/async";
+import { TimeoutPromise } from "@asnc/tslib/async";
 import { FilterIteratorFx, ACTION_TIMEOUT, DeepAssignFilter } from "../../classes/crawl_action";
 
-import { removeUndefined } from "@asnc/tslib/lib/object";
+import { removeUndefined } from "@asnc/tslib/object";
 import * as querystring from "node:querystring";
 
 /**

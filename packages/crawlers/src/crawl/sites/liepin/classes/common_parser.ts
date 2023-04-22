@@ -1,5 +1,5 @@
 import { JobCrawlerData, SiteTag } from "common/model";
-import { removeUndefined } from "@asnc/tslib/lib/object";
+import { removeUndefined } from "@asnc/tslib/object";
 import { DataParser } from "../../common";
 
 export function paseJob(

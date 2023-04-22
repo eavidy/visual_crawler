@@ -11,7 +11,7 @@
             "name": "后端调试",
             "env": {},
 
-            "runtimeArgs": ["-r", "A:/back-end/pnpm/5/node_modules/@asnowc/node-tool/ts_hook"],
+            "runtimeArgs": ["--loader", "/A:/packages/asnc-pack/ts_hook/hook.mjs"],
             "skipFiles": ["<node_internals>/**", "A:/back-end/pnpm/**", "**/node_modules/**"],
             "program": "${workspaceFolder}/packages/back-end/src/main.ts",
             "cwd": "${workspaceFolder}"

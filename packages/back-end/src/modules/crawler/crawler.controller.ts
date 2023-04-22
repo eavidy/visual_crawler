@@ -15,7 +15,7 @@ import {
 } from "@nestjs/common";
 import type { ApiReq, ApiRes } from "common/request/crawler/crawler";
 import { CrawlerService } from "./services";
-import { checkType, optional } from "@asnc/tslib/lib/std";
+import { checkType, optional } from "@asnc/tslib/std";
 import { authGuard } from "../auth/grand";
 
 const createCrawlerCheck: PipeTransform = {

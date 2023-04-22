@@ -13,7 +13,7 @@ import {
     UseGuards,
 } from "@nestjs/common";
 import { authGuard } from "./grand/auth.grand";
-import { UserService } from "src/services/db/user.db.service";
+import { UserService } from "../../services/db/user.db.service";
 import type { ApiReq } from "common/request/auth/user";
 import { UserBaseInfo } from "./services";
 

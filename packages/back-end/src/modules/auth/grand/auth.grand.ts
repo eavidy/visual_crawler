@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, UnauthorizedException, ForbiddenExceptio
 import { AuthService } from "../services/auth.service";
 import { Permission } from "../services/permission";
 import type { FastifyRequest } from "fastify";
-import { UserService } from "src/services/db/user.db.service";
+import { UserService } from "../../../services/db/user.db.service";
 import { JwtService } from "@nestjs/jwt";
 
 export class AuthGuard implements CanActivate {

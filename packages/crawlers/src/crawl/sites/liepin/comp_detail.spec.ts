@@ -1,6 +1,6 @@
 import { LiePinCompanyDetail } from "./comp_detail";
 import { CrawlerDevice } from "../../classes/browser";
-import { TimeoutPromise } from "@asnc/tslib/lib/async";
+import { TimeoutPromise } from "@asnc/tslib/async";
 async function test() {
     const bsCt = await CrawlerDevice.newContext();
     const pageCrawl = new LiePinCompanyDetail(bsCt, "https://www.liepin.com");

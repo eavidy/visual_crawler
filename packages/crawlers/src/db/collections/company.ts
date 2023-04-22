@@ -6,7 +6,7 @@ import {
     TaskType,
 } from "common/model";
 import { ObjectId, WithId } from "mongodb";
-import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/lib/std/type_check";
+import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/std/type_check";
 import { FieldCheckError } from "../classes/errors";
 import { companyCollection } from "../db";
 

@@ -1,5 +1,5 @@
 import { CrawlerPriorityJobFilterTask, JobFilterOption, SiteTag, TaskState, TaskType } from "common/model";
-import { checkFx, checkType, optional } from "@asnc/tslib/lib/std/type_check";
+import { checkFx, checkType, optional } from "@asnc/tslib/std/type_check";
 import { taskQueueCollection, citiesCollection, companyCollection, jobsCollection } from "./db";
 import { Injectable } from "@nestjs/common";
 import { Document, ObjectId } from "mongodb";

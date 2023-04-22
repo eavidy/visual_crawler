@@ -1,4 +1,4 @@
-import { TimeoutPromise } from "@asnc/tslib/lib/async";
+import { TimeoutPromise } from "@asnc/tslib/async";
 
 /**
  *  @param threshold 阈值 0~1之间的浮点数, 约接近0 随机数接近min的概率更高

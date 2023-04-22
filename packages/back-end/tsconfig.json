@@ -1,14 +1,13 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "module": "CommonJS",
+        "moduleResolution": "nodenext",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
         "rootDir": "./src",
         "baseUrl": "./",
-        "noEmit": true,
-        "incremental": true
+        "noEmit": true
     },
     "include": ["src"]
 }
