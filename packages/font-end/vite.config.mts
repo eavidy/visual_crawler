@@ -6,6 +6,10 @@ export default defineConfig({
                 target: "http://127.0.0.1:3000",
                 changeOrigin: true,
             },
+            "/auth": {
+                target: "http://127.0.0.1:3000",
+                changeOrigin: true,
+            },
         },
     },
     resolve: {
@@ -15,6 +19,6 @@ export default defineConfig({
     },
     build: {
         copyPublicDir: true,
-        outDir:"../back-end/public"
+        outDir: "../../dist/server_pack/public",
     },
 });

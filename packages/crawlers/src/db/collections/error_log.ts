@@ -1,11 +1,11 @@
-import { Collection } from "mongodb";
+import { errorLogCollection } from "../db";
 
 export class ErrorLogData {
-    constructor(private readonly collection: Collection) {}
+    constructor() {}
     async appendLogs(logs: Record<string | number, any>[]) {
-        return this.collection.insertMany(logs);
+        return errorLogCollection.insertMany(logs);
     }
     async appendLog(log: Record<string | number, any>) {
-        return this.collection.insertOne(log);
+        return errorLogCollection.insertOne(log);
     }
 }

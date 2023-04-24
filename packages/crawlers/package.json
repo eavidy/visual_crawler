@@ -2,13 +2,15 @@
     "name": "crawlers",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
-    "scripts": {},
+    "main": "dist/main.js",
+    "scripts": {
+        "build": "tsc -p tsconfig.crawler-build.json"
+    },
     "keywords": [],
     "author": "",
-    "license": "ISC",
+    "license": "MIT",
     "dependencies": {
-        "@asnc/tslib": "file:A:/packages/@asnc/basic-libs/tslib",
+        "@asnc/tslib": "link:A:/packages/@asnc/basic-libs/tslib",
         "common": "workspace:^1.0.0",
         "mongodb": "^5.1.0",
         "playwright": "^1.31.1"

@@ -12,8 +12,10 @@ import { EventEmitter } from "node:events";
 
 /**
  * @event scheduleUpdate 进度更新
- * @event taskFinished 完成一个任务 taskResult:boolean 任务是否完成, false 为中断
- * @event taskQueueFinished 任务队列清空
+ * @event statisticsUpdate 统计信息更新
+ * @event taskExc 开始执行任务(startWork中的任务)
+ * @event taskFinished 完成一个任务(startWork中的任务) taskResult:boolean 任务是否完成, false 为中断
+ * @event workFinished 任务队列清空
  * @event reportError
  * @event reportAuth
  */
@@ -55,6 +57,7 @@ export abstract class Crawler extends EventEmitter {
             taskCompleted: 0,
             taskFailed: 0,
         };
+        this.emit("statisticsUpdate");
     }
 
     async saveJobs(jobDates: JobCrawlerData[]) {
@@ -64,6 +67,8 @@ export abstract class Crawler extends EventEmitter {
             let info = this.#statistics;
             info.jobRepeated += uninserted?.length ?? 0;
             info.newJob += inserted.length;
+            this.emit("statisticsUpdate");
+
             if (checkFail) this.reportError("保存职位数据校验出错", checkFail);
         } catch (error) {
             this.reportError("保存职位数据时出现异常", this.errToJson(error));
@@ -76,6 +81,7 @@ export abstract class Crawler extends EventEmitter {
             let info = this.#statistics;
             info.newCompany += inserted.length;
             info.companyRepeated += uninserted?.length ?? 0;
+            this.emit("statisticsUpdate");
             if (checkFail) this.reportError("保存公司数据校验出错", checkFail);
 
             //新公司, 加入到爬取任务队列
@@ -138,6 +144,7 @@ export abstract class Crawler extends EventEmitter {
             let task = await this.taskQueue.takeTask();
             if (!task) break;
             let id = task._id;
+            this.emit("taskExc", { ...task });
             let { pass, result } = await this.executeTask(task, abc.signal);
             this.resetSchedule(0);
             if (pass) {
@@ -153,10 +160,11 @@ export abstract class Crawler extends EventEmitter {
                 await taskQueueData.markTasksFailed(id, result);
             }
 
+            this.emit("statisticsUpdate");
             this.emit("taskFinished", { pass, result });
         }
         this.abc = undefined;
-        this.emit("taskQueueFinished");
+        this.emit("workFinished");
     }
     stopWork(abort = false) {
         this.taskQueue.restoreTask(); //保存缓存中未执行的任务

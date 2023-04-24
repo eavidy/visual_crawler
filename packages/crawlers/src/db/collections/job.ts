@@ -1,12 +1,57 @@
 import { JobCrawlerData, SiteTag } from "common/model";
-import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/lib/std/type_check";
-import { ObjectId, Collection, WithId } from "mongodb";
+import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/std/type_check";
+import { ObjectId, WithId } from "mongodb";
 import { FieldCheckError } from "../classes/errors";
-const TIME_INTERVAL = 30 * 6 * 86400;
+import { jobsCollection } from "../db";
 
 export class JobsData {
-    constructor(private table: Collection) {}
+    async removeDuplication(jobs: JobCrawlerData[], siteTag: SiteTag) {
+        let isRepeatPms: Promise<boolean>[] = [];
+        for (const job of jobs) {
+            isRepeatPms.push(
+                jobsCollection
+                    .find({ companyId: job.companyId, jobId: job.jobId, siteTag: siteTag })
+                    .project({ _id: 0, companyId: 1, jobId: 1 })
+                    .toArray()
+                    .then((val) => !!val.length)
+            );
+        }
+        let repeated: JobCrawlerData[] = [];
+        let insertable: JobCrawlerData[] = [];
+        let results = await Promise.all(isRepeatPms);
+        for (let i = 0; i < results.length; i++) {
+            let job = jobs[i];
+            if (results[i]) repeated.push(job);
+            else {
+                if ((await jobsCollection.find({ jobId: job.jobId }).toArray()).length) console.log(job.jobId);
 
+                insertable.push(job);
+            }
+        }
+        return { repeated, insertable };
+    }
+    async removeJobIdDup(jobs: JobCrawlerData[], siteTag: SiteTag) {
+        let idMap = getIdMap(jobs, siteTag);
+        let repeated: JobCrawlerData[] = [];
+        {
+            let oldJobs = await jobsCollection
+                .aggregate<WithId<Pick<JobCrawlerData, "jobId" | "siteTag">>>()
+                .match({
+                    siteTag,
+                    jobId: { $in: Object.keys(idMap) },
+                })
+                .project({ jobId: 1, _id: 0 })
+                .toArray();
+
+            for (const old of oldJobs) {
+                let val = idMap[old.jobId];
+                if (val) repeated.push(val);
+                delete idMap[old.jobId];
+            }
+        }
+        let insertable = Object.values(idMap);
+        return { repeated, insertable };
+    }
     async appendJobs(jobs: JobCrawlerData[], siteTag: SiteTag, insertCheckedItem = true) {
         let newJobs: JobCrawlerData[] = [];
         let checkFail: { item: JobCrawlerData; err: any }[] = [];
@@ -22,35 +67,22 @@ export class JobsData {
                 if (testRes) throw new FieldCheckError(testRes);
             }
         }
-        let idMap = getIdMap(newJobs, siteTag);
-        let notInsertJobs: JobCrawlerData[] = [];
-        {
-            let oldJobs = await this.table
-                .aggregate<WithId<Pick<JobCrawlerData, "jobId" | "siteTag">>>([
-                    { $match: { siteTag, jobId: { $in: Object.keys(idMap) } } },
-                ])
-                .toArray();
+        const { insertable, repeated } = await this.removeDuplication(newJobs, siteTag);
+        // const { insertable, repeated } = await this.removeJobIdDup(newJobs, siteTag);
 
-            for (const old of oldJobs) {
-                let val = idMap[old.jobId];
-                if (val) notInsertJobs.push(val);
-                delete idMap[old.jobId];
-            }
-        }
-        let insertable = Object.values(idMap);
-        if (insertable.length) await this.table.insertMany(insertable);
+        if (insertable.length) await jobsCollection.insertMany(insertable);
 
         return {
             inserted: insertable,
-            uninserted: notInsertJobs.length ? notInsertJobs : null,
+            uninserted: repeated.length ? repeated : null,
             checkFail: checkFail.length ? checkFail : null,
         };
     }
     deleteJob(jobId: string) {
-        return this.table.deleteOne({ _id: new ObjectId(jobId) });
+        return jobsCollection.deleteOne({ _id: new ObjectId(jobId) });
     }
     getJob(jobId: string) {
-        return this.table.findOne({ _id: new ObjectId(jobId) });
+        return jobsCollection.findOne({ _id: new ObjectId(jobId) });
     }
 }
 function getIdMap(comps: JobCrawlerData[], siteTag: SiteTag) {

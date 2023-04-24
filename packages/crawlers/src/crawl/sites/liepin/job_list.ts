@@ -5,10 +5,10 @@ import { SiteTag } from "common/model";
 import { PageCrawl, DataParser } from "../common";
 import { paseJob, RawCompData, RawJobData } from "./classes/common_parser";
 import { PageNumControllable } from "./classes/page_controller";
-import { TimeoutPromise } from "@asnc/tslib/lib/async";
+import { TimeoutPromise } from "@asnc/tslib/async";
 import { FilterIteratorFx, ACTION_TIMEOUT, DeepAssignFilter } from "../../classes/crawl_action";
 
-import { removeUndefined } from "@asnc/tslib/lib/object";
+import { removeUndefined } from "@asnc/tslib/object";
 import * as querystring from "node:querystring";
 
 /**
@@ -21,11 +21,18 @@ export class LiePinJobList extends PageCrawl {
         super(context);
     }
     readonly siteTag = SiteTag.liepin;
+
     async open(options?: JobFilterOption, timeout?: number) {
         let paramsStr = "?";
-        if (options?.city) {
-            let city = cities.find((c) => c._id === options.city);
-            if (city) paramsStr += "city=" + city.liepinCode + "&dq=" + city.liepinCode;
+        if (options) {
+            if (options.city) {
+                let city = cities.find((c) => c._id === options.city);
+                if (!city) throw new Error("不存在该城市");
+                paramsStr += "city=" + city.liepinCode + "&dq=" + city.liepinCode;
+            }
+            if (options.emitTime) {
+                paramsStr += "&pubTime=" + options.emitTime;
+            }
         }
         return this.openUseParams(paramsStr, timeout);
     }
@@ -43,7 +50,7 @@ export class LiePinJobList extends PageCrawl {
     async openUseParams(params: string | LiePinFilterOption, timeout = 20 * 1000) {
         let paramsStr = typeof params === "string" ? params : querystring.stringify(params);
         let page = await super.newPage();
-        const urlChecker = /apic.liepin.com\/api\/com.liepin.searchfront4c.pc-search-job$/;
+        const urlChecker = /liepin.com\/api\/com.liepin.searchfront4c.pc-search-job$/;
         page.on("response", (res) => {
             if (/safe\.liepin\.com\/page\/liepin\/captchaPage_ip_PC/.test(res.url())) {
                 this.emit("auth");

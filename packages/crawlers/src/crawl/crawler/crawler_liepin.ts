@@ -5,7 +5,7 @@ import { radomWaitTime } from "../classes/time";
 import { SiteTag, TaskType } from "common/model";
 import { DeepAssignFilter } from "../classes/crawl_action";
 import { TaskQueue } from "../classes/task_queue";
-import { TimeoutPromise, PromiseHandle } from "@asnc/tslib/lib/async";
+import { TimeoutPromise, PromiseHandle } from "@asnc/tslib/async";
 import { CrawlerDevice } from "../classes/browser";
 
 /**
@@ -111,6 +111,7 @@ export class CrawlerLiepin extends Crawler {
             try {
                 pageCtrl = await liepJobList.open(task.taskInfo.fixedFilter);
             } catch (error) {
+                await liepJobList.closeBrowserContext();
                 return { pass: true, result: "页面打开失败" };
             }
             jobTask = new JobTask(pageCtrl, this, task, skipList, signal);
@@ -118,6 +119,7 @@ export class CrawlerLiepin extends Crawler {
             try {
                 await randomTime; //等待响应
             } catch (error) {
+                await liepJobList.closeBrowserContext();
                 break;
             }
             await jobTask.goToLimit(100);
@@ -127,7 +129,7 @@ export class CrawlerLiepin extends Crawler {
             this.emit("jobTaskRest", skipList);
             jobTask.destroy();
             await liepJobList.closeBrowserContext();
-        } while (!jobTask.isFinished);
+        } while (!jobTask.isFinished && !jobTask.breakSignal);
         return jobTask.excResult();
     }
 
@@ -164,6 +166,12 @@ export class CrawlerLiepin extends Crawler {
         signal?.removeEventListener("abort", abortActon);
 
         return { crawlCount, pageNum };
+    }
+    clearMemory() {
+        if (this.liepinCompanyDetail) {
+            this.liepinCompanyDetail.closeBrowserContext();
+            this.liepinCompanyDetail = undefined;
+        }
     }
 }
 

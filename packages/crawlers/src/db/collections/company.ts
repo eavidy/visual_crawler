@@ -1,11 +1,17 @@
-import { CompanyCrawlerData, CompanyCrawlerDataAppend, CrawlerPriorityCompanyTask, SiteTag, TaskType } from "common/model";
-import { ObjectId, Collection, WithId } from "mongodb";
-import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/lib/std/type_check";
+import {
+    CompanyCrawlerData,
+    CompanyCrawlerDataAppend,
+    CrawlerPriorityCompanyTask,
+    SiteTag,
+    TaskType,
+} from "common/model";
+import { ObjectId, WithId } from "mongodb";
+import { checkType, checkFx, ExceptTypeMap, optional } from "@asnc/tslib/std/type_check";
 import { FieldCheckError } from "../classes/errors";
+import { companyCollection } from "../db";
 
 export class CompanyData {
-    private taskQueueCollName = "task_queue";
-    constructor(private table: Collection) {}
+    constructor() {}
 
     /** 成功插入返回true, 如果数据库中已经存在ID, 返回false */
     async appendCompany(comp: CompanyCrawlerDataAppend) {
@@ -13,14 +19,14 @@ export class CompanyData {
             let res = checkType(comp, companyChecker, CheckTypeOption);
             if (res) throw new FieldCheckError(res);
         }
-        let res = await this.table.findOne({ companyId: comp.companyId, siteTag: comp.siteTag });
+        let res = await companyCollection.findOne({ companyId: comp.companyId, siteTag: comp.siteTag });
         if (res === null) {
-            await this.table.insertOne({ ...comp });
+            await companyCollection.insertOne({ ...comp });
             return true;
         }
         return false;
 
-        // this.table.updateOne({ _id: res._id }, patchObject(comp, res));
+        // companyCollection.updateOne({ _id: res._id }, patchObject(comp, res));
         //todo: 如果存在, 更新公司
     }
     /**
@@ -45,7 +51,7 @@ export class CompanyData {
         let idMap = getIdMap(newComps, siteTag);
         let notInsertComps: CompanyCrawlerDataAppend[] = []; //todo: 更新重复的公司
         {
-            let oldComps = await this.table
+            let oldComps = await companyCollection
                 .aggregate<WithId<Pick<CompanyCrawlerData, "companyId" | "siteTag">>>([
                     { $match: { siteTag, companyId: { $in: Object.keys(idMap) } } },
                     { $project: { siteTag: 1, companyId: 1 } },
@@ -59,7 +65,7 @@ export class CompanyData {
             }
         }
         let insertable = Object.values(idMap);
-        if (insertable.length) await this.table.insertMany(insertable);
+        if (insertable.length) await companyCollection.insertMany(insertable);
         return {
             inserted: insertable,
             uninserted: notInsertComps.length ? notInsertComps : null,
@@ -68,7 +74,7 @@ export class CompanyData {
     }
 
     async deleteCompany(compId: string) {
-        return this.table.deleteOne({ _id: new ObjectId(compId) });
+        return companyCollection.deleteOne({ _id: new ObjectId(compId) });
     }
 
     async appendCompanyTasksToTaskQueue(beforeTime: Date, options?: { siteTag?: SiteTag; expirationTime?: Date }) {
@@ -89,7 +95,7 @@ export class CompanyData {
             if (res) throw new FieldCheckError(res);
         }
         let siteTag = options?.siteTag;
-        let res = await this.table
+        let res = await companyCollection
             .aggregate<CrawlerPriorityCompanyTask>([
                 {
                     $match: {

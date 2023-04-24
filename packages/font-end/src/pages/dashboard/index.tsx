@@ -6,6 +6,7 @@ import { ApiReq } from "common/request/dashboard";
 import { WorkExp } from "common/request/enum";
 import { Body } from "./components/dash-left";
 import { Education } from "common/model";
+import LogoIcon from "@/components/img/logo";
 
 export default function () {
     const [filterOption, setFilterOption] = useState<ApiReq.MatchFilter>({});
@@ -76,11 +77,7 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
                 onValuesChange={() => setAnalyzable(true)}
             >
                 <div style={{ padding: 8, display: "flex", alignItems: "center", gap: "12px" }}>
-                    <Image
-                        src="/img/logo.webp"
-                        preview={false}
-                        style={{ borderRadius: "50%", width: "50px", padding: "5px", backgroundColor: "#fff" }}
-                    />
+                    <LogoIcon size={50} />
                     <b style={{ fontSize: "32px", color: "#FFF" }}>Visualized Analysis</b>
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>

@@ -1,20 +1,46 @@
-import { copyFile, readFile, writeFile, cp } from "node:fs/promises";
+import { readFile, writeFile, cp } from "node:fs/promises";
 import * as Path from "node:path";
 import * as Url from "url";
-
-async function copyPackageJson(srcPackagePath, distPackagePath) {
-    let data = await readFile(Path.resolve(srcPackagePath, "package.json"), "utf-8")
-    let packageJson = JSON.parse(data)
-    delete packageJson.devDependencies
-    let dependencies = packageJson.dependencies
-    for (const [key, value] of Object.entries(dependencies)) {
-        if (value.startsWith("workspace:") || value.startsWith("file:")) delete dependencies[key]
+/** @param {string} path */
+async function readJsonFile(path) {
+    let data = await readFile(path, "utf-8")
+    return JSON.parse(data)
+}
+class Pkg {
+    get packageJsonPath() {
+        return this.dir + "/package.json"
     }
-    await writeFile(distPackagePath + "/package.json", JSON.stringify(packageJson, null, 4)).then(() => {
+    /** @type string */
+    dir
+    constructor(home) {
+        this.dir = home
+    }
+    async readPackageJson() {
+        return readJsonFile(this.packageJsonPath)
+    }
+}
+
+
+async function copyPackageJson() {
+    let [backEndPkgJson, crawlerPkgJson] = await Promise.all([backEndPkg.readPackageJson(), crawlerPkg.readPackageJson()])
+
+    delete backEndPkgJson.devDependencies
+    let dependencies = Object.assign(crawlerPkgJson.dependencies, backEndPkgJson.dependencies)
+    backEndPkgJson.dependencies = dependencies
+
+    for (const [key, value] of Object.entries(dependencies)) {
+        if (value.startsWith("workspace:") || value.startsWith("file:")) {
+            console.log("本地依赖: " + key);
+            delete dependencies[key]
+        }
+    }
+
+    const distPkgPath = rootPkg.dir + "/dist/server_pack/package.json"
+    await writeFile(distPkgPath, JSON.stringify(backEndPkgJson, null, 4)).then(() => {
         console.log("重写package.json成功")
     })
 }
-async function copyFIle(srcPackage, distPackage) {
+async function copyFile(srcPackage, distPackage) {
     let src = Path.resolve(srcPackage, "dist"), dst = Path.resolve(distPackage, "dist")
     let pms1 = cp(src, dst, { recursive: true }).then(() => {
         console.log(`复制${src} > ${dst}`)
@@ -27,9 +53,9 @@ async function copyFIle(srcPackage, distPackage) {
     return Promise.all([pms1, pms2])
 }
 
-const projectDir = Path.resolve(Url.fileURLToPath(import.meta.url), "../..")
-const srcPackage = projectDir + "/packages/back-end"
-const distPackage = projectDir + "/dist/back-end"
 
-copyPackageJson(srcPackage, distPackage).catch(() => { console.error("重写package.json失败") })
-copyFIle(srcPackage, distPackage).catch((e) => { console.error("复制资源失败:"), console.log(e) })
+const rootPkg = new Pkg(Path.resolve(Url.fileURLToPath(import.meta.url), "../.."))
+const crawlerPkg = new Pkg(rootPkg.dir + "/packages/crawlers")
+const backEndPkg = new Pkg(rootPkg.dir + "/packages/back-end")
+
+copyPackageJson().catch((e) => { console.log(e); console.error("重写package.json失败") })

@@ -27,7 +27,7 @@ it("解析猎聘职位数据", function () {
         jobId: "56384201",
         jobData: {
             cityId: 101010100,
-            name: "招聘HR（北京/天津均可）",
+            name: "招聘hr",
             education: Education.本科,
             workExperience: -1,
             salaryMonth: 16,
