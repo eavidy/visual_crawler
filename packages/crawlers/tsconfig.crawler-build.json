@@ -2,7 +2,7 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "noEmit": false,
-        "outDir": "../../dist/crawler",
+        "outDir": "../../dist/server_pack/crawler",
         "skipLibCheck": true
     },
     "include": ["src"],

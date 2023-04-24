@@ -19,6 +19,6 @@ export default defineConfig({
     },
     build: {
         copyPublicDir: true,
-        outDir: "../../dist/public",
+        outDir: "../../dist/server_pack/public",
     },
 });

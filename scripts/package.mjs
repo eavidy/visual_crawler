@@ -35,7 +35,7 @@ async function copyPackageJson() {
         }
     }
 
-    const distPkgPath = rootPkg.dir + "/dist/package.json"
+    const distPkgPath = rootPkg.dir + "/dist/server_pack/package.json"
     await writeFile(distPkgPath, JSON.stringify(backEndPkgJson, null, 4)).then(() => {
         console.log("重写package.json成功")
     })

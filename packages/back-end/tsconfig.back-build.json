@@ -1,7 +1,7 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "outDir": "../../dist/back-end",
+        "outDir": "../../dist/server_pack/back-end",
         "skipLibCheck": true,
         "noEmit": false
     },

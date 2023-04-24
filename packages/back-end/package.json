@@ -10,8 +10,6 @@
     },
     "main": "./back-end/main.js",
     "dependencies": {
-        "playwright": "^1.31.1",
-        "@asnc/tslib": "file:A:/packages/@asnc/basic-libs/tslib",
         "@fastify/static": "^6.9.0",
         "@nestjs/common": "^9.0.0",
         "@nestjs/core": "^9.0.0",
@@ -20,8 +18,11 @@
         "@nestjs/serve-static": "^3.0.1",
         "common": "workspace:*",
         "mongodb": "^5.1.0",
+        "playwright": "^1.31.1",
         "reflect-metadata": "^0.1.13",
-        "rxjs": "^7.2.0"
+        "rxjs": "^7.2.0",
+        "tslib": "^2.5.0",
+        "@asnc/tslib": "link:A:/packages/@asnc/basic-libs/tslib"
     },
     "devDependencies": {
         "@nestjs/testing": "^9.3.12",
