@@ -1,30 +1,13 @@
-import type { ProSettings } from "@ant-design/pro-components";
-import { PageContainer, ProLayout, ProCard } from "@ant-design/pro-components";
+import type { ProLayoutProps, ProSettings } from "@ant-design/pro-components";
+import { ProLayout } from "@ant-design/pro-components";
 import { MenuProps } from "antd";
-import { useState } from "react";
-import { antdRouter } from "../admin.router";
 import React from "react";
 import Logo from "@/components/img/logo";
-import { Outlet, useLocation, useNavigate, useNavigation, useParams } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { UserAvatar } from "./components/user-avatar";
+import { BugOutlined, FileOutlined, UserOutlined } from "@ant-design/icons";
 
-function selectFirstSubMenu(path: string) {
-    let paths = path.split("/").slice(1);
-    let router = antdRouter;
-    for (let i = 0; i < paths.length && router.children?.length; i++) {
-        let key = paths[i];
-        let res = router.children?.find((val) => val.path === key);
-        if (res) router = res;
-    }
-
-    while (!router.lazy && router.children?.length) {
-        router = router.children[0];
-        path += "/" + router.path!;
-    }
-    return path;
-}
-
-const routerPrefix = "/v/admin";
+const routerPrefix = "/admin";
 export default () => {
     const settings: ProSettings | undefined = {
         title: "Visualized Analysis",
@@ -38,8 +21,7 @@ export default () => {
     function onMenuSelect(item: Parameters<NonNullable<MenuProps["onSelect"]>>[0]) {
         let path = item.key;
         if (path) {
-            let firstPath = selectFirstSubMenu(path);
-            navigate(routerPrefix + firstPath);
+            navigate(routerPrefix + path);
         }
     }
     function onMenuHeaderClick() {}
@@ -52,7 +34,7 @@ export default () => {
         >
             <ProLayout
                 logo={<Logo size={40} />}
-                route={antdRouter}
+                route={menus}
                 pageTitleRender={false}
                 location={{
                     pathname: pathname.slice(routerPrefix.length),
@@ -84,3 +66,61 @@ export default () => {
         </div>
     );
 };
+type MenuRoute = NonNullable<ProLayoutProps["route"]>;
+const menus: MenuRoute = {
+    path: "admin",
+
+    children: [
+        {
+            path: "crawler",
+            name: "采集器管理",
+            icon: <BugOutlined />,
+            children: [
+                {
+                    path: "",
+                },
+                {
+                    path: ":processId",
+                },
+            ],
+        },
+        {
+            path: "task",
+            name: "任务管理",
+            icon: <FileOutlined />,
+        },
+        {
+            path: "auth/user",
+            // name: "权限管理",
+            // icon: <SafetyCertificateOutlined />,
+            name: "用户管理",
+            icon: <UserOutlined />,
+            // children: [
+            //     {
+            //         path: "user",
+            //         name: "用户管理",
+            //         icon: <UserOutlined />,
+            //     },
+            //     {
+            //         path: "permission",
+            //         name: "权限配置",
+            //     },
+            // ],
+        },
+    ],
+};
+function selectFirstSubMenu(path: string) {
+    let paths = path.split("/").slice(1);
+    let router = menus;
+    for (let i = 0; i < paths.length && router.children?.length; i++) {
+        let key = paths[i];
+        let res = router.children?.find((val) => val.path === key);
+        if (res) router = res;
+    }
+
+    while (!router.lazy && router.children?.length) {
+        router = router.children[0];
+        path += "/" + router.path!;
+    }
+    return path;
+}

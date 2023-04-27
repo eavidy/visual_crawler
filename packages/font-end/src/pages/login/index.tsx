@@ -10,12 +10,11 @@ import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import { useRequest } from "ahooks";
 import { Effect } from "./components/effect";
-import styled from "@emotion/styled";
 import { PageContainer } from "@/components/page-container";
 import { createPwdHash } from "./funcs/pwd_hash";
 
 type LoginType = "phone" | "account";
-const loginFinGoTo = "/v/admin/crawler";
+const loginFinGoTo = "/admin/crawler";
 export default () => {
     const [loginType, setLoginType] = useState<LoginType>("phone");
     const navigate = useNavigate();
@@ -148,9 +147,3 @@ export default () => {
         </PageContainer>
     );
 };
-
-const CssLoginForm = styled(LoginForm)`
-    .ant-pro-form-login-top {
-        color: "red";
-    }
-`;
