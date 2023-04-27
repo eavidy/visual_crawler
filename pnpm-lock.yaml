@@ -17,6 +17,42 @@ importers:
         specifier: ^0.29.8
         version: registry.npmmirror.com/vitest@0.29.8
 
+  dist/server_pack:
+    dependencies:
+      '@fastify/static':
+        specifier: ^6.9.0
+        version: registry.npmmirror.com/@fastify/static@6.9.0
+      '@nestjs/common':
+        specifier: ^9.0.0
+        version: registry.npmmirror.com/@nestjs/common@9.3.9(reflect-metadata@0.1.13)(rxjs@7.8.0)
+      '@nestjs/core':
+        specifier: ^9.0.0
+        version: registry.npmmirror.com/@nestjs/core@9.3.9(@nestjs/common@9.3.9)(reflect-metadata@0.1.13)(rxjs@7.8.0)
+      '@nestjs/jwt':
+        specifier: ^10.0.3
+        version: registry.npmmirror.com/@nestjs/jwt@10.0.3(@nestjs/common@9.3.9)
+      '@nestjs/platform-fastify':
+        specifier: ^9.3.10
+        version: registry.npmmirror.com/@nestjs/platform-fastify@9.3.10(@fastify/static@6.9.0)(@nestjs/common@9.3.9)(@nestjs/core@9.3.9)
+      '@nestjs/serve-static':
+        specifier: ^3.0.1
+        version: registry.npmmirror.com/@nestjs/serve-static@3.0.1(@fastify/static@6.9.0)(@nestjs/common@9.3.9)(@nestjs/core@9.3.9)
+      mongodb:
+        specifier: ^5.1.0
+        version: registry.npmmirror.com/mongodb@5.1.0
+      playwright:
+        specifier: ^1.31.1
+        version: registry.npmmirror.com/playwright@1.31.1
+      reflect-metadata:
+        specifier: ^0.1.13
+        version: registry.npmmirror.com/reflect-metadata@0.1.13
+      rxjs:
+        specifier: ^7.2.0
+        version: registry.npmmirror.com/rxjs@7.8.0
+      tslib:
+        specifier: ^2.5.0
+        version: registry.npmmirror.com/tslib@2.5.0
+
   packages/back-end:
     dependencies:
       '@asnc/tslib':
@@ -119,9 +155,6 @@ importers:
       echarts:
         specifier: ^5.4.1
         version: registry.npmmirror.com/echarts@5.4.1
-      history:
-        specifier: ^5.3.0
-        version: registry.npmmirror.com/history@5.3.0
       js-md5:
         specifier: ^0.7.3
         version: registry.npmmirror.com/js-md5@0.7.3
@@ -1230,6 +1263,31 @@ packages:
       - supports-color
     dev: false
 
+  registry.npmmirror.com/@nestjs/serve-static@3.0.1(@fastify/static@6.9.0)(@nestjs/common@9.3.9)(@nestjs/core@9.3.9):
+    resolution: {integrity: sha512-i766UJPYOqvQ2BbRKh0/+Mmq5NkJnmKcShjWV1i5qpXyeM0KDZTn0n7g7ykWq/3LbQgjpMzrhYtGv35GX7GVQw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@nestjs/serve-static/-/serve-static-3.0.1.tgz}
+    id: registry.npmmirror.com/@nestjs/serve-static/3.0.1
+    name: '@nestjs/serve-static'
+    version: 3.0.1
+    peerDependencies:
+      '@fastify/static': ^6.5.0
+      '@nestjs/common': ^9.0.0
+      '@nestjs/core': ^9.0.0
+      express: ^4.18.1
+      fastify: ^4.7.0
+    peerDependenciesMeta:
+      '@fastify/static':
+        optional: true
+      express:
+        optional: true
+      fastify:
+        optional: true
+    dependencies:
+      '@fastify/static': registry.npmmirror.com/@fastify/static@6.9.0
+      '@nestjs/common': registry.npmmirror.com/@nestjs/common@9.3.9(reflect-metadata@0.1.13)(rxjs@7.8.0)
+      '@nestjs/core': registry.npmmirror.com/@nestjs/core@9.3.9(@nestjs/common@9.3.9)(reflect-metadata@0.1.13)(rxjs@7.8.0)
+      path-to-regexp: registry.npmmirror.com/path-to-regexp@0.2.5
+    dev: false
+
   registry.npmmirror.com/@nestjs/serve-static@3.0.1(@fastify/static@6.9.0)(@nestjs/common@9.3.9)(@nestjs/core@9.3.9)(fastify@4.15.0):
     resolution: {integrity: sha512-i766UJPYOqvQ2BbRKh0/+Mmq5NkJnmKcShjWV1i5qpXyeM0KDZTn0n7g7ykWq/3LbQgjpMzrhYtGv35GX7GVQw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@nestjs/serve-static/-/serve-static-3.0.1.tgz}
     id: registry.npmmirror.com/@nestjs/serve-static/3.0.1
@@ -1574,13 +1632,14 @@ packages:
     name: '@types/jsonwebtoken'
     version: 9.0.1
     dependencies:
-      '@types/node': registry.npmmirror.com/@types/node@18.11.18
+      '@types/node': registry.npmmirror.com/@types/node@18.16.0
     dev: false
 
   registry.npmmirror.com/@types/node@18.11.18:
     resolution: {integrity: sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/node/-/node-18.11.18.tgz}
     name: '@types/node'
     version: 18.11.18
+    dev: true
 
   registry.npmmirror.com/@types/node@18.14.2:
     resolution: {integrity: sha512-1uEQxww3DaghA0RxqHx0O0ppVlo43pJhepY51OxuQIKHpjbnYLA7vcdwioNPzIqmC2u3I/dmylcqjlh0e7AyUA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/node/-/node-18.14.2.tgz}
@@ -1592,7 +1651,6 @@ packages:
     resolution: {integrity: sha512-BsAaKhB+7X+H4GnSjGhJG9Qi8Tw+inU9nJDwmD5CgOmBLEI6ArdhikpLX7DjbjDRDTbqZzU2LSQNZg8WGPiSZQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/node/-/node-18.16.0.tgz}
     name: '@types/node'
     version: 18.16.0
-    dev: true
 
   registry.npmmirror.com/@types/parse-json@4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/parse-json/-/parse-json-4.0.0.tgz}
@@ -1638,7 +1696,7 @@ packages:
     name: '@types/whatwg-url'
     version: 8.2.2
     dependencies:
-      '@types/node': registry.npmmirror.com/@types/node@18.11.18
+      '@types/node': registry.npmmirror.com/@types/node@18.16.0
       '@types/webidl-conversions': registry.npmmirror.com/@types/webidl-conversions@7.0.0
     dev: false
 
@@ -2545,14 +2603,6 @@ packages:
     engines: {node: '>= 0.4.0'}
     dependencies:
       function-bind: registry.npmmirror.com/function-bind@1.1.1
-    dev: false
-
-  registry.npmmirror.com/history@5.3.0:
-    resolution: {integrity: sha512-ZqaKwjjrAYUYfLG+htGaIIZ4nioX2L70ZUMIFysS3xvBsSG4x/n1V6TXV3N8ZYNuFGlDirFg32T7B6WOUPDYcQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/history/-/history-5.3.0.tgz}
-    name: history
-    version: 5.3.0
-    dependencies:
-      '@babel/runtime': registry.npmmirror.com/@babel/runtime@7.21.0
     dev: false
 
   registry.npmmirror.com/hoist-non-react-statics@3.3.2:
