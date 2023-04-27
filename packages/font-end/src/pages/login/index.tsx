@@ -12,6 +12,7 @@ import { useRequest } from "ahooks";
 import { Effect } from "./components/effect";
 import { PageContainer } from "@/components/page-container";
 import { createPwdHash } from "./funcs/pwd_hash";
+import { loginResource } from "./services/login.reaource";
 
 type LoginType = "phone" | "account";
 const loginFinGoTo = "/admin/crawler";
@@ -25,7 +26,7 @@ export default () => {
             saveState: req.saveState,
         };
         try {
-            const { data } = await $http.post<ApiRes.Login>("/auth/login", reqParams);
+            const data = await loginResource.login(reqParams);
             $localStore.setToken(req.userId, data.accessToken);
             message.success("登录成功");
             navigate(loginFinGoTo);
@@ -34,7 +35,7 @@ export default () => {
             response?.data?.message && message.error(response?.data.message);
         }
     }
-    const { data, loading } = useRequest(() => $http.get<ApiRes.Visitor>("/auth/visitor").then(({ data }) => data));
+    const { data, loading } = useRequest(loginResource.getVisitor);
     return (
         <PageContainer
             contentStyle={{
@@ -95,9 +96,12 @@ export default () => {
                         </flex>
                     }
                 >
-                    <Tabs centered activeKey={loginType} onChange={(activeKey) => setLoginType(activeKey as LoginType)}>
-                        <Tabs.TabPane key={"account"} tab={"账号密码登录"} disabled />
-                    </Tabs>
+                    <Tabs
+                        items={[{ key: "account", label: "账号密码登录", disabled: true }]}
+                        centered
+                        activeKey={loginType}
+                        onChange={(activeKey) => setLoginType(activeKey as LoginType)}
+                    />
                     <ProFormText
                         name="userId"
                         fieldProps={{

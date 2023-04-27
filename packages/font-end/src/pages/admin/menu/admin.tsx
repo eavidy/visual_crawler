@@ -27,9 +27,9 @@ export default () => {
     function onMenuHeaderClick() {}
     return (
         <div
-            id="test-pro-layout"
             style={{
                 height: "100vh",
+                overflowX: "hidden",
             }}
         >
             <ProLayout

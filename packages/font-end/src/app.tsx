@@ -7,8 +7,6 @@ import { useGlobalNavigate } from "./utils/global-navigate";
 
 export default function App() {
     useGlobalNavigate(); //react-router v6 navigate, 解决axios拦截器外部修改路由的问题
-    console.log("render");
-
     return (
         <ConfigProvider
             locale={zhCN}
