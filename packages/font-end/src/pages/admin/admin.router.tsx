@@ -1,4 +1,9 @@
 import { lazyComponent } from "@/components/layz-component";
+import { ErrorPage } from "@/components/state/error";
+import { AuthorizationError } from "@/errors/auth.err";
+import { $http, $localStore } from "@/http";
+import { AxiosError } from "axios";
+import React from "react";
 import type { RouteObject } from "react-router-dom";
 
 const router: RouteObject = {
@@ -51,5 +56,25 @@ const router: RouteObject = {
             ],
         },
     ],
+    /** 页面访问权限检测 */
+    async loader({ params, request, context }) {
+        if (!$localStore.accessToken) throw new AuthorizationError("未授权", "unauthorize");
+
+        try {
+            await $http.post("/auth/visit_page");
+        } catch (e) {
+            if (e instanceof AxiosError) {
+                const { response, message } = e;
+                debugger;
+                if (response) throw new AuthorizationError(response.data.message, response.statusText);
+
+                throw new Error("授权检测失败: " + message);
+            }
+
+            throw e;
+        }
+        return null;
+    },
+    errorElement: <ErrorPage />,
 };
 export default router;
