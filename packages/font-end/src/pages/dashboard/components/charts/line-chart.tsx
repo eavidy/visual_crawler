@@ -1,7 +1,8 @@
 import { Card } from "@/components/card";
 import { Echarts } from "@/components/echarts";
+import { Empty } from "antd";
 import { EChartsOption } from "echarts";
-import React, { CSSProperties, useMemo } from "react";
+import React, { CSSProperties, useEffect, useMemo, useRef } from "react";
 
 export function LineChart(props: {
     data?: Record<string, any>[];
@@ -13,7 +14,13 @@ export function LineChart(props: {
 }) {
     const { data, dimensions, nameMap = {}, title } = props;
     const option = useMemo(() => {
-        if (!data) return;
+        if (!data?.length)
+            return {
+                title: {
+                    left: "center",
+                    text: title,
+                },
+            };
         const option: EChartsOption = {
             title: {
                 left: "center",
@@ -45,9 +52,22 @@ export function LineChart(props: {
         };
         return option;
     }, [data, dimensions]);
+    const ref = useRef<echarts.ECharts>();
+    const isEmpty = !data?.length;
+    useEffect(() => {
+        ref.current?.resize();
+    }, [isEmpty]);
+
     return (
         <Card style={props.style}>
-            <Echarts option={option} style={{ height: "100%" }} state={{ loading: props.loading }} />
+            <Echarts
+                ref={ref}
+                option={option}
+                noMerged
+                style={{ height: isEmpty ? 100 : "100%" }}
+                state={{ loading: props.loading }}
+            />
+            {isEmpty && <Empty />}
         </Card>
     );
 }

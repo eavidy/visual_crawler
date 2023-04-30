@@ -8,14 +8,15 @@ import { Body } from "./components/dash-left";
 import { Education } from "common/model";
 import LogoIcon from "@/components/img/logo";
 
+document.body.style.overflowY = "hidden";
+
 export default function () {
     const [filterOption, setFilterOption] = useState<ApiReq.MatchFilter>({});
     return (
-        <div
+        <flex
             style={{
                 width: "100%",
                 height: "100%",
-                display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
                 background: "#F5F5F5",
@@ -24,7 +25,7 @@ export default function () {
         >
             <Header onAnalysis={(values) => setFilterOption(values)} />
             <Body filterOptions={filterOption} />
-        </div>
+        </flex>
     );
 }
 

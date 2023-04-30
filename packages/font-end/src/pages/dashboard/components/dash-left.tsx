@@ -1,6 +1,6 @@
 import { useRequest } from "ahooks";
 import { ApiReq } from "common/request/dashboard";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { dashboardService } from "../services/dashboard.service";
 import { Top20Billboard } from "./charts/billboard";
 import { LineChart } from "./charts/line-chart";
@@ -8,12 +8,6 @@ import { PipChart } from "./charts/pip-chart";
 
 export function Body(props: { filterOptions: ApiReq.MatchFilter }) {
     const { filterOptions } = props;
-    const { data: dataByCity, loading: cityDataLoading } = useRequest(
-        () => dashboardService.getAnalysisByCity(filterOptions),
-        {
-            refreshDeps: [filterOptions],
-        }
-    );
 
     return (
         <flex

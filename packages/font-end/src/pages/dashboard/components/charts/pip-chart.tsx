@@ -1,7 +1,8 @@
 import { Card } from "@/components/card";
 import { Echarts } from "@/components/echarts";
+import { Empty } from "antd";
 import { EChartsOption } from "echarts";
-import React, { CSSProperties } from "react";
+import React, { CSSProperties, useEffect, useRef } from "react";
 import { useMemo } from "react";
 
 export function PipChart(props: {
@@ -14,7 +15,13 @@ export function PipChart(props: {
 }) {
     const { data, dimensions, nameMap = {}, title } = props;
     const option = useMemo(() => {
-        if (!data) return;
+        if (!data || data.length == 0)
+            return {
+                title: {
+                    text: title,
+                    left: "center",
+                },
+            };
         const option: EChartsOption = {
             title: {
                 text: title,
@@ -51,10 +58,20 @@ export function PipChart(props: {
         };
         return option;
     }, [data, dimensions, nameMap, title]);
+    const isEmpty = !data?.length;
+    const ref = useRef<echarts.ECharts>();
+    useEffect(() => ref.current?.resize(), [isEmpty]);
 
     return (
         <Card style={props.style}>
-            <Echarts style={{ height: "100%" }} option={option} state={{ loading: props.loading }} />
+            <Echarts
+                ref={ref}
+                style={{ height: isEmpty ? 100 : "100%" }}
+                option={option}
+                noMerged
+                state={{ loading: props.loading }}
+            />
+            {isEmpty && <Empty />}
         </Card>
     );
 }
