@@ -8,6 +8,7 @@ import { WorkExp } from "common/request/enum";
 import { Body } from "./components/dash-left";
 import { Education } from "common/model";
 import LogoIcon from "@/components/img/logo";
+import { Link } from "react-router-dom";
 
 document.body.style.overflowY = "hidden";
 
@@ -92,7 +93,9 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
                 onValuesChange={() => setAnalyzable(true)}
             >
                 <div style={{ padding: 8, display: "flex", alignItems: "center", gap: "12px" }}>
-                    <LogoIcon size={50} />
+                    <Link to="/login" title="后台管理">
+                        <LogoIcon size={50} />
+                    </Link>
                     <b style={{ fontSize: "32px", color: "#FFF" }}>Visualized Analysis</b>
                 </div>
                 <div style={{ display: "flex", gap: "8px", paddingRight: 20 }}>

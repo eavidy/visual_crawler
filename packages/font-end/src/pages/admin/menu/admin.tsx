@@ -33,7 +33,7 @@ export default () => {
             }}
         >
             <ProLayout
-                logo={<Logo size={40} />}
+                logo={<Logo size={40} onClick={() => navigate("/")} title="首页" />}
                 route={menus}
                 pageTitleRender={false}
                 location={{

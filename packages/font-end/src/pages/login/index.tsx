@@ -7,7 +7,7 @@ import LogoIcon from "@/components/img/logo";
 import { $http, $localStore } from "@/http";
 import { ApiReq, ApiRes } from "common/request/login";
 import { AxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useRequest } from "ahooks";
 import { Effect } from "./components/effect";
 import { PageContainer } from "@/components/page-container";
@@ -63,7 +63,11 @@ export default () => {
             </div>
             <div style={{ padding: 24 }}>
                 <LoginForm
-                    logo={<LogoIcon style={{ border: "1px #5470C6 solid" }} />}
+                    logo={
+                        <Link to="/" title="首页">
+                            <LogoIcon style={{ border: "1px #5470C6 solid" }} />
+                        </Link>
+                    }
                     style={{ flex: 0 }}
                     title="Visualized Analysis"
                     subTitle="基于爬虫的职位信息可视化系统"
