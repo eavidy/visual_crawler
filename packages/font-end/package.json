@@ -13,6 +13,7 @@
     "dependencies": {
         "@ant-design/icons": "^5.0.1",
         "@ant-design/pro-components": "^2.4.4",
+        "@emotion/css": "^11.10.8",
         "@emotion/react": "^11.10.6",
         "@emotion/styled": "^11.10.6",
         "ahooks": "^3.7.5",
@@ -29,6 +30,7 @@
     "devDependencies": {
         "@types/js-md5": "^0.7.0",
         "@types/react": "^18.0.28",
-        "@types/react-dom": "^18.0.11"
+        "@types/react-dom": "^18.0.11",
+        "dayjs": "^1.11.7"
     }
 }
