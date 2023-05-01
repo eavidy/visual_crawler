@@ -22,11 +22,7 @@ export class JobsData {
         for (let i = 0; i < results.length; i++) {
             let job = jobs[i];
             if (results[i]) repeated.push(job);
-            else {
-                if ((await jobsCollection.find({ jobId: job.jobId }).toArray()).length) console.log(job.jobId);
-
-                insertable.push(job);
-            }
+            else insertable.push(job);
         }
         return { repeated, insertable };
     }
