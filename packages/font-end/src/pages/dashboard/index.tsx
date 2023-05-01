@@ -1,21 +1,24 @@
 import { useRequest } from "ahooks";
 import React, { useMemo, useState } from "react";
 import { DatePicker, Input, Select, Form, Image, Button, Dropdown } from "antd";
+import type { Dayjs } from "dayjs";
 import { $http } from "@/http";
 import { ApiReq } from "common/request/dashboard";
 import { WorkExp } from "common/request/enum";
 import { Body } from "./components/dash-left";
 import { Education } from "common/model";
 import LogoIcon from "@/components/img/logo";
+import { Link } from "react-router-dom";
+
+document.body.style.overflowY = "hidden";
 
 export default function () {
     const [filterOption, setFilterOption] = useState<ApiReq.MatchFilter>({});
     return (
-        <div
+        <flex
             style={{
                 width: "100%",
                 height: "100%",
-                display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",
                 background: "#F5F5F5",
@@ -24,7 +27,7 @@ export default function () {
         >
             <Header onAnalysis={(values) => setFilterOption(values)} />
             <Body filterOptions={filterOption} />
-        </div>
+        </flex>
     );
 }
 
@@ -49,7 +52,7 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
             debounceWait: 500,
         }
     );
-    const [form] = Form.useForm<ApiReq.MatchFilter>();
+    const [form] = Form.useForm<Omit<ApiReq.MatchFilter, "startTime" | "endTime"> & { timeRange?: number }>();
     const workExpOption = useMemo(() => {
         return getNumEnumEntires(WorkExp).map(([label, value]) => ({
             label,
@@ -65,7 +68,20 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
     function onAnalysis() {
         setAnalyzable(false);
         const values = form.getFieldsValue();
-        onChange(values);
+        const timeRange = values.timeRange;
+        Reflect.deleteProperty(values, "timeRange");
+        let onChangeVal: ApiReq.MatchFilter = timeRange ? Object.assign(values, timeRange) : values;
+        onChange(onChangeVal);
+    }
+    function formatTimeRange(e?: Dayjs[]) {
+        if (!e) return;
+        let startTime = e[0] ? new Date(e[0].get("year"), 0, 1, 0, 0, 0, 0).getTime() : undefined;
+        let endTime = e[1] ? new Date(e[1].get("year"), 11, 31, 23, 59, 59, 999).getTime() : undefined;
+
+        return {
+            endTime,
+            startTime,
+        };
     }
 
     return (
@@ -77,10 +93,12 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
                 onValuesChange={() => setAnalyzable(true)}
             >
                 <div style={{ padding: 8, display: "flex", alignItems: "center", gap: "12px" }}>
-                    <LogoIcon size={50} />
+                    <Link to="/login" title="后台管理">
+                        <LogoIcon size={50} />
+                    </Link>
                     <b style={{ fontSize: "32px", color: "#FFF" }}>Visualized Analysis</b>
                 </div>
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div style={{ display: "flex", gap: "8px", paddingRight: 20 }}>
                     <Form.Item name="cityId">
                         <Select
                             options={data}
@@ -98,23 +116,15 @@ function Header(props: { onAnalysis: (value: ApiReq.MatchFilter) => void }) {
                     <Form.Item name="education">
                         <Select placeholder="学历" style={{ width: 100 }} options={eduOption} allowClear />
                     </Form.Item>
-                    <Form.Item
-                        name="startTime"
-                        getValueProps={(e) => {
-                            return {};
-                        }}
-                        getValueFromEvent={(e) => e?.toDate().getTime()}
-                    >
-                        <DatePicker picker="year" placeholder="起始年份" style={{ width: 100 }} allowClear />
-                    </Form.Item>
-                    <Form.Item
-                        name="endTime"
-                        getValueProps={(e) => {
-                            return {};
-                        }}
-                        getValueFromEvent={(e) => e?.toDate().getTime()}
-                    >
-                        <DatePicker picker="year" placeholder="结束年份" style={{ width: 100 }} allowClear />
+                    <Form.Item name="timeRange" getValueProps={(e) => ({})} getValueFromEvent={formatTimeRange}>
+                        <DatePicker.RangePicker
+                            picker="year"
+                            allowEmpty={[true, true]}
+                            disabledDate={(e) => {
+                                let y = e.get("year");
+                                return y < 2023 || y > new Date().getFullYear();
+                            }}
+                        />
                     </Form.Item>
                     <div style={{ justifySelf: "center", display: "flex", gap: "24px", justifyContent: "right" }}>
                         <Dropdown

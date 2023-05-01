@@ -29,8 +29,10 @@ async function copyPackageJson() {
     backEndPkgJson.dependencies = dependencies
 
     for (const [key, value] of Object.entries(dependencies)) {
-        if (value.startsWith("workspace:") || value.startsWith("file:")) {
-            console.log("本地依赖: " + key);
+        /** @type string */
+        let protocol = value.match(/^.+?:/)?.[0]
+        if (protocol === "workspace:" || protocol === "file:" || protocol === "link:") {
+            console.log("本地依赖: " + key + " -- " + protocol);
             delete dependencies[key]
         }
     }

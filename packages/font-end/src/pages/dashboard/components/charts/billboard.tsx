@@ -1,5 +1,6 @@
 import { Card } from "@/components/card";
 import { Echarts } from "@/components/echarts";
+import { Empty } from "antd";
 import type { EChartsOption, SeriesOption } from "echarts";
 import React, { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
@@ -21,7 +22,11 @@ export function Top20Billboard(props: {
 
     let height = 19 * (currentBoard?.length ?? 0) + 80;
     const cityBoardOption = useMemo(() => {
-        if (!currentBoard) return undefined;
+        if (!currentBoard || currentBoard.length === 0) {
+            return {
+                title: { text: title },
+            };
+        }
         let series: SeriesOption = { type: "bar", label: { show: true, position: "insideLeft" } };
         let option: EChartsOption = {
             title: {
@@ -64,7 +69,8 @@ export function Top20Billboard(props: {
     }, [echartsRef.current]);
     return (
         <Card style={props.style}>
-            <Echarts ref={echartsRef} style={{ height }} option={cityBoardOption} state={{ loading }} />
+            <Echarts ref={echartsRef} style={{ height }} option={cityBoardOption} noMerged state={{ loading }} />
+            {!currentBoard?.length ? <Empty /> : undefined}
         </Card>
     );
 }

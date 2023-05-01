@@ -1,5 +1,6 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
 import { message } from "antd";
+import axios, { AxiosError, AxiosResponse } from "axios";
+import { navigate } from "@/utils/global-navigate";
 
 class LocalStore {
     constructor() {}
@@ -20,7 +21,7 @@ class LocalStore {
 }
 export const $localStore = new LocalStore();
 
-export const $http = axios.create({});
+export const $http = axios.create();
 $http.interceptors.request.use(function (config) {
     config.headers.set("access-token", $localStore.accessToken);
     return config;
@@ -31,7 +32,7 @@ $http.interceptors.response.use(undefined, function (error: AxiosError<any>) {
         let errData = response.data;
         if (response.status === 401) {
             if (errData.message === "jwt expired") {
-                location.href = "/v/login";
+                navigate("/login");
             } else message.error("权限不足");
         }
         if (errData.report && errData.message) message.error(errData.message);

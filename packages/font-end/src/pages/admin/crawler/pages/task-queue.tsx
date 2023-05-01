@@ -1,6 +1,6 @@
-import { Button, Card, Form, Input, Modal, Select, Space, Switch, Table, TableProps, message } from "antd";
+import { Button, Card, Form, Modal, Select, Space, Table, TableProps, message } from "antd";
 import React, { useState } from "react";
-import { DefaultStatus, FailedStatus, FinishedStatus, ProcessingStatus } from "@/components/status-bar";
+import { DefaultStatus, FailedStatus, FinishedStatus } from "@/components/status-bar";
 import { useRequest } from "ahooks";
 import { taskQueueResource, TaskQueueList, GetTasksFilterOption } from "../services/task-queue.resource";
 import { PageContainer } from "@ant-design/pro-components";

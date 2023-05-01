@@ -23,6 +23,17 @@ export enum CompanyScale {
     gt_10000 = 1000,
     unknown = -1,
 }
-export * from "./company";
-export * from "./job";
-export * from "./task_queue";
+export enum TaskState {
+    unexecuted = 0,
+    executing = 1,
+    executed = 2,
+    failed = 3,
+}
+
+export enum TaskType {
+    company = "company",
+    jobFilter = "jobFilter",
+}
+export type * from "./company";
+export type * from "./job";
+export type * from "./task_queue";

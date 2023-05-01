@@ -7,15 +7,15 @@ import LogoIcon from "@/components/img/logo";
 import { $http, $localStore } from "@/http";
 import { ApiReq, ApiRes } from "common/request/login";
 import { AxiosError } from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useRequest } from "ahooks";
 import { Effect } from "./components/effect";
-import styled from "@emotion/styled";
 import { PageContainer } from "@/components/page-container";
 import { createPwdHash } from "./funcs/pwd_hash";
+import { loginResource } from "./services/login.reaource";
 
 type LoginType = "phone" | "account";
-const loginFinGoTo = "/v/admin/crawler";
+const loginFinGoTo = "/admin/crawler";
 export default () => {
     const [loginType, setLoginType] = useState<LoginType>("phone");
     const navigate = useNavigate();
@@ -26,7 +26,7 @@ export default () => {
             saveState: req.saveState,
         };
         try {
-            const { data } = await $http.post<ApiRes.Login>("/auth/login", reqParams);
+            const data = await loginResource.login(reqParams);
             $localStore.setToken(req.userId, data.accessToken);
             message.success("登录成功");
             navigate(loginFinGoTo);
@@ -35,7 +35,7 @@ export default () => {
             response?.data?.message && message.error(response?.data.message);
         }
     }
-    const { data, loading } = useRequest(() => $http.get<ApiRes.Visitor>("/auth/visitor").then(({ data }) => data));
+    const { data, loading } = useRequest(loginResource.getVisitor);
     return (
         <PageContainer
             contentStyle={{
@@ -63,7 +63,11 @@ export default () => {
             </div>
             <div style={{ padding: 24 }}>
                 <LoginForm
-                    logo={<LogoIcon style={{ border: "1px #5470C6 solid" }} />}
+                    logo={
+                        <Link to="/" title="首页">
+                            <LogoIcon style={{ border: "1px #5470C6 solid" }} />
+                        </Link>
+                    }
                     style={{ flex: 0 }}
                     title="Visualized Analysis"
                     subTitle="基于爬虫的职位信息可视化系统"
@@ -96,9 +100,12 @@ export default () => {
                         </flex>
                     }
                 >
-                    <Tabs centered activeKey={loginType} onChange={(activeKey) => setLoginType(activeKey as LoginType)}>
-                        <Tabs.TabPane key={"account"} tab={"账号密码登录"} disabled />
-                    </Tabs>
+                    <Tabs
+                        items={[{ key: "account", label: "账号密码登录", disabled: true }]}
+                        centered
+                        activeKey={loginType}
+                        onChange={(activeKey) => setLoginType(activeKey as LoginType)}
+                    />
                     <ProFormText
                         name="userId"
                         fieldProps={{
@@ -148,9 +155,3 @@ export default () => {
         </PageContainer>
     );
 };
-
-const CssLoginForm = styled(LoginForm)`
-    .ant-pro-form-login-top {
-        color: "red";
-    }
-`;
