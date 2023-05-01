@@ -1,11 +1,13 @@
-import { Controller, Post, UseGuards } from "@nestjs/common";
+import { Controller, Headers, Post } from "@nestjs/common";
 import { authGuard } from "./grand";
+import { IncomingHttpHeaders } from "node:http";
 
-@UseGuards(authGuard)
 @Controller()
 export class AuthenticationController {
     constructor() {}
 
     @Post("visit_page")
-    async pageIsVisibility(): Promise<void> {}
+    async pageIsVisibility(@Headers() headers: IncomingHttpHeaders): Promise<void> {
+        authGuard.parseToken(headers);
+    }
 }
