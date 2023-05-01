@@ -5,6 +5,7 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
+        "importHelpers": true,
         "rootDir": "./src",
         "baseUrl": "./",
         "noEmit": true

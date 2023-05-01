@@ -111,7 +111,11 @@ importers:
         specifier: ^4.15.0
         version: registry.npmmirror.com/fastify@4.15.0
 
-  packages/common: {}
+  packages/common:
+    devDependencies:
+      tslib:
+        specifier: ^2.5.0
+        version: registry.npmmirror.com/tslib@2.5.0
 
   packages/crawlers:
     dependencies:
@@ -127,6 +131,9 @@ importers:
       playwright:
         specifier: ^1.31.1
         version: registry.npmmirror.com/playwright@1.31.1
+      tslib:
+        specifier: ^2.5.0
+        version: registry.npmmirror.com/tslib@2.5.0
     devDependencies:
       '@types/node':
         specifier: ^18.14.2

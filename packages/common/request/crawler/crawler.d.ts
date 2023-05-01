@@ -1,5 +1,5 @@
 import { CrawlerProcessStatus, CrawlerStatus } from "../enum";
-import { CrawlerPriorityCompanyTask, CrawlerPriorityJobFilterTask, TaskType } from "../../model/task_queue";
+import { CrawlerPriorityCompanyTask, CrawlerPriorityJobFilterTask, TaskType } from "../../model";
 type TaskInfo = CrawlerPriorityCompanyTask | CrawlerPriorityJobFilterTask;
 export namespace ApiReq {
     type CreateCrawler = CreateCrawlerOptions;

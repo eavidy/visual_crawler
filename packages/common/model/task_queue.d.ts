@@ -1,15 +1,4 @@
-import { SiteTag, Education, CompanyScale } from ".";
-export enum TaskState {
-    unexecuted = 0,
-    executing = 1,
-    executed = 2,
-    failed = 3,
-}
-
-export enum TaskType {
-    company = "company",
-    jobFilter = "jobFilter",
-}
+import { SiteTag, Education, CompanyScale, TaskType, TaskState } from ".";
 
 export type CrawlerTaskAppend = Omit<CrawlerPriorityTask, "status">;
 
