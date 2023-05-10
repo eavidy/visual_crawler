@@ -8,6 +8,6 @@ export class AuthenticationController {
 
     @Post("visit_page")
     async pageIsVisibility(@Headers() headers: IncomingHttpHeaders): Promise<void> {
-        authGuard.parseToken(headers);
+        await authGuard.parseToken(headers);
     }
 }

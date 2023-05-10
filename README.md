@@ -4,11 +4,11 @@
 
 语言: Typescript
 
-前端: React + Antd + Echarts + Vite
-后端: Nest
-数据库: MongoDB
-爬虫: Playwright
-单元测试: Vitest
+前端: React + Antd + Echarts + Vite\
+后端: Nest\
+数据库: MongoDB\
+爬虫: Playwright\
+单元测试: Vitest\
 
 ### 功能模块
 
@@ -30,7 +30,7 @@
 |  ├─ public          //前端资源
 |  └─ package.json
 |
-├─ docs             //文档      
+├─ docs             //文档
 |  └─ ...
 |
 ├─ packages

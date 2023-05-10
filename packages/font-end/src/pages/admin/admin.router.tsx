@@ -65,7 +65,6 @@ const router: RouteObject = {
         } catch (e) {
             if (e instanceof AxiosError) {
                 const { response, message } = e;
-                debugger;
                 if (response) throw new AuthorizationError(response.data.message, response.statusText);
 
                 throw new Error("授权检测失败: " + message);

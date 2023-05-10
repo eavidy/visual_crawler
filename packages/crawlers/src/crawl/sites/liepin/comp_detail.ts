@@ -19,7 +19,7 @@ export class LiePinCompanyDetail extends PageCrawl {
 
     async open(companyInfo: CompInfo, timeout = 20 * 1000) {
         let page = await this.newPage();
-        let urlChecker = /apic\.liepin\.com\/api\/com\.liepin\.searchfront4c\.pc-comp-homepage-search-job$/;
+        let urlChecker = /\/api\/com\.liepin\.searchfront4c\.pc-comp-homepage-search-job$/;
         page.on("response", (res) => {
             if (/safe\.liepin\.com\/page\/liepin\/captchaPage_ip_PC/.test(res.url())) {
                 this.emit("auth");
