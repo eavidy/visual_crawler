@@ -10,6 +10,7 @@
     },
     "main": "./back-end/main.js",
     "dependencies": {
+        "@asnc/tslib": "link:A:/packages/@asnc/basic-libs/tslib",
         "@fastify/static": "^6.9.0",
         "@nestjs/common": "^9.0.0",
         "@nestjs/core": "^9.0.0",
@@ -22,7 +23,7 @@
         "reflect-metadata": "^0.1.13",
         "rxjs": "^7.2.0",
         "tslib": "^2.5.0",
-        "@asnc/tslib": "link:A:/packages/@asnc/basic-libs/tslib"
+        "winston": "^3.8.2"
     },
     "devDependencies": {
         "@nestjs/testing": "^9.3.12",

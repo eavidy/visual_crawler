@@ -154,7 +154,7 @@ export class DashService {
     }
     async getJobBillboard(matchFilter: MatchFilter) {
         if (Object.keys(matchFilter).length === 0 && this.cache.jobBillboard) return this.cache.jobBillboard;
-        let allBillboard = await this.jobAnalysisDbService.avgAndTotalByJob(matchFilter, 20);
+        let allBillboard = await this.jobAnalysisDbService.avgAndTotalByJob(matchFilter, 30);
         for (const data of Object.values(allBillboard)) {
             for (const item of data) {
                 item.avgSalary = mathRound(item.avgSalary, 2);

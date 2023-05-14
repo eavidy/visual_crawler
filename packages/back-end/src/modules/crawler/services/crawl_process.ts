@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import type { CreateCrawlProcessOptions } from "common/request/crawler/crawl_process";
 import type { CreateCrawlerOptions, CrawlerInfo } from "common/request/crawler/crawler";
 import { CrawlerProcessStatus, CrawlerStatus } from "common/request/enum";
-import type { CrawlerPriorityCompanyTask, CrawlerPriorityJobFilterTask, TaskType } from "common/model/task_queue";
+import type { CrawlerPriorityCompanyTask, CrawlerPriorityJobFilterTask } from "common/model";
 type TaskInfo = CrawlerPriorityCompanyTask | CrawlerPriorityJobFilterTask;
 /**
  * @event initDevice void
@@ -210,7 +210,7 @@ export class CrawlProcess extends EventEmitter {
         status = CrawlerStatus.stopped;
     };
 }
-export type CrawlerHandle = InstanceType<typeof CrawlProcess["CrawlerHandle"]>;
+export type CrawlerHandle = InstanceType<(typeof CrawlProcess)["CrawlerHandle"]>;
 
 function processSend(process: ChildProcess, msg: any) {
     return new Promise<void>(function (resolve, reject) {

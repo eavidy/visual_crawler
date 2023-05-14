@@ -1,26 +1,20 @@
 import { lazyComponent } from "@/components/layz-component";
-import { BugOutlined, FileOutlined, SafetyCertificateOutlined, UserOutlined } from "@ant-design/icons";
+import { ErrorPage } from "@/components/state/error";
+import { AuthorizationError } from "@/errors/auth.err";
+import { $http, $localStore } from "@/http";
+import { AxiosError } from "axios";
 import React from "react";
 import type { RouteObject } from "react-router-dom";
-export interface RouterMeta {
-    name: string;
-    icon?: JSX.Element;
-}
-export type ExtraRouterObject = Pick<RouteObject, "path" | "lazy"> & {
-    meta?: RouterMeta;
-    children?: ExtraRouterObject[];
-};
 
-const router: ExtraRouterObject = {
+const router: RouteObject = {
     path: "admin",
     lazy: () => lazyComponent(import("./menu/admin")),
 
     children: [
         {
             path: "crawler",
-            meta: {
+            handle: {
                 name: "采集器管理",
-                icon: <BugOutlined />,
             },
             children: [
                 {
@@ -35,9 +29,8 @@ const router: ExtraRouterObject = {
         },
         {
             path: "task",
-            meta: {
+            handle: {
                 name: "任务管理",
-                icon: <FileOutlined />,
             },
             children: [
                 {
@@ -48,43 +41,39 @@ const router: ExtraRouterObject = {
         },
         {
             path: "auth",
-            meta: {
-                // name: "权限管理",
-                // icon: <SafetyCertificateOutlined />,
+            handle: {
                 name: "用户管理",
-                icon: <UserOutlined />,
             },
             children: [
                 {
                     path: "user",
                     lazy: () => lazyComponent(import("./auth/pages/user")),
-                    // meta: {
-                    // name: "用户管理",
-                    // icon: <UserOutlined />,
-                    // },
                 },
                 {
                     path: "permission",
                     lazy: () => lazyComponent(import("./auth/pages/auth")),
-                    // meta: {
-                    // name: "权限配置",
-                    // },
                 },
             ],
         },
     ],
+    /** 页面访问权限检测 */
+    async loader({ params, request, context }) {
+        if (!$localStore.accessToken) throw new AuthorizationError("未授权", "unauthorize");
+
+        try {
+            await $http.post("/auth/visit_page");
+        } catch (e) {
+            if (e instanceof AxiosError) {
+                const { response, message } = e;
+                if (response) throw new AuthorizationError(response.data.message, response.statusText);
+
+                throw new Error("授权检测失败: " + message);
+            }
+
+            throw e;
+        }
+        return null;
+    },
+    errorElement: <ErrorPage />,
 };
 export default router;
-function toAntdRouter(router: ExtraRouterObject) {
-    let obj = { ...router, ...router.meta };
-    delete obj.meta;
-    if (router.children) {
-        let children: typeof obj[] = [];
-        for (const subObj of router.children) {
-            children.push(toAntdRouter(subObj));
-        }
-        obj.children = children;
-    }
-    return obj;
-}
-export const antdRouter = toAntdRouter(router);

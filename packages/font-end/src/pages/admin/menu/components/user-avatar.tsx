@@ -8,6 +8,7 @@ import { Rule } from "antd/es/form";
 import type { ApiReq } from "common/request/auth/user";
 import { createPwdHash } from "@/pages/login/funcs/pwd_hash";
 import { AxiosError } from "axios";
+import { navigate } from "@/utils/global-navigate";
 
 interface UserInfo {
     id: string;
@@ -15,8 +16,9 @@ interface UserInfo {
     permission: Set<string>;
 }
 
-function goToLoginPage() {
-    location.href = "/v/login";
+function logout() {
+    $localStore.clearToken();
+    navigate("/login");
 }
 export function UserAvatar() {
     let { refresh, data, loading } = useRequest(
@@ -43,10 +45,6 @@ export function UserAvatar() {
     const [openModal, setOpenModal] = useState<boolean | string>();
     const userName = data?.name ?? "--";
 
-    function loginOut() {
-        $localStore.clearToken();
-        goToLoginPage();
-    }
     const items: MenuProps["items"] = [
         {
             key: "updateUserInfo",
@@ -55,7 +53,7 @@ export function UserAvatar() {
             onClick: () => setOpenModal("info"),
         },
         { key: "changePwd", label: "修改密码", icon: <LockOutlined />, onClick: () => setOpenModal("pwd") },
-        { key: "logout", label: "退出登录", icon: <LogoutOutlined />, onClick: loginOut },
+        { key: "logout", label: "退出登录", icon: <LogoutOutlined />, onClick: logout },
     ];
     return (
         <>
@@ -116,7 +114,7 @@ function UserUpdateModal(props: {
         }
         if (pwd) {
             await runAsync({ ...info, pwd: { old: createPwdHash(oldPwd), new: createPwdHash(newPwd) } });
-            goToLoginPage();
+            logout();
         } else {
             await runAsync(info);
             onUserInfoChange?.(info as UserInfo);

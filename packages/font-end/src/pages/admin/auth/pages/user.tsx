@@ -81,7 +81,7 @@ export default function User() {
                 }
             >
                 <Table
-                    rowKey="key"
+                    rowKey="_id"
                     pagination={{ pageSize: 15 }}
                     size="small"
                     dataSource={data?.items}

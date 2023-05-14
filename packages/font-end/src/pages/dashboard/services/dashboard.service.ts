@@ -14,11 +14,11 @@ class DashboardResource {
         } = await $http.get<ApiRes.AnalysisByCity>("api/dashboard/analysis_city", { params: query });
 
         return {
-            avgSalary: jobsData.slice(-20),
+            avgSalary: jobsData.slice(-30),
             jobCount: jobsData
                 .slice(0)
                 .sort((a, b) => a.jobCount - b.jobCount)
-                .slice(-20),
+                .slice(-30),
         };
     }
     async getAnalysisByJob(query: ApiReq.MatchFilter) {

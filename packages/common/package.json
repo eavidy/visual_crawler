@@ -6,5 +6,8 @@
     "license": "MIT",
     "scripts": {
         "build": "tsc -p tsconfig.build.json"
+    },
+    "devDependencies": {
+        "tslib": "^2.5.0"
     }
 }
