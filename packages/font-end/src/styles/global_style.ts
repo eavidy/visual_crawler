@@ -1,4 +1,3 @@
-import "./global.css";
 import { COLOR } from "./colors";
 
 const sheets = document.styleSheets[0];

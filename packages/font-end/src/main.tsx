@@ -5,8 +5,8 @@ import "@/styles/global_style";
 import { RouterProvider } from "react-router-dom";
 
 const appElement = document.createElement("div");
-appElement.style.width = "100%";
-appElement.style.height = "100%";
+appElement.style.width = "100vw";
+appElement.style.height = "100vh";
 document.body.appendChild(appElement);
 createRoot(appElement).render(<RouterProvider router={router} />);
 
