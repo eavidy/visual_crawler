@@ -9,9 +9,10 @@
             "request": "launch",
             "sourceMaps": true,
             "name": "后端调试",
-            "env": {},
-
-            "runtimeArgs": ["--loader", "/A:/packages/asnc-pack/ts_hook/hook.mjs"],
+            "env": {
+                "MODE": "dev"
+            },
+            "runtimeArgs": ["--loader", "/A:/back-end/pnpm/5/node_modules/@asnc/ts_hook/hook.mjs"],
             "skipFiles": ["<node_internals>/**", "A:/back-end/pnpm/**", "**/node_modules/**"],
             "program": "${workspaceFolder}/packages/back-end/src/main.ts",
             "cwd": "${workspaceFolder}"
