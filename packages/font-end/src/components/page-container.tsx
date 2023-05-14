@@ -8,6 +8,8 @@ export function PageContainer(
             style={{
                 background: "#F6F7F9",
                 padding: "24px",
+                boxSizing: "border-box",
+                overflow: "hidden",
                 width: "100%",
                 height: "100%",
                 minWidth: "1200px",

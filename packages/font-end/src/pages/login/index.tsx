@@ -1,11 +1,11 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { LoginForm, ProFormCheckbox, ProFormText } from "@ant-design/pro-components";
+import { LoginForm, ProFormText } from "@ant-design/pro-components";
 import { Divider, Spin, Tabs, message } from "antd";
 import React from "react";
 import { useState } from "react";
 import LogoIcon from "@/components/img/logo";
-import { $http, $localStore } from "@/http";
-import { ApiReq, ApiRes } from "common/request/login";
+import { $localStore } from "@/http";
+import { ApiReq } from "common/request/login";
 import { AxiosError } from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useRequest } from "ahooks";
