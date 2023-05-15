@@ -1,5 +1,4 @@
-import "./global.css";
 import { COLOR } from "./colors";
 
-const sheets = document.styleSheets[0];
-sheets.insertRule(`a{color:${COLOR.main1}}`);
+// const sheets = document.styleSheets[0];
+// sheets.insertRule(`a{color:${COLOR.main1}}`);

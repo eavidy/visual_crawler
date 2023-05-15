@@ -31,6 +31,7 @@
         "@types/js-md5": "^0.7.0",
         "@types/react": "^18.0.28",
         "@types/react-dom": "^18.0.11",
-        "dayjs": "^1.11.7"
+        "dayjs": "^1.11.7",
+        "vite-plugin-cdn-import": "^0.3.5"
     }
 }
