@@ -1,10 +1,10 @@
 import { CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from "@nestjs/common";
-import { AuthService } from "../services/auth.service";
-import { Permission } from "../services/permission";
+import { AuthService } from "../services/auth.service.js";
+import { Permission } from "../services/permission.js";
 import type { FastifyRequest } from "fastify";
-import { UserService } from "../../../services/db/user.db.service";
+import { UserService } from "../../../services/db/user.db.service.js";
 import { JwtService } from "@nestjs/jwt";
-import { User } from "../services";
+import { User } from "../services/index.js";
 import { IncomingHttpHeaders } from "node:http";
 
 export class AuthGuard implements CanActivate {

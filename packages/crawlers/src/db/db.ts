@@ -1,5 +1,5 @@
 import { MongoClient } from "mongodb";
-import { DB_URI, DB_NAME } from "../config/dbconfig";
+import { DB_URI, DB_NAME } from "../config/dbconfig.js";
 
 export const dbClient = new MongoClient(DB_URI);
 export const db = dbClient.db(DB_NAME);

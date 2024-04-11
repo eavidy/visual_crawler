@@ -1,4 +1,4 @@
-import { cities } from "common/constants/cities";
+import { cities } from "common/constants/cities.js";
 import { Education, CompanyScale } from "common/model";
 
 const EDU_KEYS: readonly string[] = Object.keys(Education).filter((k) => !/\d/.test(k));

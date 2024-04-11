@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
-import { CrawlProcess } from "./crawl_process";
-import { ApiRes, CreateCrawlProcessOptions } from "common/request/crawler/crawl_process";
-import { CrawlerProcessStatus } from "common/request/enum";
+import { CrawlProcess } from "./crawl_process.js";
+import { ApiRes, CreateCrawlProcessOptions } from "common/request/crawler/crawl_process.js";
+import { CrawlerProcessStatus } from "common/request/enum.js";
 import * as Path from "node:path";
 
 let crawlModPath = Path.resolve(process.cwd(), "crawler/main.js");

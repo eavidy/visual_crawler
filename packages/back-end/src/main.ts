@@ -1,10 +1,10 @@
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
-import { AppModule } from "./modules/app.module";
-import { HttpExceptionFilter } from "./filters/exp.filter";
-import { LoggerInterceptor } from "./interceptors/logger.interceptor";
-import * as config from "./config";
-import { loggerMiddleware } from "./middlewares/logger.middleware";
+import { AppModule } from "./modules/app.module.js";
+import { HttpExceptionFilter } from "./filters/exp.filter.js";
+import { LoggerInterceptor } from "./interceptors/logger.interceptor.js";
+import * as config from "./config.js";
+import { loggerMiddleware } from "./middlewares/logger.middleware.js";
 
 async function bootstrap() {
     const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter());

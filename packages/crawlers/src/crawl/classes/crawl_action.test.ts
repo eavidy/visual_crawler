@@ -1,4 +1,4 @@
-import { DeepAssignFilter, FilterIteratorFx } from "./crawl_action";
+import { DeepAssignFilter, FilterIteratorFx } from "./crawl_action.js";
 import { it, describe, expect } from "vitest";
 
 async function* d(skipCount = 0) {

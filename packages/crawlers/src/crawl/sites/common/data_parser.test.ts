@@ -1,5 +1,5 @@
 import { expect, it, describe } from "vitest";
-import { DataParser, DataParser as Parser } from "./data_parser";
+import { DataParser, DataParser as Parser } from "./data_parser.js";
 import { CompanyScale, Education } from "common/model";
 
 it("解析薪资", function () {

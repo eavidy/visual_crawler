@@ -1,4 +1,4 @@
-import * as argParser from "./classes/parse_args";
+import * as argParser from "./classes/parse_args.js";
 const args = argParser as ProcessArgs;
 
 interface ProcessArgs {

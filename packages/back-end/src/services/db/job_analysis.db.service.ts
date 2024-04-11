@@ -1,7 +1,7 @@
 import { Education } from "common/model";
-import { WorkExp } from "common/request/enum";
+import { WorkExp } from "common/request/enum.js";
 import { Document } from "mongodb";
-import { jobsCollection } from "./db";
+import { jobsCollection } from "./db.js";
 import { Injectable } from "@nestjs/common";
 const MIN_AVG_NUMBER_OF_SAMPLES = 100;
 class JobMatcher {

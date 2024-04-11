@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { jobsCollection } from "./db";
+import { jobsCollection } from "./db.js";
 
 @Injectable()
 export class JobSearchDbService {

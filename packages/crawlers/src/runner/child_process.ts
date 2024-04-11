@@ -1,11 +1,11 @@
 import { EventEmitter } from "node:events";
-import { CrawlerLiepin } from "../crawl/crawler/crawler_liepin";
-import { CrawlerDevice } from "../crawl/classes/browser";
-import { args } from "../classes/parse_args";
-import { TaskQueue, NewCityTaskQueue } from "../crawl/classes/task_queue";
+import { CrawlerLiepin } from "../crawl/crawler/crawler_liepin.js";
+import { CrawlerDevice } from "../crawl/classes/browser.js";
+import { args } from "../classes/parse_args.js";
+import { TaskQueue, NewCityTaskQueue } from "../crawl/classes/task_queue.js";
 import { SiteTag } from "common/model";
-import type { CreateCrawlerOptions } from "common/request/crawler/crawler";
-import { dbClient } from "../db/db";
+import type { CreateCrawlerOptions } from "common/request/crawler/crawler.js";
+import { dbClient } from "../db/db.js";
 
 /**
  * @event initDevice //初始化浏览器

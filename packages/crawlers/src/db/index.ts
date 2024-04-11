@@ -1,7 +1,7 @@
-import { TaskQueueData, UnexecutedCrawlerTask, UnexecutedTask } from "./collections/task_queue";
-import { CompanyData } from "./collections/company";
-import { JobsData } from "./collections/job";
-import { ErrorLogData } from "./collections/error_log";
+import { TaskQueueData, UnexecutedCrawlerTask, UnexecutedTask } from "./collections/task_queue.js";
+import { CompanyData } from "./collections/company.js";
+import { JobsData } from "./collections/job.js";
+import { ErrorLogData } from "./collections/error_log.js";
 
 export const taskQueueData = new TaskQueueData();
 export const companyData = new CompanyData();

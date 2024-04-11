@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { UserService } from "../../../services/db/user.db.service";
-import { User } from "./auth";
+import { UserService } from "../../../services/db/user.db.service.js";
+import { User } from "./auth.js";
 import { JwtService } from "@nestjs/jwt";
 
 export interface TokenPayload {

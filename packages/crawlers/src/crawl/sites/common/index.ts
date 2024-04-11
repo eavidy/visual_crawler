@@ -1,2 +1,2 @@
-export * from "./data_parser"
-export * from "./page_crawl"
+export * from "./data_parser.js"
+export * from "./page_crawl.js"

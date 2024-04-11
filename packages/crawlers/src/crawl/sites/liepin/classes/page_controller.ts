@@ -1,4 +1,4 @@
-import { ACTION_TIMEOUT } from "../../../../crawl/classes/crawl_action";
+import { ACTION_TIMEOUT } from "../../../../crawl/classes/crawl_action.js";
 import { Page } from "playwright";
 export abstract class PageNumControllable {
     constructor(readonly page: Page) {}

@@ -1,5 +1,5 @@
 import { Controller, Headers, Post } from "@nestjs/common";
-import { authGuard } from "./grand";
+import { authGuard } from "./grand/index.js";
 import { IncomingHttpHeaders } from "node:http";
 
 @Controller()
