@@ -12,10 +12,14 @@ export class JobsData {
     for (const job of jobs) {
       isRepeatPms.push(
         jobsCollection
-          .find({ companyId: job.companyId, jobId: job.jobId, siteTag: siteTag })
+          .find({
+            companyId: job.companyId,
+            jobId: job.jobId,
+            siteTag: siteTag,
+          })
           .project({ _id: 0, companyId: 1, jobId: 1 })
           .toArray()
-          .then((val) => !!val.length)
+          .then((val) => !!val.length),
       );
     }
     let repeated: JobCrawlerData[] = [];
@@ -50,7 +54,11 @@ export class JobsData {
     let insertable = Object.values(idMap);
     return { repeated, insertable };
   }
-  async appendJobs(jobs: JobCrawlerData[], siteTag: SiteTag, insertCheckedItem = true) {
+  async appendJobs(
+    jobs: JobCrawlerData[],
+    siteTag: SiteTag,
+    insertCheckedItem = true,
+  ) {
     let newJobs: JobCrawlerData[] = [];
     let checkFail: { item: JobCrawlerData; err: any }[] = [];
     {
@@ -61,11 +69,18 @@ export class JobsData {
           else newJobs.push(item);
         }
       } else {
-        let testRes = checkType(jobs, typeChecker.arrayType(jobChecker), CheckTypeOption).error;
+        let testRes = checkType(
+          jobs,
+          typeChecker.arrayType(jobChecker),
+          CheckTypeOption,
+        ).error;
         if (testRes) throw new FieldCheckError(testRes);
       }
     }
-    const { insertable, repeated } = await this.removeDuplication(newJobs, siteTag);
+    const { insertable, repeated } = await this.removeDuplication(
+      newJobs,
+      siteTag,
+    );
     // const { insertable, repeated } = await this.removeJobIdDup(newJobs, siteTag);
 
     if (insertable.length) await jobsCollection.insertMany(insertable);

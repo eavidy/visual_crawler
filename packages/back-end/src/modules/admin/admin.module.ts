@@ -5,9 +5,9 @@ import { MODULE_PATH } from "@nestjs/common/constants.js";
 
 @SetMetadata(MODULE_PATH, "api")
 @Module({
-    controllers: [TaskQueueController],
-    providers: [TaskQueueDbService],
+  controllers: [TaskQueueController],
+  providers: [TaskQueueDbService],
 })
 export class AdminModule {
-    constructor() {}
+  constructor() {}
 }

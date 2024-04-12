@@ -8,7 +8,11 @@ export const companyData = new CompanyData();
 export const jobsData = new JobsData();
 export const errorLogData = new ErrorLogData();
 
-export type { TaskQueueData, UnexecutedCrawlerTask, UnexecutedTask } from "./collections/task_queue.js";
+export type {
+  TaskQueueData,
+  UnexecutedCrawlerTask,
+  UnexecutedTask,
+} from "./collections/task_queue.js";
 export type { JobsData } from "./collections/job.js";
 export type { CompanyData } from "./collections/company.js";
 export type { ErrorLogData } from "./collections/error_log.js";

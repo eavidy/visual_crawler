@@ -12,7 +12,10 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import { SiteTag } from "common/model/index.js";
-import { type GetTasksFilter, TaskQueueDbService } from "../../services/db/task_queue.db.service.js";
+import {
+  type GetTasksFilter,
+  TaskQueueDbService,
+} from "../../services/db/task_queue.db.service.js";
 import { authGuard } from "../auth/grand/index.js";
 import { checkType, ExceptType, typeChecker } from "evlib";
 const { optional } = typeChecker;
@@ -47,9 +50,13 @@ export class TaskQueueController {
     @Query("start", ParseIntPipe) start = 0,
     @Query("pageSize", ParseIntPipe) pageSize = 20,
     @Query()
-    query: GetTasksFilter
+    query: GetTasksFilter,
   ) {
-    return await this.taskQueueDbService.getTasks(query, pageSize, start * pageSize);
+    return await this.taskQueueDbService.getTasks(
+      query,
+      pageSize,
+      start * pageSize,
+    );
   }
 
   @Delete()
@@ -59,17 +66,34 @@ export class TaskQueueController {
   }
 
   @Post("addCompanyTask")
-  async addCompaniesToQueue(@Body() body: { idList?: string[]; siteTag: SiteTag }) {
-    let res = checkType(body, { idList: optional(typeChecker.arrayType("string")), siteTag: "number" }).error;
-    if (res) throw new BadRequestException({ message: "字段校验不通过", cause: res });
-    return this.taskQueueDbService.appendCompanyTaskFromCompanyCollection(body.siteTag, body.idList);
+  async addCompaniesToQueue(
+    @Body() body: { idList?: string[]; siteTag: SiteTag },
+  ) {
+    let res = checkType(body, {
+      idList: optional(typeChecker.arrayType("string")),
+      siteTag: "number",
+    }).error;
+    if (res)
+      throw new BadRequestException({ message: "字段校验不通过", cause: res });
+    return this.taskQueueDbService.appendCompanyTaskFromCompanyCollection(
+      body.siteTag,
+      body.idList,
+    );
   }
 
   @Post("addJobFilterTask")
-  async addCitiesToQueue(@Body() body: { cityIdList?: number[]; siteTag: SiteTag }) {
-    let res = checkType(body, { idList: optional(typeChecker.arrayType("number")), siteTag: "number" }).error;
-    if (res) throw new BadRequestException({ message: "字段校验不通过", cause: res });
-    return this.taskQueueDbService.appendCitesTasksFromCitesCollection(body.siteTag);
+  async addCitiesToQueue(
+    @Body() body: { cityIdList?: number[]; siteTag: SiteTag },
+  ) {
+    let res = checkType(body, {
+      idList: optional(typeChecker.arrayType("number")),
+      siteTag: "number",
+    }).error;
+    if (res)
+      throw new BadRequestException({ message: "字段校验不通过", cause: res });
+    return this.taskQueueDbService.appendCitesTasksFromCitesCollection(
+      body.siteTag,
+    );
   }
   @Post("clear")
   async clearTask() {

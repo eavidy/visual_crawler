@@ -1,6 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { Document, WithId } from "mongodb";
-import { UserBaseInfo, User, Permission } from "../../modules/auth/services/index.js";
+import {
+  UserBaseInfo,
+  User,
+  Permission,
+} from "../../modules/auth/services/index.js";
 import { userCollection } from "./db.js";
 import { checkType, ExceptType, typeChecker } from "evlib";
 const { optional } = typeChecker;
@@ -51,7 +55,9 @@ export class UserService {
   async isEnableVisitor() {
     let id = "visitor";
     let match: Document = { _id: id };
-    let res = await userCollection.findOne<UserBaseInfo & { pwd?: string }>(match);
+    let res = await userCollection.findOne<UserBaseInfo & { pwd?: string }>(
+      match,
+    );
     if (res) {
       let user = new User(id, res);
       if (user.hasPermission(Permission.readonly) && res.pwd) {
@@ -69,4 +75,8 @@ let userInfoExceptType: ExceptType = {
   permissions: optional(typeChecker.arrayType("string")),
 };
 
-let userUpdateExceptType: ExceptType = { ...userInfoExceptType, password: optional.string, name: optional.string };
+let userUpdateExceptType: ExceptType = {
+  ...userInfoExceptType,
+  password: optional.string,
+  name: optional.string,
+};

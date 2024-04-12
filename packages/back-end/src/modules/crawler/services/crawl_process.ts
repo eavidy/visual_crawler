@@ -1,9 +1,15 @@
 import { ChildProcess, fork } from "node:child_process";
 import { EventEmitter } from "node:events";
 import type { CreateCrawlProcessOptions } from "common/request/crawler/crawl_process.js";
-import type { CreateCrawlerOptions, CrawlerInfo } from "common/request/crawler/crawler.js";
+import type {
+  CreateCrawlerOptions,
+  CrawlerInfo,
+} from "common/request/crawler/crawler.js";
 import { CrawlerProcessStatus, CrawlerStatus } from "common/request/enum.js";
-import type { CrawlerPriorityCompanyTask, CrawlerPriorityJobFilterTask } from "common/model/index.js";
+import type {
+  CrawlerPriorityCompanyTask,
+  CrawlerPriorityJobFilterTask,
+} from "common/model/index.js";
 type TaskInfo = CrawlerPriorityCompanyTask | CrawlerPriorityJobFilterTask;
 /**
  * @event initDevice void
@@ -20,7 +26,10 @@ export class CrawlProcess extends EventEmitter {
     startRunTime?: number;
     errors: { time: Date; error: Error }[];
   };
-  constructor(private appPath: string, info: CreateCrawlProcessOptions) {
+  constructor(
+    private appPath: string,
+    info: CreateCrawlProcessOptions,
+  ) {
     super();
     const { memoryLimit = 200, name = "" } = info;
     this.info = { memoryLimit, name, errors: [] };
@@ -34,7 +43,10 @@ export class CrawlProcess extends EventEmitter {
     }
   };
   private internalId?: NodeJS.Timer;
-  async start(args: string[] = [], nodeArgs: string[] = []): Promise<void | never> {
+  async start(
+    args: string[] = [],
+    nodeArgs: string[] = [],
+  ): Promise<void | never> {
     if (this.process) throw new Error("进程不能重复启动");
     this.internalId = setInterval(this.onCrawlNew, 3 * 86400 * 1000);
     let execArgv = [...nodeArgs];
@@ -140,20 +152,26 @@ export class CrawlProcess extends EventEmitter {
     return list;
   }
 
-  updateCrawlerConfig(crawlerId: number, config: Pick<CreateCrawlerOptions, "name" | "taskCountLimit">) {
+  updateCrawlerConfig(
+    crawlerId: number,
+    config: Pick<CreateCrawlerOptions, "name" | "taskCountLimit">,
+  ) {
     let crawler = this.getCrawler(crawlerId);
     Object.assign(crawler.config, config);
   }
   startWork(crawlerId: number): Promise<void | never> {
-    if (this.#status !== CrawlerProcessStatus.running) throw new Error("进程的当前状态无法启动 Crawler");
+    if (this.#status !== CrawlerProcessStatus.running)
+      throw new Error("进程的当前状态无法启动 Crawler");
     const crawler = this.getCrawler(crawlerId);
-    if (crawler.status !== CrawlerStatus.stopped) throw new Error("当前状态无法启动");
+    if (crawler.status !== CrawlerStatus.stopped)
+      throw new Error("当前状态无法启动");
     crawler.status = CrawlerStatus.starting;
     return this.sendMsg("startWork", crawler.config, crawlerId);
   }
   stopWork(crawlerId: number, abort?: boolean) {
     const crawler = this.getCrawler(crawlerId);
-    if (crawler.status !== CrawlerStatus.working) throw new Error("当前状态无法终止 Crawler");
+    if (crawler.status !== CrawlerStatus.working)
+      throw new Error("当前状态无法终止 Crawler");
     crawler.status = CrawlerStatus.stopping;
     return this.sendMsg("stopWork", { abort }, crawlerId);
   }
@@ -173,7 +191,10 @@ export class CrawlProcess extends EventEmitter {
    * @event startWork [undefined,id]
    */
   private static CrawlerHandle = class CrawlerHandle extends EventEmitter {
-    constructor(readonly id: number, readonly config: CreateCrawlerOptions) {
+    constructor(
+      readonly id: number,
+      readonly config: CreateCrawlerOptions,
+    ) {
       super();
       this.initEvent();
     }
@@ -210,7 +231,9 @@ export class CrawlProcess extends EventEmitter {
     status = CrawlerStatus.stopped;
   };
 }
-export type CrawlerHandle = InstanceType<(typeof CrawlProcess)["CrawlerHandle"]>;
+export type CrawlerHandle = InstanceType<
+  (typeof CrawlProcess)["CrawlerHandle"]
+>;
 
 function processSend(process: ChildProcess, msg: any) {
   return new Promise<void>(function (resolve, reject) {

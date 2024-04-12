@@ -7,7 +7,9 @@ export class AuthenticationController {
   constructor() {}
 
   @Post("visit_page")
-  async pageIsVisibility(@Headers() headers: IncomingHttpHeaders): Promise<void> {
+  async pageIsVisibility(
+    @Headers() headers: IncomingHttpHeaders,
+  ): Promise<void> {
     await authGuard.parseToken(headers);
   }
 }

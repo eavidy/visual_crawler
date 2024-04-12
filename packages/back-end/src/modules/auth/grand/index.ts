@@ -1,1 +1,1 @@
-export * from "./auth.grand.js"
+export * from "./auth.grand.js";

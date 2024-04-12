@@ -1,5 +1,16 @@
-import { CrawlerPriorityJobFilterTask, JobFilterOption, SiteTag, TaskState, TaskType } from "common/model/index.js";
-import { taskQueueCollection, citiesCollection, companyCollection, jobsCollection } from "./db.js";
+import {
+  CrawlerPriorityJobFilterTask,
+  JobFilterOption,
+  SiteTag,
+  TaskState,
+  TaskType,
+} from "common/model/index.js";
+import {
+  taskQueueCollection,
+  citiesCollection,
+  companyCollection,
+  jobsCollection,
+} from "./db.js";
 import { Injectable } from "@nestjs/common";
 import { Document, ObjectId } from "mongodb";
 import { checkType, typeChecker } from "evlib";
@@ -27,16 +38,20 @@ export class TaskQueueDbService {
   async appendCitesTasksFromCitesCollection(
     siteTag: SiteTag,
     option?: Omit<JobFilterOption, "city">,
-    pickId?: number[]
+    pickId?: number[],
   ) {
     {
       let res = checkType(
         [siteTag, option, pickId],
-        ["number", typeChecker.union(["undefined", { emitTime: "number" }]), typeChecker.arrayType("number")],
+        [
+          "number",
+          typeChecker.union(["undefined", { emitTime: "number" }]),
+          typeChecker.arrayType("number"),
+        ],
         {
           checkAll: true,
           policy: "delete",
-        }
+        },
       ).error;
       if (res) throw new Error("字段校验不通过", { cause: res });
     }
@@ -72,12 +87,19 @@ export class TaskQueueDbService {
     await taskQueueCollection.insertMany(items);
     return;
   }
-  async appendCompanyTaskFromCompanyCollection(siteTag: SiteTag, pickId?: string[]) {
+  async appendCompanyTaskFromCompanyCollection(
+    siteTag: SiteTag,
+    pickId?: string[],
+  ) {
     {
-      let res = checkType([siteTag, pickId], ["number", optional(typeChecker.arrayType("string"))], {
-        checkAll: true,
-        policy: "delete",
-      }).error;
+      let res = checkType(
+        [siteTag, pickId],
+        ["number", optional(typeChecker.arrayType("string"))],
+        {
+          checkAll: true,
+          policy: "delete",
+        },
+      ).error;
       if (res) throw new Error("字段校验不通过", { cause: res });
     }
 
@@ -87,7 +109,14 @@ export class TaskQueueDbService {
     const pipeline = companyCollection
       .aggregate([
         { $match: matchOption },
-        { $set: { type: TaskType.company, siteTag, status: TaskState.unexecuted, taskInfo: "$companyId" } },
+        {
+          $set: {
+            type: TaskType.company,
+            siteTag,
+            status: TaskState.unexecuted,
+            taskInfo: "$companyId",
+          },
+        },
       ])
       .project({ _id: 0, type: 1, siteTag: 1, status: 1, taskInfo: 1 });
 
@@ -110,11 +139,15 @@ export class TaskQueueDbService {
     {
       let res = checkType(
         filter,
-        { siteTag: optional.number, status: optional.number, type: optional.string },
+        {
+          siteTag: optional.number,
+          status: optional.number,
+          type: optional.string,
+        },
         {
           checkAll: true,
           policy: "delete",
-        }
+        },
       ).error;
       if (res) throw new Error("字段校验不通过", { cause: res });
     }
@@ -123,19 +156,25 @@ export class TaskQueueDbService {
       matchOption = { $and: [filter, { status: { $ne: TaskState.executed } }] };
     } else matchOption = { ...filter, status: { $ne: TaskState.executed } };
 
-    let pipeline = taskQueueCollection.aggregate().match(matchOption).project<TaskItem>({
-      status: 1,
-      type: 1,
-      siteTag: 1,
-      taskInfo: 1,
-      priority: 1,
-    });
+    let pipeline = taskQueueCollection
+      .aggregate()
+      .match(matchOption)
+      .project<TaskItem>({
+        status: 1,
+        type: 1,
+        siteTag: 1,
+        taskInfo: 1,
+        priority: 1,
+      });
 
     pipeline.sort({ status: -1, priority: 1 });
     if (skip) pipeline.skip(skip);
     if (limit) pipeline.limit(limit);
 
-    const [total, items] = await Promise.all([taskQueueCollection.countDocuments(matchOption), pipeline.toArray()]);
+    const [total, items] = await Promise.all([
+      taskQueueCollection.countDocuments(matchOption),
+      pipeline.toArray(),
+    ]);
     await this.mgeTaskName(items);
     return { total, items };
   }

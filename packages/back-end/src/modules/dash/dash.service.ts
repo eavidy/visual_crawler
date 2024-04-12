@@ -1,5 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { JobAnalysisDbService, MatchFilter } from "../../services/db/job_analysis.db.service.js";
+import {
+  JobAnalysisDbService,
+  MatchFilter,
+} from "../../services/db/job_analysis.db.service.js";
 import cityIdMap from "common/constants/city_id_map.js";
 import { GroupItem } from "common/request/dashboard.js";
 import { Education } from "common/model/index.js";
@@ -13,7 +16,9 @@ export class DashService {
   constructor(private jobAnalysisDbService: JobAnalysisDbService) {
     let date = new Date().getTime();
     this.initCache().then(() => {
-      console.log("dashboard首页缓存完成: " + (new Date().getTime() - date) + "ms");
+      console.log(
+        "dashboard首页缓存完成: " + (new Date().getTime() - date) + "ms",
+      );
     });
   }
   private async initCache() {
@@ -38,24 +43,31 @@ export class DashService {
   }
 
   async getDataByTime(matchFilter: MatchFilter) {
-    if (Object.keys(matchFilter).length === 0 && this.cache.dataByTime) return this.cache.dataByTime;
-    let items = await this.jobAnalysisDbService.avgAndTotalGroupByTime(matchFilter);
+    if (Object.keys(matchFilter).length === 0 && this.cache.dataByTime)
+      return this.cache.dataByTime;
+    let items =
+      await this.jobAnalysisDbService.avgAndTotalGroupByTime(matchFilter);
     for (const item of items) {
       item.avgSalary = mathRound(item.avgSalary);
     }
     return items;
   }
   async getDataByCity(matchFilter: MatchFilter) {
-    if (Object.keys(matchFilter).length === 0 && this.cache.dataByCity) return this.cache.dataByCity;
-    let extFilter = matchFilter.cityId ? undefined : { "jobData.cityId": { $ne: null } };
-    let items = await this.jobAnalysisDbService.avgAndTotalGroupBy<GroupItem & { cityId: number; cityName: string }>(
+    if (Object.keys(matchFilter).length === 0 && this.cache.dataByCity)
+      return this.cache.dataByCity;
+    let extFilter = matchFilter.cityId
+      ? undefined
+      : { "jobData.cityId": { $ne: null } };
+    let items = await this.jobAnalysisDbService.avgAndTotalGroupBy<
+      GroupItem & { cityId: number; cityName: string }
+    >(
       matchFilter,
       {
         groupBy: "cityId",
         renameId: "cityId",
         sort: { avgSalary: 1 },
       },
-      extFilter
+      extFilter,
     );
 
     for (const item of items) {
@@ -68,7 +80,9 @@ export class DashService {
   async getDataByJobName(matchFilter: MatchFilter) {
     if (Object.keys(matchFilter).length === 0) return [];
 
-    let items = await this.jobAnalysisDbService.avgAndTotalGroupBy<GroupItem & { jobName: string }>(matchFilter, {
+    let items = await this.jobAnalysisDbService.avgAndTotalGroupBy<
+      GroupItem & { jobName: string }
+    >(matchFilter, {
       groupBy: "name",
       renameId: "jobName",
       sort: { avgSalary: -1 },
@@ -80,13 +94,17 @@ export class DashService {
     return items;
   }
   async getDataByEducation(matchFilter: MatchFilter) {
-    if (Object.keys(matchFilter).length === 0 && this.cache.dataByEducation) return this.cache.dataByEducation;
+    if (Object.keys(matchFilter).length === 0 && this.cache.dataByEducation)
+      return this.cache.dataByEducation;
     type EduAnItem = GroupItem & { education: string };
-    let items = await this.jobAnalysisDbService.avgAndTotalGroupBy<EduAnItem>(matchFilter, {
-      groupBy: "education",
-      renameId: "education",
-      sort: { education: 1 },
-    });
+    let items = await this.jobAnalysisDbService.avgAndTotalGroupBy<EduAnItem>(
+      matchFilter,
+      {
+        groupBy: "education",
+        renameId: "education",
+        sort: { education: 1 },
+      },
+    );
     let newList: any[] = [];
     let nEdu: EduAnItem | undefined;
     let last: EduAnItem | undefined;
@@ -95,7 +113,8 @@ export class DashService {
       if ([null, 0].includes(item.education as any)) {
         // 将null 和 0 合并(不限学历)
         if (nEdu) {
-          let sum = nEdu.jobCount * nEdu.avgSalary + item.jobCount * item.avgSalary;
+          let sum =
+            nEdu.jobCount * nEdu.avgSalary + item.jobCount * item.avgSalary;
           nEdu.jobCount += item.jobCount;
           nEdu.avgSalary = sum / nEdu.jobCount;
         } else {
@@ -104,7 +123,8 @@ export class DashService {
         }
       } else {
         item.avgSalary = mathRound(item.avgSalary, 2);
-        if ((item.education as any) === Education.博士) last = item; //排序
+        if ((item.education as any) === Education.博士)
+          last = item; //排序
         else newList.push(item);
       }
     }
@@ -117,13 +137,18 @@ export class DashService {
     return newList;
   }
   async getDataByWorkExp(matchFilter: MatchFilter) {
-    if (Object.keys(matchFilter).length === 0 && this.cache.dataByWorkExp) return this.cache.dataByWorkExp;
+    if (Object.keys(matchFilter).length === 0 && this.cache.dataByWorkExp)
+      return this.cache.dataByWorkExp;
     type WorkExpAnItem = GroupItem & { workExp: string };
-    let items = await this.jobAnalysisDbService.avgAndTotalGroupBy<WorkExpAnItem>(matchFilter, {
-      groupBy: "workExperience",
-      renameId: "workExp",
-      sort: { workExp: 1 },
-    });
+    let items =
+      await this.jobAnalysisDbService.avgAndTotalGroupBy<WorkExpAnItem>(
+        matchFilter,
+        {
+          groupBy: "workExperience",
+          renameId: "workExp",
+          sort: { workExp: 1 },
+        },
+      );
     let newList: any[] = [];
     let nExp: WorkExpAnItem | undefined;
     for (let i = 0; i < items.length; i++) {
@@ -131,7 +156,8 @@ export class DashService {
       if ([null, -1].includes(item.workExp as any)) {
         // 将null 和 -1 合并(不限经验)
         if (nExp) {
-          let sum = nExp.jobCount * nExp.avgSalary + item.jobCount * item.avgSalary;
+          let sum =
+            nExp.jobCount * nExp.avgSalary + item.jobCount * item.avgSalary;
           nExp.jobCount += item.jobCount;
           nExp.avgSalary = sum / nExp.jobCount;
         } else {
@@ -151,8 +177,12 @@ export class DashService {
     return newList;
   }
   async getJobBillboard(matchFilter: MatchFilter) {
-    if (Object.keys(matchFilter).length === 0 && this.cache.jobBillboard) return this.cache.jobBillboard;
-    let allBillboard = await this.jobAnalysisDbService.avgAndTotalByJob(matchFilter, 30);
+    if (Object.keys(matchFilter).length === 0 && this.cache.jobBillboard)
+      return this.cache.jobBillboard;
+    let allBillboard = await this.jobAnalysisDbService.avgAndTotalByJob(
+      matchFilter,
+      30,
+    );
     for (const data of Object.values(allBillboard)) {
       for (const item of data) {
         item.avgSalary = mathRound(item.avgSalary, 2);
@@ -176,7 +206,9 @@ export class DashService {
   } = {};
   readonly provinceIdNameMap = provinceIdNameMap;
   get cityOption() {
-    let option: { value: string; label: string }[] = Object.entries(cityIdMap).map(([value, label]) => ({
+    let option: { value: string; label: string }[] = Object.entries(
+      cityIdMap,
+    ).map(([value, label]) => ({
       label,
       value,
     }));

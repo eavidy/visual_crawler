@@ -23,18 +23,29 @@ const validationPipe: PipeTransform = {
       saveState: optional("boolean"),
     };
     let checkRes = checkType(value, exceptType).error;
-    if (checkRes) throw new BadRequestException({ message: "字段校验不通过", cause: checkRes });
+    if (checkRes)
+      throw new BadRequestException({
+        message: "字段校验不通过",
+        cause: checkRes,
+      });
     return value;
   },
 };
 @Controller()
 export class LoginController {
-  constructor(private authService: AuthService, private userService: UserService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+  ) {}
 
   @Post("login")
   @UsePipes(validationPipe)
   async login(@Body() body: ApiReq.Login): Promise<ApiRes.Login> {
-    const token = await this.authService.verify(body.userId, body.pwd, body.saveState);
+    const token = await this.authService.verify(
+      body.userId,
+      body.pwd,
+      body.saveState,
+    );
 
     return {
       userId: body.userId,

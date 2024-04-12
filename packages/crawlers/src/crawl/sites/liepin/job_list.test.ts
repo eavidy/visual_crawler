@@ -30,7 +30,10 @@ it("解析猎聘公司数据", function () {
     siteTag: SiteTag.liepin,
   } as CompanyCrawlerData);
 });
-const browser = await CrawlerDevice.create({ headless: true, channel: undefined });
+const browser = await CrawlerDevice.create({
+  headless: true,
+  channel: undefined,
+});
 afterAll(async function (e) {
   return browser.close();
 });
@@ -58,5 +61,5 @@ it.concurrent(
     pageCtrl.return();
     expect(jobList.length, "数据响应次数").toEqual(count + 1);
   },
-  12 * 1000
+  12 * 1000,
 );

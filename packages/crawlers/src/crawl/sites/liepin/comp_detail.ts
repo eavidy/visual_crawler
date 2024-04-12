@@ -12,16 +12,22 @@ import { ACTION_TIMEOUT } from "../../../crawl/classes/crawl_action.js";
  * @event auth    //页面需要验证码
  */
 export class LiePinCompanyDetail extends PageCrawl {
-  constructor(context: BrowserContext, readonly origin: string) {
+  constructor(
+    context: BrowserContext,
+    readonly origin: string,
+  ) {
     super(context);
   }
   siteTag = SiteTag.liepin;
 
   async open(companyInfo: CompInfo, timeout = 20 * 1000) {
     let page = await this.newPage();
-    let urlChecker = /\/api\/com\.liepin\.searchfront4c\.pc-comp-homepage-search-job$/;
+    let urlChecker =
+      /\/api\/com\.liepin\.searchfront4c\.pc-comp-homepage-search-job$/;
     page.on("response", (res) => {
-      if (/safe\.liepin\.com\/page\/liepin\/captchaPage_ip_PC/.test(res.url())) {
+      if (
+        /safe\.liepin\.com\/page\/liepin\/captchaPage_ip_PC/.test(res.url())
+      ) {
         this.emit("auth");
         return;
       }
@@ -29,7 +35,11 @@ export class LiePinCompanyDetail extends PageCrawl {
         if (res.ok()) {
           this.onResponse(res, companyInfo);
         } else {
-          this.reportError({ msg: "响应状态码异常", status: res.status(), statusText: res.statusText() });
+          this.reportError({
+            msg: "响应状态码异常",
+            status: res.status(),
+            statusText: res.statusText(),
+          });
         }
       }
     });
@@ -40,7 +50,11 @@ export class LiePinCompanyDetail extends PageCrawl {
     });
     const url = `${this.origin}/company-jobs/${companyInfo.companyId}`;
     await page.goto(url, { timeout });
-    let pageCtrl = new LiePinCompanyDetail.PageController(page, this, companyInfo);
+    let pageCtrl = new LiePinCompanyDetail.PageController(
+      page,
+      this,
+      companyInfo,
+    );
 
     return pageCtrl;
   }
@@ -54,19 +68,28 @@ export class LiePinCompanyDetail extends PageCrawl {
         jobList.push(data);
         errors.forEach((err) => this.reportError(err));
       } catch (error) {
-        this.reportError({ msg: "执行解析职位错误", err: (error as Error).toString() });
+        this.reportError({
+          msg: "执行解析职位错误",
+          err: (error as Error).toString(),
+        });
       }
     }
     this.pageCrawlFin({ jobList });
   }
   private static PageController = class PageController extends PageNumControllable {
-    constructor(page: Page, readonly og: LiePinCompanyDetail, private readonly compInfo: CompInfo) {
+    constructor(
+      page: Page,
+      readonly og: LiePinCompanyDetail,
+      private readonly compInfo: CompInfo,
+    ) {
       super(page);
     }
     async getTotalJob() {
       let text: string;
       try {
-        text = await this.page.locator(".company-header-content-tab .active").innerText({ timeout: ACTION_TIMEOUT });
+        text = await this.page
+          .locator(".company-header-content-tab .active")
+          .innerText({ timeout: ACTION_TIMEOUT });
       } catch (error) {
         return 0;
       }
@@ -77,22 +100,38 @@ export class LiePinCompanyDetail extends PageCrawl {
 
     async crawlHtml() {
       let compInfo = { ...this.compInfo };
-      const handler = this.page.locator(".content-left-section .left-list-box .job-detail-box>a");
+      const handler = this.page.locator(
+        ".content-left-section .left-list-box .job-detail-box>a",
+      );
       let data = await handler.evaluateAll(function (nodeList) {
-        let jobDataList: { city?: string; name: string; salary: string; tagList: string[]; jobId: string }[] = [];
+        let jobDataList: {
+          city?: string;
+          name: string;
+          salary: string;
+          tagList: string[];
+          jobId: string;
+        }[] = [];
         for (const node of nodeList) {
           let jobId = node.href.match(/www.liepin.com\/[^\/]*?job\/(\d+)/)?.[1];
-          let city: string | undefined = node.querySelector(".job-dq-box>.ellipsis-1").innerText?.match(/^[^-]+/)?.[0];
+          let city: string | undefined = node
+            .querySelector(".job-dq-box>.ellipsis-1")
+            .innerText?.match(/^[^-]+/)?.[0];
 
           let name = node.querySelector(".job-title-box>.ellipsis-1").innerText;
           let salary = node.querySelector(".job-salary").innerText;
           let tagList: string[] = [];
-          node.querySelectorAll(".job-labels-box>span").forEach((n: any) => tagList.push(n.innerText));
+          node
+            .querySelectorAll(".job-labels-box>span")
+            .forEach((n: any) => tagList.push(n.innerText));
           jobDataList.push({ city, name, salary, tagList, jobId });
         }
         return jobDataList;
       });
-      function paseTag(list: string[], fx: (str: string) => any, notEqual: any) {
+      function paseTag(
+        list: string[],
+        fx: (str: string) => any,
+        notEqual: any,
+      ) {
         for (let i = 0; i < list.length; i++) {
           let tag = list[i];
           let res = fx(tag);
@@ -106,7 +145,11 @@ export class LiePinCompanyDetail extends PageCrawl {
         (data): JobCrawlerData => ({
           jobData: {
             name: DataParser.paseJobName(data.name),
-            education: paseTag(data.tagList, DataParser.matchEducation, undefined),
+            education: paseTag(
+              data.tagList,
+              DataParser.matchEducation,
+              undefined,
+            ),
             workExperience: paseTag(data.tagList, DataParser.paseExp, -1) ?? -1,
             cityId: data.city ? DataParser.cityNameToId(data.city) : undefined,
             ...(DataParser.paseSalary(data.salary) ?? { salaryMonth: 12 }),
@@ -117,7 +160,7 @@ export class LiePinCompanyDetail extends PageCrawl {
           companyId: compInfo.companyId,
           jobId: data.jobId,
           siteTag: SiteTag.liepin,
-        })
+        }),
       );
     }
     async *pageNumIterator(errors: any[]): AsyncGenerator<boolean, void, void> {
@@ -142,7 +185,7 @@ export class LiePinCompanyDetail extends PageCrawl {
       }
       yield this.nextPage().then(
         () => true,
-        () => false
+        () => false,
       );
 
       let has3 = await this.hasNextPage().catch(hasNextPageCatch);
@@ -150,7 +193,7 @@ export class LiePinCompanyDetail extends PageCrawl {
       if (has3)
         yield this.gotoPage(3).then(
           () => true,
-          () => false
+          () => false,
         );
 
       while (await this.hasNextPage().catch(hasNextPageCatch)) {

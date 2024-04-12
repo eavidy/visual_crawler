@@ -28,7 +28,11 @@ const createCrawlerCheck: PipeTransform = {
         name: optional.string,
         isAuto: optional("boolean"),
       }).error;
-      if (res) throw new BadRequestException({ message: "字段校验不通过", cause: res });
+      if (res)
+        throw new BadRequestException({
+          message: "字段校验不通过",
+          cause: res,
+        });
     }
     return value;
   },
@@ -41,7 +45,10 @@ export class CrawlerController {
 
   @UsePipes(createCrawlerCheck)
   @Put(":processId")
-  createCrawler(@Param("processId", ParseIntPipe) pcId: number, @Body() body: ApiReq.CreateCrawler) {
+  createCrawler(
+    @Param("processId", ParseIntPipe) pcId: number,
+    @Body() body: ApiReq.CreateCrawler,
+  ) {
     return this.crawlerService.createCrawler(pcId, body);
   }
 
@@ -52,12 +59,17 @@ export class CrawlerController {
   }
 
   @Delete()
-  deleteCrawler(@Query("crawlerId", ParseIntPipe) crawlerId: number, @Query("processId", ParseIntPipe) pcId: number) {
+  deleteCrawler(
+    @Query("crawlerId", ParseIntPipe) crawlerId: number,
+    @Query("processId", ParseIntPipe) pcId: number,
+  ) {
     return this.crawlerService.deleteCrawler(pcId, crawlerId);
   }
 
   @Get(":processId")
-  getCrawlerList(@Param("processId", ParseIntPipe) pcId: number): { item: ApiRes.GetCrawlerInfo } {
+  getCrawlerList(@Param("processId", ParseIntPipe) pcId: number): {
+    item: ApiRes.GetCrawlerInfo;
+  } {
     let item = this.crawlerService.getCrawlerList(pcId);
     return { item };
   }

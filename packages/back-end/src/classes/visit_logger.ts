@@ -16,7 +16,11 @@ let loggerTransport: transport;
 
 if (process.env.MODE === "prod") {
   const dir = config.LOGS_DIR;
-  if (dir) loggerTransport = new transports.File({ level: LogType.other, filename: `${dir}/visit-log.txt` });
+  if (dir)
+    loggerTransport = new transports.File({
+      level: LogType.other,
+      filename: `${dir}/visit-log.txt`,
+    });
 } else {
   loggerTransport = new DevTransport({ level: LogType.other }) as any;
 }
@@ -24,7 +28,10 @@ if (process.env.MODE === "prod") {
 export const visitLogger = createLogger({
   level: LogType.other,
   levels: logLevels,
-  format: format.combine(format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }), format.json()),
+  format: format.combine(
+    format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+    format.json(),
+  ),
   transports: loggerTransport!,
 });
 type Format = InstanceType<typeof Logform.Format>;

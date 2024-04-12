@@ -20,7 +20,10 @@ export class CompanyData {
       let res = checkType(comp, companyChecker, CheckTypeOption).error;
       if (res) throw new FieldCheckError(res);
     }
-    let res = await companyCollection.findOne({ companyId: comp.companyId, siteTag: comp.siteTag });
+    let res = await companyCollection.findOne({
+      companyId: comp.companyId,
+      siteTag: comp.siteTag,
+    });
     if (res === null) {
       await companyCollection.insertOne({ ...comp });
       return true;
@@ -34,7 +37,11 @@ export class CompanyData {
    * 如果数据库存在相同id的公司, 则不插入, 返回重复公司列表
    * @param insertCheckedItem 插入校验通过的项
    */
-  async appendCompanies(comps: CompanyCrawlerDataAppend[], siteTag: SiteTag, insertCheckedItem = true) {
+  async appendCompanies(
+    comps: CompanyCrawlerDataAppend[],
+    siteTag: SiteTag,
+    insertCheckedItem = true,
+  ) {
     let newComps: CompanyCrawlerDataAppend[] = [];
     let checkFail: { item: CompanyCrawlerDataAppend; err: any }[] = [];
     {
@@ -45,7 +52,11 @@ export class CompanyData {
           else newComps.push(item);
         }
       } else {
-        let res = checkType(comps, array(companyChecker), CheckTypeOption).error;
+        let res = checkType(
+          comps,
+          array(companyChecker),
+          CheckTypeOption,
+        ).error;
         if (res) throw new FieldCheckError(res);
       }
     }
@@ -53,10 +64,9 @@ export class CompanyData {
     let notInsertComps: CompanyCrawlerDataAppend[] = []; //todo: 更新重复的公司
     {
       let oldComps = await companyCollection
-        .aggregate<WithId<Pick<CompanyCrawlerData, "companyId" | "siteTag">>>([
-          { $match: { siteTag, companyId: { $in: Object.keys(idMap) } } },
-          { $project: { siteTag: 1, companyId: 1 } },
-        ])
+        .aggregate<
+          WithId<Pick<CompanyCrawlerData, "companyId" | "siteTag">>
+        >([{ $match: { siteTag, companyId: { $in: Object.keys(idMap) } } }, { $project: { siteTag: 1, companyId: 1 } }])
         .toArray();
 
       for (const old of oldComps) {
@@ -78,7 +88,10 @@ export class CompanyData {
     return companyCollection.deleteOne({ _id: new ObjectId(compId) });
   }
 
-  async appendCompanyTasksToTaskQueue(beforeTime: Date, options?: { siteTag?: SiteTag; expirationTime?: Date }) {
+  async appendCompanyTasksToTaskQueue(
+    beforeTime: Date,
+    options?: { siteTag?: SiteTag; expirationTime?: Date },
+  ) {
     {
       let res = checkType(
         [beforeTime, options],
@@ -95,7 +108,7 @@ export class CompanyData {
             }),
           },
         ],
-        CheckTypeOption
+        CheckTypeOption,
       ).error;
       if (res) throw new FieldCheckError(res);
     }

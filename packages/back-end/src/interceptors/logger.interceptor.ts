@@ -1,4 +1,9 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+} from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { Observable } from "rxjs";
 import { visitLogger, LogType, VisitInfo } from "../classes/visit_logger.js";
@@ -6,7 +11,10 @@ import { visitLogger, LogType, VisitInfo } from "../classes/visit_logger.js";
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
   constructor() {}
-  async getReqInfo(req: FastifyRequest, response: FastifyReply): Promise<VisitInfo> {
+  async getReqInfo(
+    req: FastifyRequest,
+    response: FastifyReply,
+  ): Promise<VisitInfo> {
     const headers = req.headers;
     await response;
     return {
@@ -39,7 +47,10 @@ export class LoggerInterceptor implements NestInterceptor {
   }
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const http = context.switchToHttp();
-    this.setLog(http.getRequest<FastifyRequest>(), http.getResponse<FastifyReply>());
+    this.setLog(
+      http.getRequest<FastifyRequest>(),
+      http.getResponse<FastifyReply>(),
+    );
     return next.handle();
   }
 }

@@ -27,7 +27,10 @@ const updateBodyPipes: PipeTransform = {
       let res = checkType(value, {
         name: optional.string,
         startOrStop: optional((v) => ({
-          error: v === "start" || v === "stop" ? undefined : "只能是start或stop, 实际:" + v,
+          error:
+            v === "start" || v === "stop"
+              ? undefined
+              : "只能是start或stop, 实际:" + v,
         })),
       }).error;
       if (res) throw new BadRequestException(res);
@@ -43,7 +46,11 @@ const crateBodyPipes: PipeTransform = {
         name: optional.string,
         memoryLimit: optional(typeChecker.numberRange(100, 1024)),
       }).error;
-      if (res) throw new BadRequestException({ message: "字段校验不通过", cause: res });
+      if (res)
+        throw new BadRequestException({
+          message: "字段校验不通过",
+          cause: res,
+        });
     }
     return value;
   },
@@ -71,9 +78,13 @@ export class CrawlProcessController {
 
   @UsePipes(updateBodyPipes)
   @Put(":id")
-  async updateCrawlProcess(@Param("id", ParseIntPipe) id: number, @Body() body: ApiReq.UpdateProcess) {
+  async updateCrawlProcess(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() body: ApiReq.UpdateProcess,
+  ) {
     const { startOrStop, ...data } = body;
-    if (startOrStop == "stop") await this.crawlProcessService.stopChildProcess(id);
+    if (startOrStop == "stop")
+      await this.crawlProcessService.stopChildProcess(id);
     else if (startOrStop === "start") {
       try {
         await this.crawlProcessService.startChildProcess(id);

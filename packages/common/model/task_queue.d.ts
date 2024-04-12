@@ -1,4 +1,10 @@
-import { SiteTag, Education, CompanyScale, TaskType, TaskState } from "./index.js";
+import {
+  SiteTag,
+  Education,
+  CompanyScale,
+  TaskType,
+  TaskState,
+} from "./index.js";
 
 export type CrawlerTaskAppend = Omit<CrawlerPriorityTask, "status">;
 

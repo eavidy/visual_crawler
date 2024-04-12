@@ -1,6 +1,14 @@
-import { Crawler, UnexecutedCompanyTask, UnexecutedJobTask } from "./crawler.js";
+import {
+  Crawler,
+  UnexecutedCompanyTask,
+  UnexecutedJobTask,
+} from "./crawler.js";
 import { UnexecutedCrawlerTask } from "../../db/index.js";
-import { LiePinCompanyDetail, LiePinJobList, PageNumControllable } from "../sites/liepin/index.js";
+import {
+  LiePinCompanyDetail,
+  LiePinJobList,
+  PageNumControllable,
+} from "../sites/liepin/index.js";
 import { radomWaitTime } from "../classes/time.js";
 import { SiteTag, TaskType } from "common/model/index.js";
 import { DeepAssignFilter } from "../classes/crawl_action.js";
@@ -15,7 +23,10 @@ import { CrawlerDevice } from "../classes/browser.js";
 export class CrawlerLiepin extends Crawler {
   siteTag = SiteTag.liepin;
   readonly origin = "https://www.liepin.com";
-  constructor(readonly browser: CrawlerDevice, taskQueue: TaskQueue) {
+  constructor(
+    readonly browser: CrawlerDevice,
+    taskQueue: TaskQueue,
+  ) {
     super(taskQueue);
   }
   private async crateLiepinCompanyDetail() {
@@ -27,13 +38,22 @@ export class CrawlerLiepin extends Crawler {
     return liepin;
   }
   private async createLiepinPageList() {
-    let liepJobList = new LiePinJobList(await this.browser.newContext(), this.origin);
+    let liepJobList = new LiePinJobList(
+      await this.browser.newContext(),
+      this.origin,
+    );
     liepJobList.on("data", this.onData);
     liepJobList.on("error", this.onError);
     liepJobList.on("auth", this.reportAuth.bind(this));
     return liepJobList;
   }
-  private onData = ({ jobList, compList }: { jobList: any[]; compList?: any[] }) => {
+  private onData = ({
+    jobList,
+    compList,
+  }: {
+    jobList: any[];
+    compList?: any[];
+  }) => {
     if (compList?.length) this.saveCompanies(compList);
     if (jobList?.length) this.saveJobs(jobList);
     this.ctHandle?.resolve(jobList.length);
@@ -48,24 +68,37 @@ export class CrawlerLiepin extends Crawler {
   get getExcreting() {
     return this.#excreting;
   }
-  async executeTask(task: UnexecutedCrawlerTask, signal?: AbortSignal): Promise<{ pass: boolean; result?: any }> {
+  async executeTask(
+    task: UnexecutedCrawlerTask,
+    signal?: AbortSignal,
+  ): Promise<{ pass: boolean; result?: any }> {
     if (this.#excreting) throw new Error("执行任务中不能继续执行");
     this.#excreting = true;
     let res: any;
-    if (task.type === TaskType.company) res = await this.excCompanyTask(task as UnexecutedCompanyTask, signal);
-    else if (task.type === TaskType.jobFilter) res = await this.excJobTask(task as UnexecutedJobTask, signal);
+    if (task.type === TaskType.company)
+      res = await this.excCompanyTask(task as UnexecutedCompanyTask, signal);
+    else if (task.type === TaskType.jobFilter)
+      res = await this.excJobTask(task as UnexecutedJobTask, signal);
     else res = { pass: false };
     this.#excreting = false;
     return res;
   }
-  private ctHandle?: Promise<number | void> & { resolve(arg: number | void): void; reject(): void };
+  private ctHandle?: Promise<number | void> & {
+    resolve(arg: number | void): void;
+    reject(): void;
+  };
   randomTime(): Promise<number> {
     this.ctHandle = timeoutPromise(30 * 1000, true);
-    return Promise.all([this.ctHandle, radomWaitTime(2 * 1000, 4 * 1000)]).then(([count]) => count ?? 0);
+    return Promise.all([this.ctHandle, radomWaitTime(2 * 1000, 4 * 1000)]).then(
+      ([count]) => count ?? 0,
+    );
   }
   private companyTaskCount = 0;
   private liepinCompanyDetail?: LiePinCompanyDetail;
-  async excCompanyTask(task: UnexecutedCompanyTask, signal?: AbortSignal): Promise<{ pass: boolean; result: any }> {
+  async excCompanyTask(
+    task: UnexecutedCompanyTask,
+    signal?: AbortSignal,
+  ): Promise<{ pass: boolean; result: any }> {
     let companyTask;
     if (this.liepinCompanyDetail) {
       companyTask = this.liepinCompanyDetail;
@@ -93,15 +126,27 @@ export class CrawlerLiepin extends Crawler {
       this.resetSchedule(totalPage);
 
       let errors: any[] = [];
-      let { crawlCount, pageNum } = await this.traversePageNum(ctrl, errors, signal, task);
+      let { crawlCount, pageNum } = await this.traversePageNum(
+        ctrl,
+        errors,
+        signal,
+        task,
+      );
 
-      if (errors.length) this.reportError("公司页面翻页出错", { child: errors, task });
-      result = { pass: crawlCount / totalJob > 0.75, result: { total: totalJob, crawlCount } };
+      if (errors.length)
+        this.reportError("公司页面翻页出错", { child: errors, task });
+      result = {
+        pass: crawlCount / totalJob > 0.75,
+        result: { total: totalJob, crawlCount },
+      };
     } else result = { pass: true, result: { total: 0, crawlCount: 0 } };
     await ctrl.close();
     return result;
   }
-  async excJobTask(task: UnexecutedJobTask, signal?: AbortSignal): Promise<{ pass: boolean; result: any }> {
+  async excJobTask(
+    task: UnexecutedJobTask,
+    signal?: AbortSignal,
+  ): Promise<{ pass: boolean; result: any }> {
     let jobTask: JobTask;
     let skipList: number[] | undefined = task.taskInfo.skipList;
     do {
@@ -138,7 +183,7 @@ export class CrawlerLiepin extends Crawler {
     pageCtrl: PageNumControllable,
     errors: any[],
     signal?: AbortSignal,
-    task?: UnexecutedCrawlerTask
+    task?: UnexecutedCrawlerTask,
   ) {
     let breakSignal = false;
     let abortActon = () => (breakSignal = true);
@@ -190,7 +235,7 @@ class JobTask {
     private readonly crawler: CrawlerLiepin,
     private readonly task: UnexecutedJobTask,
     skipList?: number[],
-    private readonly signal?: AbortSignal
+    private readonly signal?: AbortSignal,
   ) {
     signal?.addEventListener("abort", this.onAbort);
     this.deepFilter = pageCtrl.createDeepAssignFilter();
@@ -256,14 +301,18 @@ class JobTask {
         //todo:处理验证
       }
       await randomTime.catch(() =>
-        this.crawler.reportError("等待响应超时", { task: this.task, index: this.deepFilter.assignRes })
+        this.crawler.reportError("等待响应超时", {
+          task: this.task,
+          index: this.deepFilter.assignRes,
+        }),
       );
       isFullList = await pageCtrl.isFullList();
 
       let isLast = res?.isLast || !isFullList;
       if (res === undefined || (isLast && this.count > limitCount)) break; //结束
       let newSchedule = this.deepFilter.getCurrent() * 9;
-      if (newSchedule > this.crawler.currentSchedule) this.crawler.currentSchedule = newSchedule;
+      if (newSchedule > this.crawler.currentSchedule)
+        this.crawler.currentSchedule = newSchedule;
       if (this.breakSignal) break;
 
       if (res?.isLast && isFullList) {
@@ -271,7 +320,7 @@ class JobTask {
           pageCtrl,
           this.traversePageNumErrors,
           this.signal,
-          this.task
+          this.task,
         );
         this.count += pageNum;
       }
@@ -284,7 +333,10 @@ class JobTask {
   excResult() {
     let deepFilter = this.deepFilter;
     return {
-      pass: this.#fin || (!this.breakSignal && deepFilter.assignRes[0] / deepFilter.index[0] > 0.6),
+      pass:
+        this.#fin ||
+        (!this.breakSignal &&
+          deepFilter.assignRes[0] / deepFilter.index[0] > 0.6),
       result: { index: deepFilter.index, result: deepFilter.assignRes },
     };
   }
@@ -295,7 +347,7 @@ class JobTask {
 
 function timeoutPromise<T>(
   time: number,
-  isReject = false
+  isReject = false,
 ): Promise<T> & { resolve(data: T | void): void; reject(): void } {
   const { promise, reject, resolve } = withPromise<void>();
   const id = setTimeout(isReject ? reject : resolve, time);

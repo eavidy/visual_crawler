@@ -13,7 +13,11 @@
         "MODE": "dev"
       },
       "runtimeArgs": ["--loader", "@asnc/ts_hook/hook.mjs"],
-      "skipFiles": ["<node_internals>/**", "A:/back-end/pnpm/**", "**/node_modules/**"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "A:/back-end/pnpm/**",
+        "**/node_modules/**"
+      ],
       "program": "${workspaceFolder}/packages/back-end/src/main.ts",
       "cwd": "${workspaceFolder}"
     },

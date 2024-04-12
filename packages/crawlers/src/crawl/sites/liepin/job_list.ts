@@ -1,12 +1,20 @@
 import { BrowserContext, Response } from "playwright";
-import { CompanyCrawlerData, JobCrawlerData, JobFilterOption } from "common/model/index.js";
+import {
+  CompanyCrawlerData,
+  JobCrawlerData,
+  JobFilterOption,
+} from "common/model/index.js";
 import { cities } from "common/constants/cities.js";
 import { SiteTag } from "common/model/index.js";
 import { PageCrawl, DataParser } from "../common/index.js";
 import { paseJob, RawCompData, RawJobData } from "./classes/common_parser.js";
 import { PageNumControllable } from "./classes/page_controller.js";
 import { afterTime } from "evlib";
-import { FilterIteratorFx, ACTION_TIMEOUT, DeepAssignFilter } from "../../classes/crawl_action.js";
+import {
+  FilterIteratorFx,
+  ACTION_TIMEOUT,
+  DeepAssignFilter,
+} from "../../classes/crawl_action.js";
 
 import { removeUndefinedKey } from "evlib";
 import * as querystring from "node:querystring";
@@ -17,7 +25,10 @@ import * as querystring from "node:querystring";
  * @event auth    //页面需要验证码
  */
 export class LiePinJobList extends PageCrawl {
-  constructor(context: BrowserContext, readonly origin: string) {
+  constructor(
+    context: BrowserContext,
+    readonly origin: string,
+  ) {
     super(context);
   }
   readonly siteTag = SiteTag.liepin;
@@ -37,7 +48,9 @@ export class LiePinJobList extends PageCrawl {
     return this.openUseParams(paramsStr, timeout);
   }
   async openUseLine(cityId?: number) {
-    let city = cityId ? cities.find((c) => c._id === cityId)?.liepinCode : undefined;
+    let city = cityId
+      ? cities.find((c) => c._id === cityId)?.liepinCode
+      : undefined;
     return this.openUseParams({
       salary: filter.salary[0].code,
       workYearCode: filter.workYearCode[0].code,
@@ -47,12 +60,19 @@ export class LiePinJobList extends PageCrawl {
       ...(city ? { city, dq: city } : null),
     });
   }
-  async openUseParams(params: string | LiePinFilterOption, timeout = 20 * 1000) {
-    let paramsStr = typeof params === "string" ? params : querystring.stringify(params);
+  async openUseParams(
+    params: string | LiePinFilterOption,
+    timeout = 20 * 1000,
+  ) {
+    let paramsStr =
+      typeof params === "string" ? params : querystring.stringify(params);
     let page = await super.newPage();
-    const urlChecker = /liepin.com\/api\/com.liepin.searchfront4c.pc-search-job$/;
+    const urlChecker =
+      /liepin.com\/api\/com.liepin.searchfront4c.pc-search-job$/;
     page.on("response", (res) => {
-      if (/safe\.liepin\.com\/page\/liepin\/captchaPage_ip_PC/.test(res.url())) {
+      if (
+        /safe\.liepin\.com\/page\/liepin\/captchaPage_ip_PC/.test(res.url())
+      ) {
         this.emit("auth");
         return;
       }
@@ -60,7 +80,11 @@ export class LiePinJobList extends PageCrawl {
         if (res.ok()) {
           this.onResponse(res);
         } else {
-          this.reportError({ msg: "响应状态码异常", status: res.status(), statusText: res.statusText() });
+          this.reportError({
+            msg: "响应状态码异常",
+            status: res.status(),
+            statusText: res.statusText(),
+          });
         }
       }
     });
@@ -78,7 +102,8 @@ export class LiePinJobList extends PageCrawl {
   }
   async loadFin() {}
   private async onResponse(res: Response) {
-    let data: ResData[] = (await res.json().catch(() => {}))?.data?.data?.jobCardList ?? [];
+    let data: ResData[] =
+      (await res.json().catch(() => {}))?.data?.data?.jobCardList ?? [];
 
     const resData = this.paseData(data);
     this.pageCrawlFin(resData);
@@ -97,7 +122,10 @@ export class LiePinJobList extends PageCrawl {
           compData = this.paseCompany(company);
           compList.push(compData);
         } catch (error) {
-          this.reportError({ msg: "执行解析公司错误", err: (error as Error).stack });
+          this.reportError({
+            msg: "执行解析公司错误",
+            err: (error as Error).stack,
+          });
         }
       }
       try {
@@ -109,7 +137,10 @@ export class LiePinJobList extends PageCrawl {
         jobList.push(data);
         errors.forEach((err) => this.reportError(err));
       } catch (error) {
-        this.reportError({ msg: "执行解析职位错误", err: (error as Error).toString() });
+        this.reportError({
+          msg: "执行解析职位错误",
+          err: (error as Error).toString(),
+        });
       }
     }
     return { jobList, compList };
@@ -150,40 +181,47 @@ class JobPageController extends PageNumControllable {
 
   //7
   async *salary(skipCount = 0) {
-    let list = await this.getBasicFilters("薪资").locator(".options-item").all();
+    let list = await this.getBasicFilters("薪资")
+      .locator(".options-item")
+      .all();
     for (let i = skipCount; i < list.length; i++) {
       let item = list[i];
       yield await item.click({ timeout: ACTION_TIMEOUT }).then(
         () => true,
-        () => false
+        () => false,
       );
     }
     return await this.getFilterClearIcon("salary")
       .click({ timeout: ACTION_TIMEOUT })
       .then(
         () => true,
-        () => false
+        () => false,
       );
   }
   //7
   async *experience(skipCount = 0) {
-    let list = await this.getBasicFilters("经验").locator(".options-item").all();
+    let list = await this.getBasicFilters("经验")
+      .locator(".options-item")
+      .all();
     for (let i = skipCount; i < list.length; i++) {
       let item = list[i];
       yield await item.click({ timeout: ACTION_TIMEOUT }).then(
         () => true,
-        () => false
+        () => false,
       );
     }
     return await this.getFilterClearIcon("workYearCode")
       .click({ timeout: ACTION_TIMEOUT })
       .then(
         () => true,
-        () => false
+        () => false,
       );
   }
   //7
-  async *education(skipCount = 0, list = ["初中及以下", "高中", "中专/中技", "大专", "本科", "硕士", "博士"]) {
+  async *education(
+    skipCount = 0,
+    list = ["初中及以下", "高中", "中专/中技", "大专", "本科", "硕士", "博士"],
+  ) {
     // let lastStr = "学历";
     let loc = await this.getOtherFilters().nth(0);
     for (let i = skipCount; i < list.length; i++) {
@@ -202,14 +240,23 @@ class JobPageController extends PageNumControllable {
       .click({ timeout: ACTION_TIMEOUT })
       .then(
         () => true,
-        () => false
+        () => false,
       );
   }
 
   //8
   async *compScale(
     skipCount = 0,
-    list = ["1-49人", "50-99人", "100-499人", "500-999人", "1000-2000人", "2000-5000人", "5000-10000人", "10000人以上"]
+    list = [
+      "1-49人",
+      "50-99人",
+      "100-499人",
+      "500-999人",
+      "1000-2000人",
+      "2000-5000人",
+      "5000-10000人",
+      "10000人以上",
+    ],
   ) {
     let loc = await this.getOtherFilters().nth(3);
     for (let i = skipCount; i < list.length; i++) {
@@ -227,13 +274,23 @@ class JobPageController extends PageNumControllable {
       .click({ timeout: ACTION_TIMEOUT })
       .then(
         () => true,
-        () => false
+        () => false,
       );
   }
   //6
   async *financingStage(
     skinList = 0,
-    list = ["天使轮", "A轮", "B轮", "C轮", "D轮及以上", "已上市", "战略融资", "融资未公开", "其他"]
+    list = [
+      "天使轮",
+      "A轮",
+      "B轮",
+      "C轮",
+      "D轮及以上",
+      "已上市",
+      "战略融资",
+      "融资未公开",
+      "其他",
+    ],
   ) {
     //融资阶段
     let loc = await this.getOtherFilters().nth(4);
@@ -252,13 +309,17 @@ class JobPageController extends PageNumControllable {
       .click({ timeout: ACTION_TIMEOUT })
       .then(
         () => true,
-        () => false
+        () => false,
       );
   }
   get iterationSequence(): FilterIteratorFx[] {
-    return [this.salary, this.experience, this.education, this.compScale, this.financingStage].map((fx) =>
-      fx.bind(this)
-    );
+    return [
+      this.salary,
+      this.experience,
+      this.education,
+      this.compScale,
+      this.financingStage,
+    ].map((fx) => fx.bind(this));
   }
   createDeepAssignFilter() {
     let list = this.iterationSequence;
@@ -266,20 +327,24 @@ class JobPageController extends PageNumControllable {
   }
   private getFilterClearIcon(key: string) {
     return this.page.locator(
-      `.selected-options-box .selected-options-list-box .selected-item[data-key='${key}'] .anticon-close`
+      `.selected-options-box .selected-options-list-box .selected-item[data-key='${key}'] .anticon-close`,
     );
   }
   private getBasicFilters(title?: string) {
-    let loc = this.page.locator(".filter-options-container .filter-options-row-section >.options-row");
+    let loc = this.page.locator(
+      ".filter-options-container .filter-options-row-section >.options-row",
+    );
     return title ? loc.filter({ hasText: title }) : loc;
   }
   private getOtherFilters() {
     return this.page.locator(
-      ".filter-options-container .filter-options-selector-section .row-options-detail-box .select-box"
+      ".filter-options-container .filter-options-selector-section .row-options-detail-box .select-box",
     );
   }
   private async clickSelector(text: string) {
-    let loc = this.page.locator(".ant-select-dropdown .rc-virtual-list-holder .ant-select-item");
+    let loc = this.page.locator(
+      ".ant-select-dropdown .rc-virtual-list-holder .ant-select-item",
+    );
     return loc.getByText(text).click({ timeout: ACTION_TIMEOUT });
   }
 
@@ -291,7 +356,9 @@ class JobPageController extends PageNumControllable {
     return !!res;
   }
   async isFullList() {
-    let count = await this.page.locator(".content-left-section .job-list-box>div").count();
+    let count = await this.page
+      .locator(".content-left-section .job-list-box>div")
+      .count();
     return count === 40;
   }
   async *pageNumIterator(errors: any[]): AsyncGenerator<boolean, void, void> {
@@ -305,7 +372,7 @@ class JobPageController extends PageNumControllable {
         () => {
           errors.push({ message: "转跳下一页时出现异常" });
           return false;
-        }
+        },
       );
     }
   }

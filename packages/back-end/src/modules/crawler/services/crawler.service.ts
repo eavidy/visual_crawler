@@ -1,6 +1,13 @@
-import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from "@nestjs/common";
 import { CrawlProcessService } from "./process_center.service.js";
-import type { ApiRes, CreateCrawlerOptions } from "common/request/crawler/crawler.js";
+import type {
+  ApiRes,
+  CreateCrawlerOptions,
+} from "common/request/crawler/crawler.js";
 
 @Injectable()
 export class CrawlerService {
@@ -21,7 +28,11 @@ export class CrawlerService {
     let process = this.getProcess(pcId);
     return process.removeCrawler(crawlerId);
   }
-  updateCrawler(pcId: number, crawlerId: number, data: { start?: boolean; name?: string; taskCountLimit?: number }) {
+  updateCrawler(
+    pcId: number,
+    crawlerId: number,
+    data: { start?: boolean; name?: string; taskCountLimit?: number },
+  ) {
     const { start, ...config } = data;
     let process = this.getProcess(pcId);
     if (!Object.keys(config).length) {
@@ -29,7 +40,9 @@ export class CrawlerService {
     }
     if (start !== undefined) {
       try {
-        start ? process.startWork(crawlerId) : process.stopWork(crawlerId, true);
+        start
+          ? process.startWork(crawlerId)
+          : process.stopWork(crawlerId, true);
       } catch (error) {
         throw new ConflictException();
       }

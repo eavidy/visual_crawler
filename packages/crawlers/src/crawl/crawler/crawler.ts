@@ -70,7 +70,10 @@ export abstract class Crawler extends EventEmitter {
   async saveJobs(jobDates: JobCrawlerData[]) {
     if (jobDates.length === 0) return;
     try {
-      let { inserted, uninserted, checkFail } = await jobsData.appendJobs(jobDates, this.siteTag);
+      let { inserted, uninserted, checkFail } = await jobsData.appendJobs(
+        jobDates,
+        this.siteTag,
+      );
       let info = this.#statistics;
       info.jobRepeated += uninserted?.length ?? 0;
       info.newJob += inserted.length;
@@ -84,7 +87,8 @@ export abstract class Crawler extends EventEmitter {
   async saveCompanies(companies: CompanyCrawlerDataAppend[]) {
     if (companies.length === 0) return;
     try {
-      let { inserted, uninserted, checkFail } = await companyData.appendCompanies(companies, this.siteTag);
+      let { inserted, uninserted, checkFail } =
+        await companyData.appendCompanies(companies, this.siteTag);
       let info = this.#statistics;
       info.newCompany += inserted.length;
       info.companyRepeated += uninserted?.length ?? 0;
@@ -99,7 +103,7 @@ export abstract class Crawler extends EventEmitter {
               siteTag: this.siteTag,
               type: TaskType.company,
               taskInfo: company.companyId,
-            }))
+            })),
           )
           .catch((error) => {
             this.reportError("添加公司任务到队列出错", this.errToJson(error));
@@ -113,7 +117,10 @@ export abstract class Crawler extends EventEmitter {
     return taskQueueData.updateTaskInfo(task._id, info);
   }
 
-  abstract executeTask(task: UnexecutedCrawlerTask, abc?: AbortSignal): Promise<{ pass: boolean; result?: any }>;
+  abstract executeTask(
+    task: UnexecutedCrawlerTask,
+    abc?: AbortSignal,
+  ): Promise<{ pass: boolean; result?: any }>;
   private errToJson(err: any) {
     if (err instanceof Error) {
       return {

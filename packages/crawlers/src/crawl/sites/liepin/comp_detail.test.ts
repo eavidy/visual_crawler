@@ -3,7 +3,10 @@ import { LiePinCompanyDetail } from "./comp_detail.js";
 import { CrawlerDevice } from "../../classes/browser.js";
 import { afterTime } from "evlib";
 
-const browser = await CrawlerDevice.create({ headless: true, channel: undefined });
+const browser = await CrawlerDevice.create({
+  headless: true,
+  channel: undefined,
+});
 afterAll(async function (e) {
   return browser.close();
 });
@@ -22,5 +25,5 @@ it.concurrent(
     const pageCount = await ctrl.getTotalJob();
     expect(pageCount, "页面数量大于0").greaterThan(0);
   },
-  10 * 1000
+  10 * 1000,
 );

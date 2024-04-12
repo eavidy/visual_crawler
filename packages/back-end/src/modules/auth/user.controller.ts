@@ -27,7 +27,11 @@ export class UserController {
     return { items };
   }
   @Put()
-  async createUser(@Body("id") id: string, @Body("pwd") pwd: string, @Body("name") name: string = id) {
+  async createUser(
+    @Body("id") id: string,
+    @Body("pwd") pwd: string,
+    @Body("name") name: string = id,
+  ) {
     return this.userService.createUser(id, { password: pwd, name });
   }
   @Delete()
@@ -53,7 +57,8 @@ export class UserController {
     let userInfo: Partial<UserBaseInfo> = info;
     if (pwd) {
       const user = await this.userService.getUser(id);
-      if (user?.password !== pwd.old) throw new BadRequestException("旧密码不正确");
+      if (user?.password !== pwd.old)
+        throw new BadRequestException("旧密码不正确");
       userInfo = { ...info, password: pwd.new };
     }
     try {

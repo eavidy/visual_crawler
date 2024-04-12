@@ -1,7 +1,11 @@
 import { ServerResponse, IncomingMessage } from "node:http";
 import { visitLogger, LogType, VisitInfo } from "../classes/visit_logger.js";
 
-export function loggerMiddleware(req: IncomingMessage, res: ServerResponse, next: () => void) {
+export function loggerMiddleware(
+  req: IncomingMessage,
+  res: ServerResponse,
+  next: () => void,
+) {
   const url = req.url;
   if (url === "/") {
     res.on("close", function () {

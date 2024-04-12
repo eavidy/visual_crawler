@@ -5,7 +5,7 @@ import { DataParser } from "../../common/index.js";
 export function paseJob(
   job: RawJobData,
   siteTag: SiteTag,
-  company: { companyId?: string; industry?: string; scale?: number }
+  company: { companyId?: string; industry?: string; scale?: number },
 ): { data: JobCrawlerData; errors: any[] } {
   const errors: any[] = [];
   let salary = DataParser.paseSalary(job.salary);
@@ -17,8 +17,11 @@ export function paseJob(
   {
     let cityStr = job.dq;
     const cityName = cityStr.match(/^[^-]+/)?.[0];
-    cityId = cityName ? DataParser.cityNameToId(cityName) : DataParser.matchCityToId(cityStr);
-    if (cityId === undefined) errors.push({ msg: "解析城市id失败", str: cityStr });
+    cityId = cityName
+      ? DataParser.cityNameToId(cityName)
+      : DataParser.matchCityToId(cityStr);
+    if (cityId === undefined)
+      errors.push({ msg: "解析城市id失败", str: cityStr });
   }
   let data = {
     jobData: {
