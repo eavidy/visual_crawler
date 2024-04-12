@@ -1,37 +1,39 @@
 {
-    "name": "font-end",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "@ant-design/icons": "^5.3.6",
-        "@ant-design/pro-components": "^2.7.0",
-        "@emotion/css": "^11.11.2",
-        "@emotion/react": "^11.11.4",
-        "@emotion/styled": "^11.11.5",
-        "ahooks": "^3.7.11",
-        "antd": "^5.16.1",
-        "axios": "^1.6.8",
-        "common": "workspace:*",
-        "echarts": "^5.5.0",
-        "js-md5": "^0.8.3",
-        "rc-field-form": "^1.44.0",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "react-router-dom": "^6.22.3"
-    },
-    "devDependencies": {
-        "@types/js-md5": "^0.7.2",
-        "@types/react": "^18.2.77",
-        "@types/react-dom": "^18.2.25",
-        "dayjs": "^1.11.10",
-        "vite-plugin-cdn-import": "^0.3.5"
-    }
+  "name": "font-end",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ant-design/icons": "^5.3.6",
+    "@ant-design/pro-components": "^2.7.0",
+    "@emotion/css": "^11.11.2",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "ahooks": "^3.7.11",
+    "antd": "^5.16.1",
+    "axios": "^1.6.8",
+    "common": "workspace:*",
+    "echarts": "^5.5.0",
+    "echarts-comp": "^0.0.4",
+    "js-md5": "^0.8.3",
+    "rc-field-form": "^1.44.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3"
+  },
+  "devDependencies": {
+    "@types/js-md5": "^0.7.2",
+    "@types/react": "^18.2.77",
+    "@types/react-dom": "^18.2.25",
+    "dayjs": "^1.11.10",
+    "vite-plugin-cdn-import": "^0.3.5"
+  }
 }
