@@ -9,6 +9,6 @@
     "build": "tsc -p tsconfig.build.json"
   },
   "devDependencies": {
-    "tslib": "^2.5.0"
+    "tslib": "^2.6.2"
   }
 }
