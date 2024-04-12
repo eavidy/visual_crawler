@@ -1,4 +1,4 @@
-import { CrawlerTaskAppend, SiteTag, TaskState, TaskType } from "common/model";
+import { CrawlerTaskAppend, SiteTag, TaskState, TaskType } from "common/model/index.js";
 import { taskQueueData, UnexecutedCrawlerTask } from "../../db/index.js";
 import { cities } from "common/constants/cities.js";
 

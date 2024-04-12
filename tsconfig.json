@@ -1,11 +1,12 @@
 {
-    "compilerOptions": {
-        "module": "NodeNext",
-        "target": "ESNext",
-        "moduleResolution": "nodenext",
-        "strict": true,
-        "lib": ["ESNext"],
-        "skipDefaultLibCheck": true
-    },
-    "exclude": ["node_modules"]
+  "compilerOptions": {
+    "module": "NodeNext",
+    "target": "ESNext",
+    "moduleResolution": "nodenext",
+    "isolatedModules": true,
+    "strict": true,
+    "lib": ["ESNext"],
+    "skipDefaultLibCheck": true
+  },
+  "exclude": ["node_modules"]
 }

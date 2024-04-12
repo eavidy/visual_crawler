@@ -1,4 +1,4 @@
-import { Education } from "common/model";
+import { Education } from "common/model/index.js";
 import { WorkExp } from "common/request/enum.js";
 import { Document } from "mongodb";
 import { jobsCollection } from "./db.js";

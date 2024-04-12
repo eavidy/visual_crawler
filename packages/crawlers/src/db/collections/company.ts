@@ -4,7 +4,7 @@ import {
   CrawlerPriorityCompanyTask,
   SiteTag,
   TaskType,
-} from "common/model";
+} from "common/model/index.js";
 import { ObjectId, WithId } from "mongodb";
 import { checkType, ExceptType, typeChecker } from "evlib";
 import { FieldCheckError } from "../classes/errors.js";

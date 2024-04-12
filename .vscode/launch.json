@@ -1,21 +1,34 @@
 {
-    // 使用 IntelliSense 了解相关属性。
-    // 悬停以查看现有属性的描述。
-    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node",
-            "request": "launch",
-            "sourceMaps": true,
-            "name": "后端调试",
-            "env": {
-                "MODE": "dev"
-            },
-            "runtimeArgs": ["--loader", "/A:/back-end/pnpm/5/node_modules/@asnc/ts_hook/hook.mjs"],
-            "skipFiles": ["<node_internals>/**", "A:/back-end/pnpm/**", "**/node_modules/**"],
-            "program": "${workspaceFolder}/packages/back-end/src/main.ts",
-            "cwd": "${workspaceFolder}"
-        }
-    ]
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "sourceMaps": true,
+      "name": "后端调试",
+      "env": {
+        "MODE": "dev"
+      },
+      "runtimeArgs": ["--loader", "@asnc/ts_hook/hook.mjs"],
+      "skipFiles": ["<node_internals>/**", "A:/back-end/pnpm/**", "**/node_modules/**"],
+      "program": "${workspaceFolder}/packages/back-end/src/main.ts",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Typescript",
+      "type": "node",
+      "request": "launch",
+      "presentation": {
+        "hidden": false,
+        "group": "node"
+      },
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeArgs": ["--loader", "@asnc/ts_hook/hook.mjs"],
+      "program": "${relativeFile}",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
 }

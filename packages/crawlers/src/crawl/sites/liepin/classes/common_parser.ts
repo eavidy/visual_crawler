@@ -1,4 +1,4 @@
-import { JobCrawlerData, SiteTag } from "common/model";
+import { JobCrawlerData, SiteTag } from "common/model/index.js";
 import { removeUndefinedKey } from "evlib";
 import { DataParser } from "../../common/index.js";
 

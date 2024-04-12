@@ -3,7 +3,7 @@ import { CrawlerLiepin } from "../crawl/crawler/crawler_liepin.js";
 import { CrawlerDevice } from "../crawl/classes/browser.js";
 import { args } from "../classes/parse_args.js";
 import { TaskQueue, NewCityTaskQueue } from "../crawl/classes/task_queue.js";
-import { SiteTag } from "common/model";
+import { SiteTag } from "common/model/index.js";
 import type { CreateCrawlerOptions } from "common/request/crawler/crawler.js";
 import { dbClient } from "../db/db.js";
 

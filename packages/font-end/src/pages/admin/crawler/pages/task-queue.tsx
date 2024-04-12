@@ -5,7 +5,7 @@ import { useRequest } from "ahooks";
 import { taskQueueResource, TaskQueueList, GetTasksFilterOption } from "../services/task-queue.resource";
 import { PageContainer } from "@ant-design/pro-components";
 import { ProcessAddModal, ProcessAddModalProps } from "../components/process-add-modal";
-import { SiteTag, TaskState, TaskType } from "common/model";
+import { SiteTag, TaskState, TaskType } from "common/model/index.js";
 export default function TaskQueueList() {
     const [currentPage, setCurrentPage] = useState(1);
     const [form] = Form.useForm<GetTasksFilterOption>();

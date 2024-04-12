@@ -1,6 +1,6 @@
 import { CrawlerLiepin } from "../crawl/crawler/crawler_liepin.js";
 import { CrawlerDevice } from "../crawl/classes/browser.js";
-import { SiteTag, TaskType } from "common/model";
+import { SiteTag, TaskType } from "common/model/index.js";
 import { ObjectId } from "mongodb";
 import { dbClient } from "../db/db.js";
 import { NewCityTaskQueue, TaskQueue } from "../crawl/classes/task_queue.js";

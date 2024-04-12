@@ -1,8 +1,8 @@
 import { DataParser, PageCrawl } from "../common/index.js";
 import { BrowserContext, Page, Response } from "playwright";
-import { SiteTag } from "common/model";
+import { SiteTag } from "common/model/index.js";
 import { paseJob } from "./classes/common_parser.js";
-import { JobCrawlerData } from "common/model";
+import { JobCrawlerData } from "common/model/index.js";
 import { PageNumControllable } from "./classes/page_controller.js";
 import { ACTION_TIMEOUT } from "../../../crawl/classes/crawl_action.js";
 

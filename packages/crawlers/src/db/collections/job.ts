@@ -1,4 +1,4 @@
-import { JobCrawlerData, SiteTag } from "common/model";
+import { JobCrawlerData, SiteTag } from "common/model/index.js";
 import { checkType, ExceptType, typeChecker, TypeCheckOptions } from "evlib";
 import { ObjectId, WithId } from "mongodb";
 import { FieldCheckError } from "../classes/errors.js";

@@ -1,13 +1,14 @@
 {
-    "name": "common",
-    "version": "1.0.0",
-    "description": "",
-    "author": "Asnow",
-    "license": "MIT",
-    "scripts": {
-        "build": "tsc -p tsconfig.build.json"
-    },
-    "devDependencies": {
-        "tslib": "^2.5.0"
-    }
+  "name": "common",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Asnow",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "devDependencies": {
+    "tslib": "^2.5.0"
+  }
 }

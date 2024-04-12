@@ -1,4 +1,4 @@
-import { CrawlerProcessStatus } from "../enum";
+import { CrawlerProcessStatus } from "../enum.js";
 
 export namespace ApiReq {
     interface DeleteCrawlProcess {}

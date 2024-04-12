@@ -11,8 +11,8 @@ import {
   UseGuards,
   UsePipes,
 } from "@nestjs/common";
-import { SiteTag } from "common/model";
-import { GetTasksFilter, TaskQueueDbService } from "../../services/db/task_queue.db.service.js";
+import { SiteTag } from "common/model/index.js";
+import { type GetTasksFilter, TaskQueueDbService } from "../../services/db/task_queue.db.service.js";
 import { authGuard } from "../auth/grand/index.js";
 import { checkType, ExceptType, typeChecker } from "evlib";
 const { optional } = typeChecker;

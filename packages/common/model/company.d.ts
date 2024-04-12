@@ -1,4 +1,4 @@
-import { SiteTag } from ".";
+import { SiteTag } from "./index.js";
 export interface CompanyBasicData {
     /* 所属行业 */
     industry?: string;

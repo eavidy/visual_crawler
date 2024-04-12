@@ -1,13 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { JobAnalysisDbService, MatchFilter } from "../../services/db/job_analysis.db.service.js";
-import _cityIdMap from "common/constants/city_id_map.js";
+import cityIdMap from "common/constants/city_id_map.js";
 import { GroupItem } from "common/request/dashboard.js";
-import { Education } from "common/model";
+import { Education } from "common/model/index.js";
 function mathRound(value: number, decimals = 0) {
   let dv = 10 ** decimals;
   return Math.round(value * dv) / dv;
 }
-const cityIdMap = _cityIdMap.default;
 
 @Injectable()
 export class DashService {

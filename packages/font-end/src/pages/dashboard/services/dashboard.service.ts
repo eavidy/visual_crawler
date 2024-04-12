@@ -1,5 +1,5 @@
 import { $http } from "@/http";
-import { Education } from "common/model";
+import { Education } from "common/model/index.js";
 import { ApiRes, ApiReq } from "common/request/dashboard";
 import { WorkExp } from "common/request/enum";
 

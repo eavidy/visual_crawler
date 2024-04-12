@@ -1,4 +1,4 @@
-import { CrawlerPriorityJobFilterTask, JobFilterOption, SiteTag, TaskState, TaskType } from "common/model";
+import { CrawlerPriorityJobFilterTask, JobFilterOption, SiteTag, TaskState, TaskType } from "common/model/index.js";
 import { taskQueueCollection, citiesCollection, companyCollection, jobsCollection } from "./db.js";
 import { Injectable } from "@nestjs/common";
 import { Document, ObjectId } from "mongodb";

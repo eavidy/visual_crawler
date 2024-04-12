@@ -1,5 +1,5 @@
-import { CrawlerProcessStatus, CrawlerStatus } from "../enum";
-import { CrawlerPriorityCompanyTask, CrawlerPriorityJobFilterTask, TaskType } from "../../model";
+import { CrawlerProcessStatus, CrawlerStatus } from "../enum.js";
+import { CrawlerPriorityCompanyTask, CrawlerPriorityJobFilterTask, TaskType } from "../../model/index.js";
 type TaskInfo = CrawlerPriorityCompanyTask | CrawlerPriorityJobFilterTask;
 export namespace ApiReq {
     type CreateCrawler = CreateCrawlerOptions;

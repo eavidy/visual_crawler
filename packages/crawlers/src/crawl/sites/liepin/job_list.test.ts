@@ -1,6 +1,6 @@
 import { it, expect, beforeEach, afterAll } from "vitest";
 import { LiePinJobList } from "./job_list.js";
-import { CompanyCrawlerData, SiteTag } from "common/model";
+import { CompanyCrawlerData, SiteTag } from "common/model/index.js";
 import { CrawlerDevice } from "../../classes/browser.js";
 import { listIterator } from "../../classes/crawl_action.js";
 import { afterTime } from "evlib";

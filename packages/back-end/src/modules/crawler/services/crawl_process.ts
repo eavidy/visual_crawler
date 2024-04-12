@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 import type { CreateCrawlProcessOptions } from "common/request/crawler/crawl_process.js";
 import type { CreateCrawlerOptions, CrawlerInfo } from "common/request/crawler/crawler.js";
 import { CrawlerProcessStatus, CrawlerStatus } from "common/request/enum.js";
-import type { CrawlerPriorityCompanyTask, CrawlerPriorityJobFilterTask } from "common/model";
+import type { CrawlerPriorityCompanyTask, CrawlerPriorityJobFilterTask } from "common/model/index.js";
 type TaskInfo = CrawlerPriorityCompanyTask | CrawlerPriorityJobFilterTask;
 /**
  * @event initDevice void

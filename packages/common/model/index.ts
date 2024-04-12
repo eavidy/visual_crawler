@@ -34,6 +34,6 @@ export enum TaskType {
     company = "company",
     jobFilter = "jobFilter",
 }
-export type * from "./company";
-export type * from "./job";
-export type * from "./task_queue";
+export type * from "./company.js";
+export type * from "./job.js";
+export type * from "./task_queue.js";

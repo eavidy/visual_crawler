@@ -1,5 +1,5 @@
 import { Collection, ObjectId, WithId, Db } from "mongodb";
-import { CrawlerPriorityTask, TaskState, SiteTag, CrawlerTaskAppend, TaskType } from "common/model";
+import { CrawlerPriorityTask, TaskState, SiteTag, CrawlerTaskAppend, TaskType } from "common/model/index.js";
 import { TypeCheckOptions, checkType, typeChecker } from "evlib";
 import { FieldCheckError } from "../classes/errors.js";
 import { db, taskQueueCollection } from "../db.js";

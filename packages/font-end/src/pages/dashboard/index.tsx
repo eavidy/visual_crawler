@@ -6,7 +6,7 @@ import { $http } from "@/http";
 import { ApiReq } from "common/request/dashboard";
 import { WorkExp } from "common/request/enum";
 import { Body } from "./components/dash-left";
-import { Education } from "common/model";
+import { Education } from "common/model/index.js";
 import LogoIcon from "@/components/img/logo";
 import { Link } from "react-router-dom";
 

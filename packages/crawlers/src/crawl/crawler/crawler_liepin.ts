@@ -2,7 +2,7 @@ import { Crawler, UnexecutedCompanyTask, UnexecutedJobTask } from "./crawler.js"
 import { UnexecutedCrawlerTask } from "../../db/index.js";
 import { LiePinCompanyDetail, LiePinJobList, PageNumControllable } from "../sites/liepin/index.js";
 import { radomWaitTime } from "../classes/time.js";
-import { SiteTag, TaskType } from "common/model";
+import { SiteTag, TaskType } from "common/model/index.js";
 import { DeepAssignFilter } from "../classes/crawl_action.js";
 import { TaskQueue } from "../classes/task_queue.js";
 import { afterTime, withPromise, WithPromise, promiseHandle } from "evlib";

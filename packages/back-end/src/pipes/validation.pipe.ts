@@ -1,5 +1,5 @@
 import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from "@nestjs/common";
-import { checkType, ExceptType } from "evlib";
+import { checkType, type ExceptType } from "evlib";
 @Injectable()
 export class ValidationPipe implements PipeTransform {
   constructor(private exceptType: ExceptType) {}
