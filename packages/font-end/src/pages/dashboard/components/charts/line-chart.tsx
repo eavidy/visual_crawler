@@ -1,4 +1,4 @@
-import { Card } from "@/components/card";
+import { Card } from "@/components/card.tsx";
 import { ECharts, EChartsOption } from "echarts-comp";
 import { Empty } from "antd";
 import React, { CSSProperties, useEffect, useMemo, useRef } from "react";
@@ -59,7 +59,12 @@ export function LineChart(props: {
 
   return (
     <Card style={props.style}>
-      <ECharts ref={ref} option={option} style={{ height: isEmpty ? 100 : "100%" }} loading={props.loading} />
+      <ECharts
+        ref={ref}
+        option={option}
+        style={{ height: isEmpty ? 100 : "100%" }}
+        loading={props.loading}
+      />
       {isEmpty && <Empty />}
     </Card>
   );

@@ -1,6 +1,6 @@
-import { $http } from "@/http";
-import { createPwdHash } from "@/pages/login/funcs/pwd_hash";
-import { ApiReq, ApiRes } from "common/request/auth/user";
+import { $http } from "@/http/index.ts";
+import { createPwdHash } from "@/pages/login/funcs/pwd_hash.ts";
+import type { ApiReq, ApiRes } from "common/request/auth/user.d.ts";
 class UserResource {
   async getUserList() {
     const { data } = await $http.get<{

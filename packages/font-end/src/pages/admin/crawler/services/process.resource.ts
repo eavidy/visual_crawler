@@ -1,11 +1,9 @@
-import { $http } from "@/http";
-import { ApiReq, ApiRes } from "common/request/crawler/crawl_process";
+import { $http } from "@/http/index.ts";
+import type { ApiReq, ApiRes } from "common/request/crawler/crawl_process.d.ts";
 
 class CrawlerResource {
   async getProcessList(): Promise<ApiRes.GetProcessList> {
-    const { data } = await $http.get<{ items: ApiRes.GetProcessList }>(
-      "/api/crawl/process",
-    );
+    const { data } = await $http.get<{ items: ApiRes.GetProcessList }>("/api/crawl/process");
     for (const item of data.items) {
       if (item.startRunTime) item.startRunTime = new Date(item.startRunTime);
       for (const err of item.errors) {

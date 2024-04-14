@@ -1,5 +1,5 @@
-import { $http } from "@/http";
-import { ApiReq, ApiRes } from "common/request/login";
+import { $http } from "@/http/index.ts";
+import type { ApiReq, ApiRes } from "common/request/login.d.ts";
 
 class LoginResource {
   async login(params: ApiReq.Login) {

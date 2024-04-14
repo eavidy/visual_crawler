@@ -1,11 +1,6 @@
-import { $http } from "@/http";
-import {
-  ApiReq,
-  ApiRes,
-  CrawlerMeta,
-  CrawlerInfo as RawCrawlerInfo,
-} from "common/request/crawler/crawler";
-import { CrawlerProcessStatus, CrawlerStatus } from "common/request/enum";
+import { $http } from "@/http/index.ts";
+import type { ApiReq, ApiRes, CrawlerMeta, CrawlerInfo as RawCrawlerInfo } from "common/request/crawler/crawler.d.ts";
+import { CrawlerProcessStatus, CrawlerStatus } from "common/request/enum.ts";
 export interface CrawlerInfo extends RawCrawlerInfo {
   companyRepetitionRate: number;
   jobRepetitionRate: number;
@@ -18,15 +13,10 @@ export interface GetCrawlerInfo {
 }
 class CrawlerResource {
   async getCrawlerList(processId: number): Promise<GetCrawlerInfo> {
-    const { data } = await $http.get<{ item: ApiRes.GetCrawlerInfo }>(
-      "/api/crawl/crawler/" + processId,
-    );
+    const { data } = await $http.get<{ item: ApiRes.GetCrawlerInfo }>("/api/crawl/crawler/" + processId);
     let list = data.item.crawlerList;
     for (const item of list as CrawlerInfo[]) {
-      if (
-        item.status === CrawlerStatus.working ||
-        item.status === CrawlerStatus.stopping
-      ) {
+      if (item.status === CrawlerStatus.working || item.status === CrawlerStatus.stopping) {
         item.startWorkDate = new Date(item.startWorkDate!);
       }
       let statistics = item.statistics;
@@ -36,14 +26,10 @@ class CrawlerResource {
       item.companyRepetitionRate = companyTotal
         ? Math.round((statistics.companyRepeated / companyTotal) * 10000) / 100
         : 0;
-      item.jobRepetitionRate = jobTotal
-        ? Math.round((statistics.jobRepeated / jobTotal) * 10000) / 100
-        : 0;
+      item.jobRepetitionRate = jobTotal ? Math.round((statistics.jobRepeated / jobTotal) * 10000) / 100 : 0;
 
       let schedule = item.schedule;
-      item.taskPercent = schedule.total
-        ? Math.round((schedule.current / schedule.total) * 10000) / 100
-        : 0;
+      item.taskPercent = schedule.total ? Math.round((schedule.current / schedule.total) * 10000) / 100 : 0;
     }
     return data.item as GetCrawlerInfo;
   }

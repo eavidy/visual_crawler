@@ -1,4 +1,4 @@
-import { Card } from "@/components/card";
+import { Card } from "@/components/card.tsx";
 import { ECharts, EChartsOption } from "echarts-comp";
 import { Empty } from "antd";
 import React, { CSSProperties, useEffect, useRef } from "react";

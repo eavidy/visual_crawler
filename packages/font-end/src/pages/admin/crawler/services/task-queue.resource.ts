@@ -1,18 +1,15 @@
-import { $http } from "@/http";
-import { ApiReq, ApiRes } from "common/request/crawler/task_queue";
+import { $http } from "@/http/index.ts";
+import type { ApiReq, ApiRes } from "common/request/crawler/task_queue.d.ts";
 
 export type TaskQueueList = Required<ApiRes.GetTaskQueueList> & {
   taskInfo: string;
   key: string;
 };
-export type GetTasksFilterOption = Pick<
-  ApiReq.GetTaskQueueList,
-  "status" | "type"
->;
+export type GetTasksFilterOption = Pick<ApiReq.GetTaskQueueList, "status" | "type">;
 class TaskQueueResource {
   async getTasks(
     pagination: { pageSize: number; start: number },
-    filterOption?: GetTasksFilterOption,
+    filterOption?: GetTasksFilterOption
   ): Promise<{ items: TaskQueueList[]; total: number }> {
     const { data } = await $http.get<{
       items: ApiRes.GetTaskQueueList[];

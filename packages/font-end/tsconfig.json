@@ -1,17 +1,18 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "target": "ES6",
     "lib": ["ESNext", "DOM"],
     "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
     "jsx": "react",
-    "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "noEmit": true
   },
   "include": ["src"]
 }

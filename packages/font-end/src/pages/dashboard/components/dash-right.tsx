@@ -1,34 +1,35 @@
 import { useRequest } from "ahooks";
 import React from "react";
-import { dashboardService } from "../services/dashboard.service";
-import { Top20Billboard } from "./charts/billboard";
+import { dashboardService } from "../services/dashboard.service.ts";
+import { Top20Billboard } from "./charts/billboard.ts";
 
 export function Right() {
-    const { data: globalBillboard, loading: globalBillboardLoading } = useRequest(dashboardService.getGlobalBillboard);
+  const { data: allJobBillboard, loading: allJobBillboardLoading } = useRequest(dashboardService.getAnalysisByJob);
+  const { data: allCityBillboard, loading: allCityBillboardLoading } = useRequest(dashboardService.getAnalysisByCity);
 
-    return (
-        <div
-            style={{
-                width: "300px",
-                overflowY: "auto",
-            }}
-        >
-            <div>
-                <Top20Billboard
-                    data={globalBillboard?.allCityBillboard as any}
-                    dimensions={["cityName", "avgSalary", "jobCount"]}
-                    legendNameMap={{ avgSalary: "平均薪资", jobCount: "职位需求" }}
-                    title="城市排行TOP20"
-                    loading={globalBillboardLoading}
-                />
-                <Top20Billboard
-                    data={globalBillboard?.allJobBillboard as any}
-                    dimensions={["jobName", "avgSalary", "jobCount"]}
-                    legendNameMap={{ avgSalary: "平均薪资", jobCount: "职位需求" }}
-                    title="职位排行TOP20"
-                    loading={globalBillboardLoading}
-                />
-            </div>
-        </div>
-    );
+  return (
+    <div
+      style={{
+        width: "300px",
+        overflowY: "auto",
+      }}
+    >
+      <div>
+        <Top20Billboard
+          data={allJobBillboard}
+          dimensions={["cityName", "avgSalary", "jobCount"]}
+          legendNameMap={{ avgSalary: "平均薪资", jobCount: "职位需求" }}
+          title="城市排行TOP20"
+          loading={allJobBillboardLoading}
+        />
+        <Top20Billboard
+          data={allCityBillboard}
+          dimensions={["jobName", "avgSalary", "jobCount"]}
+          legendNameMap={{ avgSalary: "平均薪资", jobCount: "职位需求" }}
+          title="职位排行TOP20"
+          loading={allCityBillboardLoading}
+        />
+      </div>
+    </div>
+  );
 }

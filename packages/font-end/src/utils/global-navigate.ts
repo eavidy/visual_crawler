@@ -4,7 +4,7 @@ import {
   useNavigate,
   NavigateFunction,
 } from "react-router-dom";
-import { GlobalHook } from "./global-hook";
+import { GlobalHook } from "./global-hook.ts";
 
 export function navigate(delta: number): void;
 export function navigate(to: To, option?: NavigateOptions): void;

@@ -26,10 +26,7 @@ export class CrawlProcess extends EventEmitter {
     startRunTime?: number;
     errors: { time: Date; error: Error }[];
   };
-  constructor(
-    private appPath: string,
-    info: CreateCrawlProcessOptions,
-  ) {
+  constructor(private appPath: string, info: CreateCrawlProcessOptions) {
     super();
     const { memoryLimit = 200, name = "" } = info;
     this.info = { memoryLimit, name, errors: [] };
@@ -42,10 +39,10 @@ export class CrawlProcess extends EventEmitter {
       }
     }
   };
-  private internalId?: NodeJS.Timer;
+  private internalId?: NodeJS.Timeout;
   async start(
     args: string[] = [],
-    nodeArgs: string[] = [],
+    nodeArgs: string[] = []
   ): Promise<void | never> {
     if (this.process) throw new Error("进程不能重复启动");
     this.internalId = setInterval(this.onCrawlNew, 3 * 86400 * 1000);
@@ -154,7 +151,7 @@ export class CrawlProcess extends EventEmitter {
 
   updateCrawlerConfig(
     crawlerId: number,
-    config: Pick<CreateCrawlerOptions, "name" | "taskCountLimit">,
+    config: Pick<CreateCrawlerOptions, "name" | "taskCountLimit">
   ) {
     let crawler = this.getCrawler(crawlerId);
     Object.assign(crawler.config, config);
@@ -191,10 +188,7 @@ export class CrawlProcess extends EventEmitter {
    * @event startWork [undefined,id]
    */
   private static CrawlerHandle = class CrawlerHandle extends EventEmitter {
-    constructor(
-      readonly id: number,
-      readonly config: CreateCrawlerOptions,
-    ) {
+    constructor(readonly id: number, readonly config: CreateCrawlerOptions) {
       super();
       this.initEvent();
     }

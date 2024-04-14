@@ -1,13 +1,13 @@
-import { $http } from "@/http";
+import { $http } from "@/http/index.ts";
 import { Education } from "common/model/index.js";
-import { ApiRes, ApiReq } from "common/request/dashboard";
-import { WorkExp } from "common/request/enum";
+import type { ApiRes, ApiReq } from "common/request/dashboard.d.ts";
+import { WorkExp } from "common/request/enum.ts";
 
 class DashboardResource {
   async getJobBillboard(query: ApiReq.MatchFilter) {
     const { data } = await $http.get<ApiRes.JobBillboard>(
       "api/dashboard/job_billboard",
-      { params: query },
+      { params: query }
     );
     return data;
   }
@@ -45,7 +45,7 @@ class DashboardResource {
       "api/dashboard/data_by_education",
       {
         params: query,
-      },
+      }
     );
 
     for (const item of items) {
@@ -72,7 +72,7 @@ class DashboardResource {
       "api/dashboard/data_by_time",
       {
         params: query,
-      },
+      }
     );
 
     return items;

@@ -13,7 +13,7 @@ import { radomWaitTime } from "../classes/time.js";
 import { SiteTag, TaskType } from "common/model/index.js";
 import { DeepAssignFilter } from "../classes/crawl_action.js";
 import { TaskQueue } from "../classes/task_queue.js";
-import { afterTime, withPromise, WithPromise, promiseHandle } from "evlib";
+import { afterTime, withPromise } from "evlib";
 import { CrawlerDevice } from "../classes/browser.js";
 
 /**
@@ -23,10 +23,7 @@ import { CrawlerDevice } from "../classes/browser.js";
 export class CrawlerLiepin extends Crawler {
   siteTag = SiteTag.liepin;
   readonly origin = "https://www.liepin.com";
-  constructor(
-    readonly browser: CrawlerDevice,
-    taskQueue: TaskQueue,
-  ) {
+  constructor(readonly browser: CrawlerDevice, taskQueue: TaskQueue) {
     super(taskQueue);
   }
   private async crateLiepinCompanyDetail() {
@@ -40,7 +37,7 @@ export class CrawlerLiepin extends Crawler {
   private async createLiepinPageList() {
     let liepJobList = new LiePinJobList(
       await this.browser.newContext(),
-      this.origin,
+      this.origin
     );
     liepJobList.on("data", this.onData);
     liepJobList.on("error", this.onError);
@@ -70,7 +67,7 @@ export class CrawlerLiepin extends Crawler {
   }
   async executeTask(
     task: UnexecutedCrawlerTask,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<{ pass: boolean; result?: any }> {
     if (this.#excreting) throw new Error("执行任务中不能继续执行");
     this.#excreting = true;
@@ -90,14 +87,14 @@ export class CrawlerLiepin extends Crawler {
   randomTime(): Promise<number> {
     this.ctHandle = timeoutPromise(30 * 1000, true);
     return Promise.all([this.ctHandle, radomWaitTime(2 * 1000, 4 * 1000)]).then(
-      ([count]) => count ?? 0,
+      ([count]) => count ?? 0
     );
   }
   private companyTaskCount = 0;
   private liepinCompanyDetail?: LiePinCompanyDetail;
   async excCompanyTask(
     task: UnexecutedCompanyTask,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<{ pass: boolean; result: any }> {
     let companyTask;
     if (this.liepinCompanyDetail) {
@@ -130,7 +127,7 @@ export class CrawlerLiepin extends Crawler {
         ctrl,
         errors,
         signal,
-        task,
+        task
       );
 
       if (errors.length)
@@ -145,7 +142,7 @@ export class CrawlerLiepin extends Crawler {
   }
   async excJobTask(
     task: UnexecutedJobTask,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ): Promise<{ pass: boolean; result: any }> {
     let jobTask: JobTask;
     let skipList: number[] | undefined = task.taskInfo.skipList;
@@ -183,7 +180,7 @@ export class CrawlerLiepin extends Crawler {
     pageCtrl: PageNumControllable,
     errors: any[],
     signal?: AbortSignal,
-    task?: UnexecutedCrawlerTask,
+    task?: UnexecutedCrawlerTask
   ) {
     let breakSignal = false;
     let abortActon = () => (breakSignal = true);
@@ -235,7 +232,7 @@ class JobTask {
     private readonly crawler: CrawlerLiepin,
     private readonly task: UnexecutedJobTask,
     skipList?: number[],
-    private readonly signal?: AbortSignal,
+    private readonly signal?: AbortSignal
   ) {
     signal?.addEventListener("abort", this.onAbort);
     this.deepFilter = pageCtrl.createDeepAssignFilter();
@@ -304,7 +301,7 @@ class JobTask {
         this.crawler.reportError("等待响应超时", {
           task: this.task,
           index: this.deepFilter.assignRes,
-        }),
+        })
       );
       isFullList = await pageCtrl.isFullList();
 
@@ -320,7 +317,7 @@ class JobTask {
           pageCtrl,
           this.traversePageNumErrors,
           this.signal,
-          this.task,
+          this.task
         );
         this.count += pageNum;
       }
@@ -347,7 +344,7 @@ class JobTask {
 
 function timeoutPromise<T>(
   time: number,
-  isReject = false,
+  isReject = false
 ): Promise<T> & { resolve(data: T | void): void; reject(): void } {
   const { promise, reject, resolve } = withPromise<void>();
   const id = setTimeout(isReject ? reject : resolve, time);

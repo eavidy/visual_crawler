@@ -1,6 +1,6 @@
 import { message } from "antd";
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { navigate } from "@/utils/global-navigate";
+import { navigate } from "@/utils/global-navigate.ts";
 
 class LocalStore {
   constructor() {}
@@ -27,9 +27,7 @@ $http.interceptors.request.use(function (config) {
   return config;
 });
 $http.interceptors.response.use(undefined, function (error: AxiosError<any>) {
-  let response:
-    | AxiosResponse<{ report?: boolean; message?: string }>
-    | undefined = error.response;
+  let response: AxiosResponse<{ report?: boolean; message?: string }> | undefined = error.response;
   if (response) {
     let errData = response.data;
     if (response.status === 401) {

@@ -1,9 +1,13 @@
-import { Card } from "@/components/card";
+import { Card } from "@/components/card.tsx";
 import { ECharts, EChartsOption } from "echarts-comp";
 import { Empty } from "antd";
-import type { SeriesOption } from "echarts";
-import React, { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
-
+import React, {
+  CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 export function Top20Billboard(props: {
   data?: Record<string, any[]>;
   title?: string;
@@ -27,7 +31,10 @@ export function Top20Billboard(props: {
         title: { text: title },
       };
     }
-    let series: SeriesOption = { type: "bar", label: { show: true, position: "insideLeft" } };
+    let series: any = {
+      type: "bar",
+      label: { show: true, position: "insideLeft" },
+    };
     let option: EChartsOption = {
       title: {
         text: title,
@@ -35,7 +42,7 @@ export function Top20Billboard(props: {
 
       legend: {
         selectedMode: "single",
-        formatter(name) {
+        formatter(name: any) {
           return legendNameMap[name];
         },
         top: 20,
@@ -69,7 +76,12 @@ export function Top20Billboard(props: {
   }, [echartsRef.current]);
   return (
     <Card style={props.style}>
-      <ECharts ref={echartsRef} style={{ height }} option={cityBoardOption} loading={loading} />
+      <ECharts
+        ref={echartsRef}
+        style={{ height }}
+        option={cityBoardOption}
+        loading={loading}
+      />
       {!currentBoard?.length ? <Empty /> : undefined}
     </Card>
   );

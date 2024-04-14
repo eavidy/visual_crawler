@@ -12,9 +12,9 @@
   "license": "MIT",
   "dependencies": {
     "common": "workspace:^",
-    "evlib": "^1.7.2",
+    "evlib": "^2.0.0",
     "mongodb": "^6.5.0",
-    "playwright": "^1.43.0",
+    "playwright": "^1.43.1",
     "tslib": "^2.6.2"
   },
   "devDependencies": {

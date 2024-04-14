@@ -49,9 +49,6 @@
 └─ LICENSE
 ```
 
-> 私有依赖: @asnc/tslib
-> 开发依赖: typescript，@asnc/ts_hook. 这两个包未添加到项目中
-
 ### 后端配置
 
 从环境变量注入配置
