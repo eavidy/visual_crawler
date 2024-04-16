@@ -1,5 +1,5 @@
-import { Education } from "../model";
-import { WorkExp } from "./enum";
+import { Education } from "../model/index.js";
+import { WorkExp } from "./enum.js";
 
 export interface GroupItem {
   avgSalary: number;

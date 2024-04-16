@@ -46,36 +46,39 @@ export default defineConfig({
       "@": "/src/",
     },
   },
+
   build: {
     copyPublicDir: true,
     outDir: "../../dist/server_pack/public",
     chunkSizeWarningLimit: 1024 * 4,
-
     emptyOutDir: true,
+    rollupOptions: {
+      external: ["react", "react-dom", "antd", "dayjs", "react-router", "react-router-dom"],
+    },
   },
   plugins: [
-    importToCDN({
-      modules: [
-        {
-          name: "react",
-          path: CDN.origin + "react@18.2.0/umd/react.production.min.js",
-          var: "React",
-        },
-        {
-          name: "react-dom",
-          path: CDN.origin + "react-dom@18.2.0/umd/react-dom.production.min.js",
-          var: "ReactDOM",
-        },
-        {
-          name: "axios",
-          path: CDN.origin + "axios@1.4.0/dist/axios.min.js",
-          var: "axios",
-        },
-        ...CDN.antd(),
-        ...CDN.reactRouterDom(),
-      ],
-      prodUrl: "https://unpkg.com/",
-    }),
+    // importToCDN({
+    //   modules: [
+    //     {
+    //       name: "react",
+    //       path: CDN.origin + "react@18.2.0/umd/react.production.min.js",
+    //       var: "React",
+    //     },
+    //     {
+    //       name: "react-dom",
+    //       path: CDN.origin + "react-dom@18.2.0/umd/react-dom.production.min.js",
+    //       var: "ReactDOM",
+    //     },
+    //     {
+    //       name: "axios",
+    //       path: CDN.origin + "axios@1.4.0/dist/axios.min.js",
+    //       var: "axios",
+    //     },
+    //     ...CDN.antd(),
+    //     ...CDN.reactRouterDom(),
+    //   ],
+    //   prodUrl: "https://unpkg.com/",
+    // }),
   ],
   preview: {
     proxy: {

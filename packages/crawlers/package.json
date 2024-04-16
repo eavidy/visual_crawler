@@ -5,7 +5,7 @@
   "main": "dist/main.js",
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.crawler-build.json"
+    "build": "tsc -p tsconfig.build.json"
   },
   "keywords": [],
   "author": "",

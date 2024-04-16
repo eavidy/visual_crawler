@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "package": "node scripts/package.mjs",
-    "build:all": ""
+    "build:all": "pnpm -r build"
   },
   "keywords": [],
   "author": "Asnow",

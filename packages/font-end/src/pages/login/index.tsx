@@ -11,7 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useRequest } from "ahooks";
 import { Effect } from "./components/effect.tsx";
 import { PageContainer } from "@/components/page-container.tsx";
-import { createPwdHash } from "./funcs/pwd_hash.tsx";
+import { createPwdHash } from "./funcs/pwd_hash.ts";
 import { loginResource } from "./services/login.resource.ts";
 
 type LoginType = "phone" | "account";

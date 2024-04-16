@@ -1,4 +1,4 @@
-import { AuthorizationError } from "@/errors/auth.err";
+import { AuthorizationError } from "@/errors/auth.err.ts";
 import React, { useEffect } from "react";
 import { Navigate, useRouteError } from "react-router-dom";
 

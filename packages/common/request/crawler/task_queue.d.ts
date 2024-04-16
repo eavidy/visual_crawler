@@ -1,5 +1,5 @@
 import { TaskState } from "vitest";
-import { SiteTag, TaskType } from "../../model";
+import { SiteTag, TaskType } from "../../model/index.js";
 
 export namespace ApiReq {
   interface GetTaskQueueList {
