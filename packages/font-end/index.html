@@ -1,71 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
-        <script src="./src/main.tsx" type="module" defer></script>
-        <style>
-            html,
-            body {
-                margin: 0;
-                padding: 0;
-                height: 100vh;
-                width: 100vw;
-            }
-            flex {
-                display: flex;
-            }
-        </style>
-        <style id="loadingStyle">
-            #loading {
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                position: absolute;
-                height: 100vh;
-                width: 100vw;
-            }
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="./src/main.tsx" type="module" defer></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        width: 100vw;
+      }
+      flex {
+        display: flex;
+      }
+    </style>
+    <style id="loadingStyle">
+      #loading {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: absolute;
+        height: 100vh;
+        width: 100vw;
+      }
 
-            @keyframes flowCss {
-                0% {
-                    /* 移动背景位置 */
-                    background-position: 0 0;
-                }
+      @keyframes flowCss {
+        0% {
+          /* 移动背景位置 */
+          background-position: 0 0;
+        }
 
-                100% {
-                    background-position: -400% 0;
-                }
-            }
+        100% {
+          background-position: -400% 0;
+        }
+      }
 
-            #loading {
-                background: -webkit-linear-gradient(
-                    135deg,
-                    #0eaf6d,
-                    #ff6ac6 25%,
-                    #147b96 50%,
-                    #53d545 55%,
-                    #2cc4e0 60%,
-                    #8b2ce0 80%,
-                    #ff6384 95%,
-                    #08dfb4
-                );
-                /* 文字颜色填充设置为透明 */
-                -webkit-text-fill-color: transparent;
-                /* 背景裁剪，即让文字使用背景色 */
-                -webkit-background-clip: text;
-                /* 背景图放大一下，看着柔和一些 */
-                background-size: 200% 100%;
-                /* 应用动画flowCss 12秒速度 无限循环 线性匀速动画*/
-                animation: flowCss 12s infinite linear;
-            }
-        </style>
-    </head>
-    <body>
-        <flex id="loading">
-            <h1>Loading...</h1>
-        </flex>
-    </body>
+      #loading {
+        background: -webkit-linear-gradient(
+          135deg,
+          #0eaf6d,
+          #ff6ac6 25%,
+          #147b96 50%,
+          #53d545 55%,
+          #2cc4e0 60%,
+          #8b2ce0 80%,
+          #ff6384 95%,
+          #08dfb4
+        );
+        /* 文字颜色填充设置为透明 */
+        -webkit-text-fill-color: transparent;
+        /* 背景裁剪，即让文字使用背景色 */
+        -webkit-background-clip: text;
+        /* 背景图放大一下，看着柔和一些 */
+        background-size: 200% 100%;
+        /* 应用动画flowCss 12秒速度 无限循环 线性匀速动画*/
+        animation: flowCss 12s infinite linear;
+      }
+    </style>
+  </head>
+  <body>
+    <flex id="loading">
+      <h1>Loading...</h1>
+    </flex>
+  </body>
 </html>

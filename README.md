@@ -8,7 +8,7 @@
 后端: Nest\
 数据库: MongoDB\
 爬虫: Playwright\
-单元测试: Vitest\
+单元测试: Vitest
 
 ### 功能模块
 
@@ -48,9 +48,6 @@
 ├─ README.md
 └─ LICENSE
 ```
-
-> 私有依赖: @asnc/tslib
-> 开发依赖: typescript，@asnc/ts_hook. 这两个包未添加到项目中
 
 ### 后端配置
 

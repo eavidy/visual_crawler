@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 declare namespace JSX {
-    interface IntrinsicElements {
-        flex: JSX.IntrinsicElements["div"];
-    }
+  interface IntrinsicElements {
+    flex: JSX.IntrinsicElements["div"];
+  }
 }

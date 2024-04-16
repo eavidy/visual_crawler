@@ -1,19 +1,21 @@
 {
-    "name": "visual-crawler",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-        "package": "node scripts/package.mjs",
-        "build:all": ""
-    },
-    "keywords": [],
-    "author": "Asnow",
-    "license": "MIT",
-    "devDependencies": {
-        "@swc/core": "^1.3.53",
-        "vite": "^4.3.1",
-        "vite-plugin-node": "^3.0.2",
-        "vitest": "^0.29.8"
-    }
+  "name": "visual-crawler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "package": "node scripts/package.mjs",
+    "build:all": "pnpm -r build"
+  },
+  "keywords": [],
+  "author": "Asnow",
+  "license": "MIT",
+  "devDependencies": {
+    "@asnc/ts_hook": "^0.2.1",
+    "@swc/core": "^1.4.13",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.8",
+    "vite-plugin-node": "^3.1.0",
+    "vitest": "^1.5.0"
+  }
 }

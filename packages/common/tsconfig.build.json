@@ -1,12 +1,12 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-        "module": "commonjs",
-        "baseUrl": ".",
-        "rootDir": ".",
-        "outDir": "../../dist/node_modules/common",
-        "skipLibCheck": true
-    },
-    "exclude": ["node_modules"],
-    "include": ["**/*.ts"]
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "../../dist/node_modules/common",
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules"],
+  "include": ["**/*.ts"]
 }

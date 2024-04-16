@@ -1,14 +1,14 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-        "moduleResolution": "nodenext",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "allowSyntheticDefaultImports": true,
-        "importHelpers": true,
-        "rootDir": "./src",
-        "baseUrl": "./",
-        "noEmit": true
-    },
-    "include": ["src"]
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "nodenext",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+    "rootDir": "./src",
+    "baseUrl": "./",
+    "noEmit": true
+  },
+  "include": ["src"]
 }

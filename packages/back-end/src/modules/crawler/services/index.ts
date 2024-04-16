@@ -1,2 +1,2 @@
-export * from "./crawler.service"
-export * from "./process_center.service"
+export * from "./crawler.service.js";
+export * from "./process_center.service.js";

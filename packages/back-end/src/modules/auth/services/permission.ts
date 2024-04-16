@@ -1,4 +1,4 @@
 export enum Permission {
-    all = "all",
-    readonly = "readonly",
+  all = "all",
+  readonly = "readonly",
 }
