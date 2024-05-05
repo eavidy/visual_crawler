@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import router from "./router.tsx";
-import "@/styles/global_style";
+import "@/styles/global_style.ts";
 import { RouterProvider } from "react-router-dom";
 
 const appElement = document.createElement("div");
@@ -15,11 +15,7 @@ if (import.meta.env.DEV) {
   const rawError = console.error;
   console.error = function error() {
     let msg = arguments[0];
-    if (
-      typeof msg === "string" &&
-      msg.startsWith("Warning: The tag <%s> is unrecognized in this browser")
-    )
-      return;
+    if (typeof msg === "string" && msg.startsWith("Warning: The tag <%s> is unrecognized in this browser")) return;
     rawError.apply(console, arguments as any);
   };
 }

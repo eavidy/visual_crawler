@@ -1,5 +1,4 @@
-import { chromium, Browser, LaunchOptions } from "playwright";
-
+import { chromium, Browser, LaunchOptions, BrowserContext } from "playwright";
 declare let navigator: any;
 
 export class CrawlerDevice {
@@ -12,35 +11,32 @@ export class CrawlerDevice {
     };
     const browser = await chromium.launch(defaultOptions);
 
-    browser.on("disconnected", () => browser.close());
+    browser.on("disconnected", function (this: Browser) {
+      this.close();
+    });
     return new this(browser, options);
   }
-  private static dvc?: CrawlerDevice | Promise<CrawlerDevice>;
-  static async newContext() {
-    if (!this.dvc) {
-      let pms = this.create().then((bs) => {
-        CrawlerDevice.dvc = bs;
+  private static device?: CrawlerDevice | Promise<CrawlerDevice>;
+  static async newContext(): Promise<BrowserContext> {
+    let deviceWait = this.device;
+    if (!deviceWait) {
+      deviceWait = this.create().then((bs) => {
+        CrawlerDevice.device = bs;
         return bs;
       });
-      this.dvc = pms;
+      this.device = deviceWait;
     }
-    let bs = this.dvc instanceof Promise ? await this.dvc : this.dvc;
-    return bs.newContext();
+    const device = await deviceWait;
+    return device.newContext();
   }
   static async close() {
-    if (!this.dvc) return;
-
-    let bs = this.dvc;
-    this.dvc = undefined;
-    if (bs instanceof Promise) {
-      return (await bs).close();
-    } else return bs.close();
+    let deviceWait = this.device;
+    if (!deviceWait) return;
+    const device = await deviceWait;
+    return device.close();
   }
 
-  private constructor(
-    readonly browser: Browser,
-    private options?: LaunchOptions,
-  ) {}
+  private constructor(readonly browser: Browser, private options?: LaunchOptions) {}
   private randomNumber() {
     return Math.floor(Math.random() * 9);
   }
@@ -84,3 +80,4 @@ export class CrawlerDevice {
     return this.browser.close();
   }
 }
+export type { BrowserContext, Page } from "playwright";

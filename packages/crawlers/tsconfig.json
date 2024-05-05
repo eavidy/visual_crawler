@@ -2,12 +2,10 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "paths": {
-      "@/*": ["src/*"]
-    },
-    "rootDir": "src",
-    "noEmit": true
-  },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+      "@/*": ["./src/*"]
+    }
+  }
 }

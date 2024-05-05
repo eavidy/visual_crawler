@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "package": "node scripts/package.mjs",
     "build:all": "pnpm -r build"
@@ -13,6 +14,7 @@
   "devDependencies": {
     "@asnc/ts_hook": "^0.2.1",
     "@swc/core": "^1.4.13",
+    "prettier": "^3.2.5",
     "typescript": "^5.4.5",
     "vite": "^5.2.8",
     "vite-plugin-node": "^3.1.0",

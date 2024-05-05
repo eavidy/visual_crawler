@@ -3,7 +3,7 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "target": "ES6",
+    "target": "ES2017",
     "lib": ["ESNext", "DOM"],
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": true,
@@ -13,6 +13,5 @@
       "@/*": ["src/*"]
     },
     "noEmit": true
-  },
-  "include": ["src"]
+  }
 }

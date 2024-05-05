@@ -2,7 +2,6 @@ import React, { useEffect, useMemo } from "react";
 import { Outlet } from "react-router-dom";
 import { COLOR } from "./styles/colors.ts";
 import { ConfigProvider } from "antd";
-// @ts-ignore
 import zhCN from "antd/locale/zh_CN.js";
 import { useGlobalNavigate } from "./utils/global-navigate.ts";
 function removeLoadingAnimation() {
@@ -11,7 +10,6 @@ function removeLoadingAnimation() {
   let ele = document.getElementById("loading");
   ele?.parentNode?.removeChild(ele);
 }
-
 export default function App() {
   useEffect(() => {
     removeLoadingAnimation();

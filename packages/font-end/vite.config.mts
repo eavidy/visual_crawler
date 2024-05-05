@@ -1,50 +1,68 @@
-import { defineConfig } from "vite";
-import { Plugin as importToCDN, autoComplete } from "vite-plugin-cdn-import";
+import type { UserConfig, Alias } from "vite";
+import { isAbsolute } from "node:path";
+import pkg from "./package.json" with { type: "json" };
 
-type CdnOption = Parameters<typeof importToCDN>[0]["modules"];
-class CDN {
-  static origin = "https://unpkg.com/";
-  // static origin = "https://cdn.jsdelivr.net/npm/";
-  static reactRouterDom(): CdnOption {
-    return [
-      {
-        name: "@remix-run/router",
-        path: this.origin + "@remix-run/router@1.6.1/dist/router.umd.min.js",
-        var: "ReactRouter",
-      },
-      {
-        name: "react-router",
-        path: this.origin + "react-router@6.11.1/dist/umd/react-router.production.min.js",
-        var: "ReactRouter",
-      },
-      {
-        name: "react-router-dom",
-        path: this.origin + "react-router-dom@6.11.1/dist/umd/react-router-dom.production.min.js",
-        var: "ReactRouterDOM",
-      },
-    ];
+function genPkgMap(deps: Record<string, string>) {
+  let map: Record<string, string> = {};
+  const testor = /^.\d+\./;
+  const d = /^\d/;
+  for (const [name, version] of Object.entries(deps)) {
+    if (d.test(version)) {
+      map[name] = version;
+    } else if (testor.test(version)) {
+      map[name] = version.slice(1);
+    }
   }
-  static antd(): CdnOption {
-    return [
-      {
-        name: "dayjs",
-        path: this.origin + "dayjs@1.11.7/dayjs.min.js",
-        var: "dayjs",
-      },
-      {
-        name: "antd",
-        path: this.origin + "antd@5.4.7/dist/antd.min.js",
-        var: "antd",
-      },
-    ];
+  return map;
+}
+const CDN_LIST = genPkgMap(pkg.dependencies);
+
+function toESM_CDN(name: string, version: string, sub: string = ""): string {
+  let base = `https://esm.sh/${name}@${version}${sub}`;
+  // if (["antd", "react", "echarts"].includes(name)) base += "?bundle-deps";
+  return base;
+}
+
+function pasePkg(importname: string): { name: string; sub?: string } | undefined {
+  if (isAbsolute(importname) || importname.startsWith(".")) return;
+  let f1 = importname.indexOf("/");
+  if (f1 === -1) return { name: importname };
+
+  if (importname.startsWith("@")) {
+    let sub = importname.slice(f1 + 1);
+    const f2 = sub.indexOf("/");
+    if (f2 === -1) return { name: importname };
+
+    return { name: importname.slice(0, f1 + 1 + f2), sub: sub.slice(f2) };
+  } else {
+    let sub = importname.slice(f1);
+    return { name: importname.slice(0, f1), sub: sub ? sub : undefined };
+  }
+}
+class CdnReplace implements Alias {
+  find = /^/;
+  replacement = "";
+  customResolver(source: string, importer?: string) {
+    const res = pasePkg(source);
+    if (!res) return;
+    const version = CDN_LIST[res.name];
+    if (!version) {
+      return;
+    }
+    const finalName = toESM_CDN(res.name, version, res.sub);
+
+    return {
+      external: true,
+      id: finalName,
+    };
   }
 }
 
-export default defineConfig({
+const IS_PREVIEW = false;
+
+const config: UserConfig = {
   resolve: {
-    alias: {
-      "@": "/src/",
-    },
+    alias: [{ find: "@/", replacement: "/src/" }, ...(IS_PREVIEW ? [new CdnReplace()] : [])],
   },
 
   build: {
@@ -52,34 +70,9 @@ export default defineConfig({
     outDir: "../../dist/server_pack/public",
     chunkSizeWarningLimit: 1024 * 4,
     emptyOutDir: true,
-    rollupOptions: {
-      external: ["react", "react-dom", "antd", "dayjs", "react-router", "react-router-dom"],
-    },
+    target: IS_PREVIEW ? "esnext" : "es2017",
+    minify: !IS_PREVIEW,
   },
-  plugins: [
-    // importToCDN({
-    //   modules: [
-    //     {
-    //       name: "react",
-    //       path: CDN.origin + "react@18.2.0/umd/react.production.min.js",
-    //       var: "React",
-    //     },
-    //     {
-    //       name: "react-dom",
-    //       path: CDN.origin + "react-dom@18.2.0/umd/react-dom.production.min.js",
-    //       var: "ReactDOM",
-    //     },
-    //     {
-    //       name: "axios",
-    //       path: CDN.origin + "axios@1.4.0/dist/axios.min.js",
-    //       var: "axios",
-    //     },
-    //     ...CDN.antd(),
-    //     ...CDN.reactRouterDom(),
-    //   ],
-    //   prodUrl: "https://unpkg.com/",
-    // }),
-  ],
   preview: {
     proxy: {
       "/api": {
@@ -104,4 +97,5 @@ export default defineConfig({
       },
     },
   },
-});
+};
+export default config;

@@ -3,6 +3,7 @@
   "compilerOptions": {
     "noEmit": false,
     "outDir": "../../dist/server_pack/crawler",
+    "rootDir": "./src",
     "skipLibCheck": true,
     "importHelpers": true
   },
